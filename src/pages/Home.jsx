@@ -205,7 +205,7 @@ export default function HomePage() {
       {/* ── Stats ── */}
       <section className="stats-section">
         <div className="container">
-          <div className="stats-row">
+          <div className="stats-row" data-aos="fade-up">
             {STATS.map((s, i) => (
               <div 
                 key={i} 
@@ -230,9 +230,11 @@ export default function HomePage() {
               <div 
                 key={i} 
                 className="feature-card"
+                data-aos="fade-up"
+                data-aos-delay={i * 100}
               >
                 <div className="feature-icon">{f.icon}</div>
-                <div>
+                <div className="feature-text">
                   <h4>{f.title}</h4>
                   <p>{f.desc}</p>
                 </div>
@@ -245,17 +247,19 @@ export default function HomePage() {
       {/* ── Categories ── */}
       <section className="section">
         <div className="container">
-          <div className="section-heading">
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Browse by craft</p>
             <h2>Hunarmandchilik turlari</h2>
             <p>O'zbek an'anaviy hunarmandchiligining ko'p qirrali dunyosini kashf eting</p>
           </div>
           <div className="categories-grid">
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map((cat, i) => (
               <Link 
                 key={cat.id} 
                 to={`/products?category=${cat.id}`} 
                 className="category-card"
+                data-aos="zoom-in"
+                data-aos-delay={i * 50}
               >
                 <div className="category-icon" style={{ background: cat.color + '20', color: cat.color }}>
                   <CategoryIcon name={cat.icon} size={24} />
@@ -274,13 +278,13 @@ export default function HomePage() {
       {/* ── Featured Products ── */}
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
-          <div className="section-heading">
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Handpicked</p>
             <h2>Tanlangan mahsulotlar</h2>
             <p>Platformamizning eng mashhur va yuqori baholangan buyumlari</p>
           </div>
           
-          <div className="products-grid">
+          <div className="products-grid" data-aos="fade-up" data-aos-delay="100">
             {featured.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
 
@@ -295,13 +299,13 @@ export default function HomePage() {
       {/* ── Craftsmen ── */}
       <section className="section">
         <div className="container">
-          <div className="section-heading">
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Meet the artisans</p>
             <h2>Mashhur hunarmandlar</h2>
             <p>Platformamizning eng iqtidorli va tajribali ustalari</p>
           </div>
           
-          <div className="craftsmen-grid">
+          <div className="craftsmen-grid" data-aos="fade-up" data-aos-delay="100">
             {MOCK_CRAFTSMEN.map((c) => (
               <Link 
                 key={c.id} 
@@ -348,12 +352,12 @@ export default function HomePage() {
       {/* ── New Arrivals ── */}
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
-          <div className="section-heading">
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Just arrived</p>
             <h2>Yangi mahsulotlar</h2>
           </div>
           
-          <div className="products-grid">
+          <div className="products-grid" data-aos="fade-up" data-aos-delay="100">
             {newest.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
@@ -362,7 +366,7 @@ export default function HomePage() {
       {/* ── CTA Banner ── */}
       <section className="cta-section">
         <div className="container">
-          <div className="cta-card">
+          <div className="cta-card" data-aos="zoom-in-up">
             <div className="cta-content">
               <p className="eyebrow" style={{ color: 'var(--brand-300)' }}>Join the platform</p>
               <h2>Hunarmand sifatida ro'yxatdan o'ting</h2>

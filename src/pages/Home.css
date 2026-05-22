@@ -132,7 +132,7 @@
 .stat-item:hover { background: var(--bg-secondary); }
 
 .stat-num {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Italiana', serif;
   font-size: clamp(32px, 4vw, 44px);
   font-weight: 600;
   color: var(--brand-600);
@@ -157,27 +157,63 @@
 .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 .feature-card {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 32px 28px;
   background: var(--bg-primary);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  transition: box-shadow 0.2s;
+  border-radius: var(--radius-xl);
+  transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
 }
-.feature-card:hover { box-shadow: 4px 4px 0 #e1e1e1; }
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 4px 4px 0 #e1e1e1;
+}
+
 .feature-icon {
-  width: 44px; height: 44px;
-  background: linear-gradient(135deg, var(--brand-500), var(--brand-300));
-  border-radius: var(--radius-md);
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--brand-50), var(--brand-100));
+  border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(212,130,42,.3);
+  color: var(--brand-600);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.feature-card h4 { font-size: 14px; margin-bottom: 4px; }
-.feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.feature-icon svg { width: 26px; height: 26px; stroke-width: 1.5; }
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1) rotate(5deg);
+  background: linear-gradient(135deg, var(--brand-100), var(--brand-200));
+}
+
+.feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.feature-card p {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
 
 /* ─── Categories ─────────────────────────────────────────────── */
 .categories-grid {

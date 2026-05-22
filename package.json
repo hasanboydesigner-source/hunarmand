@@ -26,6 +26,7 @@
     "react-image-gallery": "^2.1.2",
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.15.1",
+    "react-spinners": "^0.17.0",
     "recharts": "^3.8.1",
     "swiper": "^12.1.4",
     "zustand": "^5.0.13"

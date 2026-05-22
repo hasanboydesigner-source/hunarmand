@@ -36,7 +36,7 @@
   flex-shrink: 0;
 }
 .logo-text { display: flex; flex-direction: column; line-height: 1; gap: 2px; }
-.logo-primary { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.2px; }
+.logo-primary { font-family: 'Italiana', serif; font-size: 19px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.2px; }
 .logo-sub { font-size: 9.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
 
 /* Nav */

@@ -44,9 +44,14 @@ export default function CartPage() {
   return (
     <div className="cart-page page-with-header">
       <div className="cart-header">
-        <div className="container">
-          <h1><ShoppingCart size={24} /> Savatcha</h1>
-          <p>{items.reduce((s,i)=>s+i.quantity,0)} ta mahsulot</p>
+        <div className="container cart-header-inner">
+          <div className="ch-icon-box">
+            <ShoppingCart size={28} />
+          </div>
+          <div className="ch-title-wrap">
+            <h1>Savatcha <span className="ch-badge">{items.reduce((s,i)=>s+i.quantity,0)} ta</span></h1>
+            <p>Xaridlaringizni xavfsiz rasmiylashtiring</p>
+          </div>
         </div>
       </div>
 
@@ -78,19 +83,22 @@ export default function CartPage() {
                     <div className="ci-info">
                       <Link to={`/products/${item.id}`} className="ci-title">{item.title}</Link>
                       {item.variant && <p className="ci-variant">{item.variant}</p>}
+                      <div className="ci-price-mobile">{formatPrice(item.price)}</div>
                     </div>
                   </div>
                   <div className="ci-price">{formatPrice(item.price)}</div>
-                  <div className="ci-qty">
-                    <button className="qty-btn-sm" onClick={() => updateQuantity(item.key, item.quantity-1)}><Minus size={12}/></button>
-                    <span>{item.quantity}</span>
-                    <button className="qty-btn-sm" onClick={() => updateQuantity(item.key, item.quantity+1)}><Plus size={12}/></button>
-                  </div>
-                  <div className="ci-total">
-                    <strong>{formatPrice(item.price * item.quantity)}</strong>
-                    <button className="ci-remove" onClick={() => handleRemove(item.key, item.title)}>
-                      <Trash2 size={14} />
-                    </button>
+                  <div className="ci-actions-wrapper">
+                    <div className="ci-qty">
+                      <button className="qty-btn-sm" onClick={() => updateQuantity(item.key, item.quantity-1)}><Minus size={12}/></button>
+                      <span>{item.quantity}</span>
+                      <button className="qty-btn-sm" onClick={() => updateQuantity(item.key, item.quantity+1)}><Plus size={12}/></button>
+                    </div>
+                    <div className="ci-total">
+                      <strong>{formatPrice(item.price * item.quantity)}</strong>
+                      <button className="ci-remove" onClick={() => handleRemove(item.key, item.title)}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
