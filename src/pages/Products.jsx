@@ -7,6 +7,24 @@ import { Filter, Grid3X3, List, SlidersHorizontal, X, ChevronDown, Search } from
 import { motion, AnimatePresence } from 'framer-motion';
 import './Products.css';
 
+const gridVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1
+    }
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      staggerChildren: 0.03,
+      staggerDirection: -1
+    }
+  }
+};
+
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState('grid');
@@ -195,6 +213,10 @@ export default function ProductsPage() {
             ) : (
               <motion.div
                 key="products-container"
+                variants={gridVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
                 layout
                 className={view === 'grid' ? 'products-grid' : 'products-list'}
               >
@@ -214,9 +236,27 @@ function FilterGroup({ title, children }) {
     <div className="filter-group">
       <button className="filter-group-header" onClick={() => setOpen(!open)}>
         <span>{title}</span>
-        <ChevronDown size={15} className={open ? 'rotated' : ''} />
+        <motion.div
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <ChevronDown size={15} />
+        </motion.div>
       </button>
-      {open && <div className="filter-group-body">{children}</div>}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="filter-group-body">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
