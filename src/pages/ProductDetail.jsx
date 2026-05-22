@@ -1,4 +1,10 @@
 import { useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Thumbs, FreeMode } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/thumbs';
+import 'swiper/css/free-mode';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MOCK_PRODUCTS, MOCK_REVIEWS, CATEGORIES, formatPrice, getDiscount, getInitials } from '../data/constants';
 import { useCartStore, useWishlistStore } from '../store/useStore';
@@ -19,8 +25,9 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
   const [qty, setQty] = useState(1);
-  const [activeImg, setActiveImg] = useState(0);
   const [activeTab, setActiveTab] = useState('desc');
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+
   const wished = product ? has(product.id) : false;
   const reviews = MOCK_REVIEWS.filter((r) => r.productId === id);
   const related = MOCK_PRODUCTS.filter((p) => p.category === product?.category && p.id !== id).slice(0, 4);
@@ -56,7 +63,7 @@ export default function ProductDetailPage() {
             <Link to="/">Bosh sahifa</Link><ChevronRight size={13} />
             <Link to="/products">Mahsulotlar</Link><ChevronRight size={13} />
             <Link to={`/products?category=${product.category}`}>
-              {CATEGORIES.find(c=>c.id===product.category)?.label}
+              {CATEGORIES.find(c => c.id === product.category)?.label}
             </Link><ChevronRight size={13} />
             <span>{product.title}</span>
           </nav>
@@ -67,34 +74,58 @@ export default function ProductDetailPage() {
         {/* ── Left: Gallery ── */}
         <div className="pd-gallery">
           <div className="pd-main-img">
-            <img src={images[activeImg]} alt={product.title} />
+            <Swiper
+              spaceBetween={10}
+              navigation={false}
+              thumbs={{ swiper: thumbsSwiper }}
+              modules={[FreeMode, Navigation, Thumbs]}
+              className="pd-main-swiper"
+            >
+              {images.map((img, i) => (
+                <SwiperSlide key={i}>
+                  <img src={img} alt={`${product.title} ${i + 1}`} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
             {discount > 0 && <div className="pd-discount-badge">-{discount}%</div>}
             {product.isNew && <div className="pd-new-badge">Yangi</div>}
             <button className={`pd-wish-btn ${wished ? 'active' : ''}`} onClick={handleWishlist}>
-              <Heart size={20} fill={wished?'#ef4444':'none'} color={wished?'#ef4444':'currentColor'} />
+              <Heart size={20} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
             </button>
           </div>
           <div className="pd-thumbnails">
-            {images.map((img, i) => (
-              <button key={i} className={`pd-thumb ${i===activeImg?'active':''}`} onClick={() => setActiveImg(i)}>
-                <img src={img} alt={`${product.title} ${i+1}`} />
-              </button>
-            ))}
+            <Swiper
+              onSwiper={setThumbsSwiper}
+              spaceBetween={10}
+              slidesPerView={'auto'}
+              freeMode={true}
+              watchSlidesProgress={true}
+              modules={[FreeMode, Navigation, Thumbs]}
+              className="pd-thumbs-swiper"
+            >
+              {images.map((img, i) => (
+                <SwiperSlide key={i}>
+                  <div className="pd-thumb">
+                    <img src={img} alt={`Thumbnail ${i + 1}`} />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         </div>
 
         {/* ── Right: Info ── */}
         <div className="pd-info">
           <div className="pd-category-tag">
-            <span className="cat-icon-sm"><CategoryIcon name={CATEGORIES.find(c=>c.id===product.category)?.icon} size={13} /></span>
-            {CATEGORIES.find(c=>c.id===product.category)?.label}
+            <span className="cat-icon-sm"><CategoryIcon name={CATEGORIES.find(c => c.id === product.category)?.icon} size={13} /></span>
+            {CATEGORIES.find(c => c.id === product.category)?.label}
           </div>
           <h1 className="pd-title">{product.title}</h1>
 
           <div className="pd-rating-row">
             <div className="stars">
-              {[1,2,3,4,5].map((s) => (
-                <Star key={s} size={15} fill={s<=Math.round(product.rating)?'#f59e0b':'none'} color="#f59e0b" />
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star key={s} size={15} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
               ))}
             </div>
             <span className="pd-rating-num">{product.rating}</span>
@@ -122,7 +153,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Stock */}
-          <div className={`pd-stock ${product.inStock===0?'out':product.inStock<=3?'low':'in'}`}>
+          <div className={`pd-stock ${product.inStock === 0 ? 'out' : product.inStock <= 3 ? 'low' : 'in'}`}>
             <CheckCircle2 size={15} />
             {product.inStock === 0 ? 'Mahsulot tugagan' : product.inStock <= 3 ? `Faqat ${product.inStock} ta qoldi!` : `Mavjud (${product.inStock} ta)`}
           </div>
@@ -130,15 +161,15 @@ export default function ProductDetailPage() {
           {/* Qty + Actions */}
           <div className="pd-qty-row">
             <div className="qty-control">
-              <button className="qty-btn" onClick={() => setQty(Math.max(1, qty-1))}><Minus size={14}/></button>
+              <button className="qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}><Minus size={14} /></button>
               <span className="qty-value">{qty}</span>
-              <button className="qty-btn" onClick={() => setQty(Math.min(product.inStock, qty+1))}><Plus size={14}/></button>
+              <button className="qty-btn" onClick={() => setQty(Math.min(product.inStock, qty + 1))}><Plus size={14} /></button>
             </div>
             <div className="pd-actions">
-              <button className="btn btn-primary btn-lg pd-action-btn" onClick={handleAddToCart} disabled={product.inStock===0}>
+              <button className="btn btn-primary btn-lg pd-action-btn" onClick={handleAddToCart} disabled={product.inStock === 0}>
                 <ShoppingCart size={17} /> Savatga
               </button>
-              <button className="btn btn-secondary btn-lg pd-action-btn" onClick={handleBuyNow} disabled={product.inStock===0}>
+              <button className="btn btn-secondary btn-lg pd-action-btn" onClick={handleBuyNow} disabled={product.inStock === 0}>
                 <Zap size={17} /> Hozir sotib ol
               </button>
             </div>
@@ -186,9 +217,9 @@ export default function ProductDetailPage() {
       {/* ── Tabs ── */}
       <div className="container pd-tabs-section">
         <div className="pd-tabs">
-          {['desc','specs','reviews'].map((tab) => (
-            <button key={tab} className={`pd-tab ${activeTab===tab?'active':''}`} onClick={() => setActiveTab(tab)}>
-              {tab==='desc'?'Tavsif':tab==='specs'?'Xususiyatlar':`Sharhlar (${reviews.length})`}
+          {['desc', 'specs', 'reviews'].map((tab) => (
+            <button key={tab} className={`pd-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+              {tab === 'desc' ? 'Tavsif' : tab === 'specs' ? 'Xususiyatlar' : `Sharhlar (${reviews.length})`}
             </button>
           ))}
         </div>
@@ -209,7 +240,7 @@ export default function ProductDetailPage() {
                 <tr><td>Og'irligi</td><td>{product.weight}</td></tr>
                 <tr><td>SKU</td><td>{product.sku}</td></tr>
                 <tr><td>Tayyorlash vaqti</td><td>{product.productionTime}</td></tr>
-                <tr><td>Kategoriya</td><td>{CATEGORIES.find(c=>c.id===product.category)?.label}</td></tr>
+                <tr><td>Kategoriya</td><td>{CATEGORIES.find(c => c.id === product.category)?.label}</td></tr>
               </tbody>
             </table>
           )}
@@ -220,7 +251,7 @@ export default function ProductDetailPage() {
                 <div className="reviews-score">
                   <span className="big-score">{product.rating}</span>
                   <div className="stars">
-                    {[1,2,3,4,5].map(s=><Star key={s} size={20} fill={s<=Math.round(product.rating)?'#f59e0b':'none'} color="#f59e0b"/>)}
+                    {[1, 2, 3, 4, 5].map(s => <Star key={s} size={20} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />)}
                   </div>
                   <p>{product.reviewCount} ta sharh</p>
                 </div>
@@ -238,7 +269,7 @@ export default function ProductDetailPage() {
                           {r.verified && <span className="verified-purchase">✓ Tasdiqlangan xarid</span>}
                         </div>
                         <div className="stars">
-                          {[1,2,3,4,5].map(s=><Star key={s} size={11} fill={s<=r.rating?'#f59e0b':'none'} color="#f59e0b"/>)}
+                          {[1, 2, 3, 4, 5].map(s => <Star key={s} size={11} fill={s <= r.rating ? '#f59e0b' : 'none'} color="#f59e0b" />)}
                         </div>
                       </div>
                       <span className="review-date">{r.date}</span>
@@ -264,18 +295,18 @@ export default function ProductDetailPage() {
       )}
       {/* Mobile Sticky Action Bar */}
       <div className="pd-mobile-sticky-bar">
-        <button 
-          className={`pd-msb-wish-btn ${wished ? 'active' : ''}`} 
+        <button
+          className={`pd-msb-wish-btn ${wished ? 'active' : ''}`}
           onClick={handleWishlist}
           aria-label="Sevimlilarga qo'shish"
         >
           <Heart size={20} fill={wished ? "#ef4444" : "none"} color={wished ? "#ef4444" : "currentColor"} />
         </button>
         <div className="pd-msb-actions">
-          <button className="btn btn-primary pd-msb-action-btn" onClick={handleAddToCart} disabled={product.inStock===0}>
+          <button className="btn btn-primary pd-msb-action-btn" onClick={handleAddToCart} disabled={product.inStock === 0}>
             <ShoppingCart size={17} /> Savatga
           </button>
-          <button className="btn btn-secondary pd-msb-action-btn" onClick={handleBuyNow} disabled={product.inStock===0}>
+          <button className="btn btn-secondary pd-msb-action-btn" onClick={handleBuyNow} disabled={product.inStock === 0}>
             <Zap size={17} /> Hozir sotib ol
           </button>
         </div>

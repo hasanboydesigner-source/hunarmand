@@ -1,5 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 import { CATEGORIES, MOCK_PRODUCTS, MOCK_CRAFTSMEN } from '../data/constants';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
@@ -105,8 +110,6 @@ function CountUp({ end, suffix = '' }) {
 }
 
 export default function HomePage() {
-  const [slide, setSlide] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const featured = MOCK_PRODUCTS.filter((p) => p.featured);
   const newest = MOCK_PRODUCTS.filter((p) => p.isNew);
@@ -117,14 +120,6 @@ export default function HomePage() {
     }, 800);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (paused || isLoading) return;
-    const t = setInterval(() => setSlide((s) => (s + 1) % HERO_SLIDES.length), 5000);
-    return () => clearInterval(t);
-  }, [paused, isLoading]);
-
-  const current = HERO_SLIDES[slide];
 
   if (isLoading) {
     return (
@@ -173,36 +168,38 @@ export default function HomePage() {
   return (
     <div className="home-page page-with-header">
       {/* ── Hero ── */}
-      <section className="hero" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-        <div className="hero-bg">
-          <img src={current.image} alt={current.title} className="hero-bg-img" />
-          <div className="hero-bg-overlay" />
-        </div>
-
-        <div className="container hero-container">
-          <div className="hero-content">
-            <div className="hero-tag">{current.tag}</div>
-            <h1 className="hero-title" style={{ whiteSpace: 'pre-line' }}>
-              {current.title}
-            </h1>
-            <p className="hero-subtitle">{current.subtitle}</p>
-            <div className="hero-actions">
-              <Link to={current.ctaLink} className="btn btn-primary btn-xl">{current.cta} <ArrowRight size={18} /></Link>
-              <Link to="/craftsmen" className="btn hero-ghost-btn btn-xl">Hunarmandlar</Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Slide indicators */}
-        <div className="hero-dots">
-          {HERO_SLIDES.map((_, i) => (
-            <button 
-              key={i} 
-              className={`hero-dot ${i === slide ? 'active' : ''}`} 
-              onClick={() => setSlide(i)} 
-            />
+      <section className="hero">
+        <Swiper
+          modules={[Autoplay, Pagination, EffectFade]}
+          effect="fade"
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          pagination={{ clickable: true, el: '.hero-dots', bulletClass: 'hero-dot', bulletActiveClass: 'active' }}
+          loop={true}
+          className="hero-swiper"
+        >
+          {HERO_SLIDES.map((slideItem, index) => (
+            <SwiperSlide key={index}>
+              <div className="hero-bg">
+                <img src={slideItem.image} alt={slideItem.title} className="hero-bg-img" />
+                <div className="hero-bg-overlay" />
+              </div>
+              <div className="container hero-container">
+                <div className="hero-content">
+                  <div className="hero-tag">{slideItem.tag}</div>
+                  <h1 className="hero-title" style={{ whiteSpace: 'pre-line' }}>
+                    {slideItem.title}
+                  </h1>
+                  <p className="hero-subtitle">{slideItem.subtitle}</p>
+                  <div className="hero-actions">
+                    <Link to={slideItem.ctaLink} className="btn btn-primary btn-xl">{slideItem.cta} <ArrowRight size={18} /></Link>
+                    <Link to="/craftsmen" className="btn hero-ghost-btn btn-xl">Hunarmandlar</Link>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
           ))}
-        </div>
+          <div className="hero-dots"></div>
+        </Swiper>
       </section>
 
       {/* ── Stats ── */}

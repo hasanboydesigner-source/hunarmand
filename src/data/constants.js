@@ -173,6 +173,41 @@ export const MOCK_PRODUCTS = [
     dimensions: '20cm × 30cm × 15cm', weight: '1.2kg',
     productionTime: '1-2 hafta',
   },
+  {
+    id: 'p9', title: "Chust Do'ppisi",
+    category: 'toʻqimachilik', price: 150000, originalPrice: 180000,
+    rating: 4.9, reviewCount: 342, sold: 890,
+    image: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCybJ8Z-TcQf9xP27I1eE5Afe6abeDduJ2VNKUsRB1t5nZZllhPTY3CNAlIUN1VpEB4NzMFLauyLk5o12kVudWyunEPE-xIK8nVWWkME377fr6I92MkcixhGsfUsuPxODirosU4HlacZU/w1200-h630-p-k-no-nu/DO%2527PPI.jpg',
+    images: [
+      'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCybJ8Z-TcQf9xP27I1eE5Afe6abeDduJ2VNKUsRB1t5nZZllhPTY3CNAlIUN1VpEB4NzMFLauyLk5o12kVudWyunEPE-xIK8nVWWkME377fr6I92MkcixhGsfUsuPxODirosU4HlacZU/w1200-h630-p-k-no-nu/DO%2527PPI.jpg',
+      'https://silkgranat.uz/wp-content/uploads/2022/11/a0055.webp'
+    ],
+    craftsman: { id: 'c9', name: 'Zokir Usta', region: 'Namangan', rating: 4.8, avatar: null },
+    description: "Haqiqiy qo'lda tikilgan Chust do'ppisi. An'anaviy oq-qora naqshli, paxta va ipak iplaridan tayyorlangan eng sifatli namuna.",
+    materials: "Paxta, ipak ip",
+    inStock: 50, sku: 'CD-009',
+    featured: true, isNew: true,
+    dimensions: 'Standart o\'lcham', weight: '50g',
+    productionTime: '1 hafta',
+  },
+  {
+    id: 'p10', title: "Chust Pichog'i (Qora qirrali)",
+    category: 'misgarlik', price: 250000, originalPrice: null,
+    rating: 5.0, reviewCount: 156, sold: 420,
+    image: 'https://frankfurt.apollo.olxcdn.com/v1/files/m6u5mx8buopc2-UZ/image;s=1280x855',
+    images: [
+      'https://frankfurt.apollo.olxcdn.com/v1/files/m6u5mx8buopc2-UZ/image;s=1280x855',
+      "https://frankfurt.apollo.olxcdn.com/v1/files/p6j9t9j6gxmz1-UZ/image;s=765x1020",
+      'https://upload.wikimedia.org/wikipedia/commons/c/cf/Chust_pichoq.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original'
+    ],
+    craftsman: { id: 'c6', name: 'Hamid Yusupov', region: 'Chust', rating: 4.8, avatar: null },
+    description: "Asl Chust pichog'i. Yuqori sifatli karbonli po'latdan yasalgan, dastasi kiyik shoxi va jezdan tayyorlangan.",
+    materials: "Karbonli po'lat, kiyik shoxi, jez",
+    inStock: 15, sku: 'CP-010',
+    featured: true, isNew: false,
+    dimensions: 'Uzunligi 25 sm', weight: '150g',
+    productionTime: '2 hafta',
+  }
 ];
 
 /* ─── Mock Craftsmen ─────────────────────────────────────────── */
