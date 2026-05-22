@@ -1,11 +1,11 @@
-.breadcrumb-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-light); padding: 12px 0; }
+.breadcrumb-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-light); padding: 8px 0; }
 .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); flex-wrap: wrap; }
 .breadcrumb a { color: var(--text-secondary); transition: color 0.2s; }
 .breadcrumb a:hover { color: var(--brand-500); }
 .breadcrumb span { color: var(--text-primary); font-weight: 500; }
 
-.pd-page .container { padding-top: 32px; padding-bottom: 32px; }
-.pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: flex-start; }
+.pd-grid.container { padding-top: 24px; padding-bottom: 32px; }
+.pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: flex-start; }
 
 /* Gallery */
 .pd-main-img {
@@ -122,8 +122,111 @@
 
 .not-found { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 60vh; }
 
+/* Mobile Sticky Action Bar */
+.pd-mobile-sticky-bar {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  .pd-grid { grid-template-columns: 1fr; gap: 24px; }
-  .pd-actions { flex-wrap: wrap; }
-  .pd-action-btn { min-width: 140px; }
+  /* Hide Breadcrumbs on mobile to save vertical space */
+  .breadcrumb-bar {
+    display: none;
+  }
+
+  /* Grid and Spacing */
+  .pd-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .pd-page .container {
+    padding-top: 12px;
+  }
+
+  /* Horizontal swipe thumbnails */
+  .pd-thumbnails {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 4px 2px 12px 2px;
+    gap: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .pd-thumbnails::-webkit-scrollbar {
+    display: none;
+  }
+  .pd-thumb {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Mobile Sticky Bar */
+  .pd-mobile-sticky-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-light);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+  }
+
+  /* Add extra padding to the page container bottom so sticky bar does not overlap content */
+  .pd-page {
+    padding-bottom: 76px;
+  }
+
+  /* Wishlist button in sticky bar */
+  .pd-msb-wish-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .pd-msb-wish-btn.active {
+    border-color: var(--error);
+    background: var(--error-light);
+    color: var(--error);
+  }
+
+  /* Actions inside sticky bar */
+  .pd-msb-actions {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .pd-msb-action-btn {
+    flex: 1;
+    height: 44px;
+    font-size: 14px;
+    padding: 0 16px !important;
+  }
+
+  /* Hide inline buy buttons on mobile since we have the sticky bar */
+  .pd-qty-row .pd-actions {
+    display: none !important;
+  }
+  .pd-qty-row {
+    margin-bottom: 12px;
+    justify-content: flex-start;
+  }
+
+  .reviews-summary {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
 }

@@ -43,10 +43,207 @@ export default function AdminPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
+  // Toast notification state
+  const [toasts, setToasts] = useState([]);
+  const addToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
+  // Persistent states initialized from localStorage
+  const [users, setUsers] = useState(() => {
+    const saved = localStorage.getItem('hunarmand_users');
+    return saved ? JSON.parse(saved) : MOCK_USERS;
+  });
+
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem('hunarmand_products');
+    return saved ? JSON.parse(saved) : MOCK_PRODUCTS;
+  });
+
+  const [craftsmen, setCraftsmen] = useState(() => {
+    const saved = localStorage.getItem('hunarmand_craftsmen');
+    return saved ? JSON.parse(saved) : MOCK_CRAFTSMEN;
+  });
+
+  const [orders, setOrders] = useState(() => {
+    const saved = localStorage.getItem('hunarmand_orders');
+    return saved ? JSON.parse(saved) : [
+      { id: '#HM-10234', product: 'Rishton Keramika Set',  customer: 'Zulfiya M.',  date: '2026-05-20', status: 'processing', amount: 360000 },
+      { id: '#HM-10219', product: 'Keramika Piyola',       customer: 'Bobur T.',    date: '2026-05-18', status: 'shipped',    amount: 120000 },
+      { id: '#HM-10198', product: 'Keramika Kosa',         customer: 'Kamola R.',   date: '2026-05-15', status: 'delivered',  amount: 240000 },
+      { id: '#HM-10187', product: 'Dekorativ Tovoq',       customer: 'Alisher K.',  date: '2026-05-12', status: 'pending',    amount: 180000 },
+      { id: '#HM-10171', product: 'Buxoro Gilamdek',       customer: 'Nodira S.',   date: '2026-05-10', status: 'cancelled',  amount: 95000  },
+      { id: '#HM-10160', product: 'Atlas Mato',            customer: 'Jamshid U.',  date: '2026-05-08', status: 'delivered',  amount: 320000 },
+    ];
+  });
+
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('hunarmand_admin_settings');
+    return saved ? JSON.parse(saved) : {
+      commissionStandard: '8',
+      commissionPremium: '5',
+      shippingStandard: '30000',
+      shippingFreeLimit: '500000',
+      smtpServer: 'smtp.gmail.com',
+      smtpPort: '587',
+      smsApiKey: '****',
+      smsSenderName: 'HUNARMAND'
+    };
+  });
+
+  // Searching & Filtering States
+  const [userSearchQ, setUserSearchQ] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('all');
+  const [productSearchQ, setProductSearchQ] = useState('');
+  const [craftsmenSearchQ, setCraftsmenSearchQ] = useState('');
+  const [orderSearchQ, setOrderSearchQ] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+
+  // Modals States
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserModal, setShowUserModal] = useState(false);
+
+  const [selectedCraftsman, setSelectedCraftsman] = useState(null);
+  const [showCraftsmanModal, setShowCraftsmanModal] = useState(false);
+
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
+  // Filter computations
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.name.toLowerCase().includes(userSearchQ.toLowerCase()) || u.email.toLowerCase().includes(userSearchQ.toLowerCase());
+    const matchesRole = userRoleFilter === 'all' || u.role === userRoleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  const filteredProducts = products.filter(p =>
+    p.title.toLowerCase().includes(productSearchQ.toLowerCase())
+  );
+
+  const filteredCraftsmen = craftsmen.filter(c =>
+    c.name.toLowerCase().includes(craftsmenSearchQ.toLowerCase()) || c.region.toLowerCase().includes(craftsmenSearchQ.toLowerCase())
+  );
+
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch = o.product.toLowerCase().includes(orderSearchQ.toLowerCase()) || o.customer.toLowerCase().includes(orderSearchQ.toLowerCase()) || o.id.toLowerCase().includes(orderSearchQ.toLowerCase());
+    const matchesStatus = orderStatusFilter === 'all' || o.status === orderStatusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Action methods
   const handleLogout = () => {
     logout();
     navigate('/');
   };
+
+  const handleToggleUserStatus = (userId) => {
+    const updated = users.map(u => {
+      if (u.id === userId) {
+        const newStatus = u.status === 'active' ? 'banned' : 'active';
+        addToast(newStatus === 'banned' ? `${u.name} bloklandi!` : `${u.name} blokdan chiqarildi!`, newStatus === 'banned' ? 'error' : 'success');
+        return { ...u, status: newStatus };
+      }
+      return u;
+    });
+    setUsers(updated);
+    localStorage.setItem('hunarmand_users', JSON.stringify(updated));
+  };
+
+  const handleApproveProduct = (prodId) => {
+    const updated = products.map(p => {
+      if (p.id === prodId) {
+        addToast(`"${p.title}" muvaffaqiyatli tasdiqlandi!`, 'success');
+        return { ...p, status: 'approved' };
+      }
+      return p;
+    });
+    setProducts(updated);
+    localStorage.setItem('hunarmand_products', JSON.stringify(updated));
+  };
+
+  const handleRejectProduct = (prodId) => {
+    const reason = prompt("Rad etish sababini kiriting:");
+    if (reason === null) return;
+    if (!reason.trim()) {
+      addToast("Rad etish sababi bo'sh bo'lishi mumkin emas!", 'error');
+      return;
+    }
+    const updated = products.map(p => {
+      if (p.id === prodId) {
+        addToast(`"${p.title}" rad etildi. Sababi: ${reason}`, 'info');
+        return { ...p, status: 'rejected', rejectReason: reason };
+      }
+      return p;
+    });
+    setProducts(updated);
+    localStorage.setItem('hunarmand_products', JSON.stringify(updated));
+  };
+
+  const handleDeleteProduct = (prodId) => {
+    if (window.confirm("Haqiqatan ham ushbu mahsulotni platformadan o'chirmoqchisiz?")) {
+      const updated = products.filter(p => p.id !== prodId);
+      setProducts(updated);
+      localStorage.setItem('hunarmand_products', JSON.stringify(updated));
+      addToast("Mahsulot o'chirildi!", 'info');
+    }
+  };
+
+  const handleVerifyCraftsman = (craftId) => {
+    const updated = craftsmen.map(c => {
+      if (c.id === craftId) {
+        addToast(`"${c.name}" muvaffaqiyatli tasdiqlandi!`, 'success');
+        return { ...c, isVerified: true };
+      }
+      return c;
+    });
+    setCraftsmen(updated);
+    localStorage.setItem('hunarmand_craftsmen', JSON.stringify(updated));
+  };
+
+  const handleUpdateOrderStatus = (orderId, newStatus) => {
+    const updated = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
+    setOrders(updated);
+    localStorage.setItem('hunarmand_orders', JSON.stringify(updated));
+    setSelectedOrder(prev => prev && prev.id === orderId ? { ...prev, status: newStatus } : prev);
+    addToast(`Buyurtma holati yangilandi: ${ORDER_STATUSES[newStatus]?.label}`, 'success');
+  };
+
+  const handleSaveSettings = (e, section) => {
+    e.preventDefault();
+    localStorage.setItem('hunarmand_admin_settings', JSON.stringify(settings));
+    addToast(`"${section}" muvaffaqiyatli saqlandi!`, 'success');
+  };
+
+  // Dynamic calculations
+  const totalRev = orders
+    .filter(o => o.status === 'delivered' || o.status === 'processing')
+    .reduce((sum, o) => sum + o.amount, 0);
+
+  const dynamicPlatformMetrics = [
+    { label:'Jami foydalanuvchi', value: String(12480 + users.length), icon:<Users size={20}/>,     delta:'+234', color:'var(--info)' },
+    { label:'Faol mahsulotlar',  value: String(products.length), icon:<Package size={20}/>,    delta:'+89',  color:'var(--brand-500)' },
+    { label:"Jami buyurtmalar",  value: String(94200 + orders.length), icon:<ShoppingBag size={20}/>,delta:'+1.2K',color:'var(--success)' },
+    { label:'Jami daromad',      value: formatPrice(2400000000 + totalRev), icon:<DollarSign size={20}/>, delta:'+18%', color:'#f59e0b',unit:"" },
+  ];
+
+  const ceramicCount = products.filter(p => p.category === 'keramika').length;
+  const carpetCount = products.filter(p => p.category === 'gilam').length;
+  const jewelryCount = products.filter(p => p.category === 'zargarlik').length;
+  const otherCount = products.length - (ceramicCount + carpetCount + jewelryCount);
+  const totalProds = products.length || 1;
+  const dynamicPieData = [
+    { name: 'Keramika', value: Math.round((ceramicCount / totalProds) * 100), color: '#e8a042' },
+    { name: 'Gilam', value: Math.round((carpetCount / totalProds) * 100), color: '#059669' },
+    { name: 'Zargarlik', value: Math.round((jewelryCount / totalProds) * 100), color: '#7c3aed' },
+    { name: 'Boshqa', value: Math.round((otherCount / totalProds) * 100), color: '#6b7280' },
+  ];
+
+  const pendingCraftsmenCount = craftsmen.filter(c => !c.isVerified).length;
+  const rejectedProductsCount = products.filter(p => p.status === 'rejected').length;
 
   return (
     <div className="admin-page">
@@ -78,7 +275,7 @@ export default function AdminPage() {
           <div className="animate-fadeIn">
             <div className="admin-header"><h1>Dashboard</h1><span className="admin-date">{new Date().toLocaleDateString('uz-UZ',{year:'numeric',month:'long',day:'numeric'})}</span></div>
             <div className="metrics-grid">
-              {PLATFORM_METRICS.map(m=>(
+              {dynamicPlatformMetrics.map(m=>(
                 <div key={m.label} className="metric-card">
                   <div className="metric-icon" style={{background:m.color+'20',color:m.color}}>{m.icon}</div>
                   <div className="metric-info">
@@ -108,14 +305,14 @@ export default function AdminPage() {
                 <h3>Kategoriya bo'yicha sotuv</h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie data={PIE_DATA} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={4} dataKey="value">
-                      {PIE_DATA.map((e,i)=><Cell key={i} fill={e.color}/>)}
+                    <Pie data={dynamicPieData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={4} dataKey="value">
+                      {dynamicPieData.map((e,i)=><Cell key={i} fill={e.color}/>)}
                     </Pie>
                     <Tooltip contentStyle={{background:'var(--bg-primary)',border:'1px solid var(--border-light)',borderRadius:'8px',fontSize:'13px'}}/>
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pie-legend">
-                  {PIE_DATA.map(d=>(
+                  {dynamicPieData.map(d=>(
                     <div key={d.name} className="pie-legend-item">
                       <span className="pie-dot" style={{background:d.color}}/>
                       <span>{d.name}</span><strong>{d.value}%</strong>
@@ -127,8 +324,12 @@ export default function AdminPage() {
 
             {/* Alerts */}
             <div className="admin-alerts">
-              <div className="alert-item warning"><AlertTriangle size={16}/> 3 ta yangi hunarmand tasdiqlash kutmoqda</div>
-              <div className="alert-item error"><XCircle size={16}/> 2 ta mahsulot shikoyat olgan — moderatsiya kerak</div>
+              {pendingCraftsmenCount > 0 && (
+                <div className="alert-item warning"><AlertTriangle size={16}/> {pendingCraftsmenCount} ta yangi hunarmand tasdiqlash kutmoqda</div>
+              )}
+              {rejectedProductsCount > 0 && (
+                <div className="alert-item error"><XCircle size={16}/> {rejectedProductsCount} ta mahsulot rad etilgan / moderatsiyada</div>
+              )}
               <div className="alert-item success"><CheckCircle2 size={16}/> Tizim barqaror ishlayapti</div>
             </div>
           </div>
@@ -140,22 +341,44 @@ export default function AdminPage() {
             <div className="admin-header"><h1>Foydalanuvchilar</h1></div>
             <div className="admin-card">
               <div className="admin-card-toolbar">
-                <input className="form-input" placeholder="Qidirish..." style={{maxWidth:280}}/>
-                <select className="form-input form-select" style={{width:'auto'}}>
-                  <option>Barchasi</option><option>Mijoz</option><option>Hunarmand</option>
+                <input
+                  className="form-input"
+                  placeholder="Ism yoki email bo'yicha qidirish..."
+                  style={{maxWidth:280}}
+                  value={userSearchQ}
+                  onChange={e => setUserSearchQ(e.target.value)}
+                />
+                <select
+                  className="form-input form-select"
+                  style={{width:'auto'}}
+                  value={userRoleFilter}
+                  onChange={e => setUserRoleFilter(e.target.value)}
+                >
+                  <option value="all">Barchasi</option>
+                  <option value="customer">Mijoz</option>
+                  <option value="craftsman">Hunarmand</option>
                 </select>
               </div>
               <table className="table">
                 <thead><tr><th>Ism</th><th>Email</th><th>Rol</th><th>Holat</th><th>Qo'shilgan</th><th>Amal</th></tr></thead>
                 <tbody>
-                  {MOCK_USERS.map(u=>(
+                  {filteredUsers.length === 0 ? (
+                    <tr><td colSpan={6} style={{textAlign:'center',padding:40,color:'var(--text-muted)'}}>Foydalanuvchi topilmadi</td></tr>
+                  ) : filteredUsers.map(u=>(
                     <tr key={u.id}>
                       <td><div style={{display:'flex',alignItems:'center',gap:8}}><div className="avatar avatar-sm">{u.name[0]}</div><strong>{u.name}</strong></div></td>
                       <td>{u.email}</td>
                       <td><span className={`badge ${u.role==='craftsman'?'badge-brand':'badge-info'}`}>{u.role==='craftsman'?'Hunarmand':'Mijoz'}</span></td>
                       <td><span className={`badge ${u.status==='active'?'badge-success':'badge-error'}`}>{u.status==='active'?'Aktiv':'Bloklangan'}</span></td>
                       <td>{u.joined}</td>
-                      <td><div className="action-btns"><button className="btn btn-ghost btn-sm"><Eye size={13}/></button><button className="btn btn-ghost btn-sm" style={{color:'var(--error)'}}><XCircle size={13}/></button></div></td>
+                      <td>
+                        <div className="action-btns">
+                          <button className="btn btn-ghost btn-sm" onClick={() => openUserDetail(u)}><Eye size={13}/></button>
+                          <button className="btn btn-ghost btn-sm" style={{color: u.status === 'active' ? 'var(--error)' : 'var(--success)'}} onClick={() => handleToggleUserStatus(u.id)}>
+                            <XCircle size={13}/>
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -169,16 +392,37 @@ export default function AdminPage() {
           <div className="animate-fadeIn">
             <div className="admin-header"><h1>Mahsulotlar moderatsiyasi</h1></div>
             <div className="admin-card">
+              <div className="admin-card-toolbar">
+                <input
+                  className="form-input"
+                  placeholder="Mahsulot nomini qidirish..."
+                  style={{maxWidth:280}}
+                  value={productSearchQ}
+                  onChange={e => setProductSearchQ(e.target.value)}
+                />
+              </div>
               <table className="table">
                 <thead><tr><th>Mahsulot</th><th>Hunarmand</th><th>Narx</th><th>Holat</th><th>Amal</th></tr></thead>
                 <tbody>
-                  {MOCK_PRODUCTS.map(p=>(
+                  {filteredProducts.length === 0 ? (
+                    <tr><td colSpan={5} style={{textAlign:'center',padding:40,color:'var(--text-muted)'}}>Mahsulot topilmadi</td></tr>
+                  ) : filteredProducts.map(p=>(
                     <tr key={p.id}>
                       <td><div className="product-cell"><img src={p.image} alt={p.title} className="product-cell-img"/>{p.title}</div></td>
-                      <td>{p.craftsman?.name}</td>
+                      <td>{p.craftsman?.name || 'Noma\'lum'}</td>
                       <td>{formatPrice(p.price)}</td>
-                      <td><span className="badge badge-success">Tasdiqlangan</span></td>
-                      <td><div className="action-btns"><button className="btn btn-ghost btn-sm"><CheckCircle2 size={13} color="var(--success)"/></button><button className="btn btn-ghost btn-sm"><XCircle size={13} color="var(--error)"/></button><button className="btn btn-ghost btn-sm"><Trash2 size={13} color="var(--error)"/></button></div></td>
+                      <td>
+                        <span className={`badge ${p.status === 'rejected' ? 'badge-error' : 'badge-success'}`}>
+                          {p.status === 'rejected' ? 'Rad etilgan' : 'Tasdiqlangan'}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-btns">
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleApproveProduct(p.id)} title="Tasdiqlash"><CheckCircle2 size={13} color="var(--success)"/></button>
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleRejectProduct(p.id)} title="Rad etish"><XCircle size={13} color="var(--error)"/></button>
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleDeleteProduct(p.id)} title="O'chirish"><Trash2 size={13} color="var(--error)"/></button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -192,10 +436,21 @@ export default function AdminPage() {
           <div className="animate-fadeIn">
             <div className="admin-header"><h1>Hunarmandlar</h1></div>
             <div className="admin-card">
+              <div className="admin-card-toolbar">
+                <input
+                  className="form-input"
+                  placeholder="Hunarmand yoki viloyatni qidirish..."
+                  style={{maxWidth:280}}
+                  value={craftsmenSearchQ}
+                  onChange={e => setCraftsmenSearchQ(e.target.value)}
+                />
+              </div>
               <table className="table">
                 <thead><tr><th>Ism</th><th>Viloyat</th><th>Mutaxassislik</th><th>Mahsulot</th><th>Reyting</th><th>Holat</th><th>Amal</th></tr></thead>
                 <tbody>
-                  {MOCK_CRAFTSMEN.map(c=>(
+                  {filteredCraftsmen.length === 0 ? (
+                    <tr><td colSpan={7} style={{textAlign:'center',padding:40,color:'var(--text-muted)'}}>Usta topilmadi</td></tr>
+                  ) : filteredCraftsmen.map(c=>(
                     <tr key={c.id}>
                       <td><strong>{c.name}</strong></td>
                       <td>{c.region}</td>
@@ -203,7 +458,80 @@ export default function AdminPage() {
                       <td>{c.totalProducts}</td>
                       <td>⭐ {c.rating}</td>
                       <td><span className={`badge ${c.isVerified?'badge-success':'badge-warning'}`}>{c.isVerified?'Tasdiqlangan':'Kutilmoqda'}</span></td>
-                      <td><div className="action-btns"><button className="btn btn-secondary btn-sm">Ko'rish</button>{!c.isVerified&&<button className="btn btn-primary btn-sm"><CheckCircle2 size={12}/>Tasdiqlash</button>}</div></td>
+                      <td>
+                        <div className="action-btns">
+                          <button className="btn btn-secondary btn-sm" onClick={() => openCraftsmanDetail(c)}>Ko'rish</button>
+                          {!c.isVerified && <button className="btn btn-primary btn-sm" onClick={() => handleVerifyCraftsman(c.id)}><CheckCircle2 size={12}/>Tasdiqlash</button>}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── Orders ── */}
+        {active==='orders' && (
+          <div className="animate-fadeIn">
+            <div className="admin-header">
+              <h1>Buyurtmalar boshqaruvi</h1>
+              <span className="dash-count">{filteredOrders.length} ta buyurtma</span>
+            </div>
+            <div className="admin-card">
+              <div className="admin-card-toolbar">
+                <input
+                  className="form-input"
+                  placeholder="Buyurtma yoki mijozni qidirish..."
+                  style={{maxWidth:280}}
+                  value={orderSearchQ}
+                  onChange={e => setOrderSearchQ(e.target.value)}
+                />
+                <select
+                  className="form-input form-select"
+                  style={{width:'auto'}}
+                  value={orderStatusFilter}
+                  onChange={e => setOrderStatusFilter(e.target.value)}
+                >
+                  <option value="all">Barcha holatlar</option>
+                  {Object.entries(ORDER_STATUSES).map(([key, val]) => (
+                    <option key={key} value={key}>{val.label}</option>
+                  ))}
+                </select>
+              </div>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Mijoz</th>
+                    <th>Mahsulot</th>
+                    <th>Sana</th>
+                    <th>Holat</th>
+                    <th>Summa</th>
+                    <th>Amal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.length === 0 ? (
+                    <tr><td colSpan={7} style={{textAlign:'center',padding:40,color:'var(--text-muted)'}}>Sorov bo'yicha buyurtma topilmadi</td></tr>
+                  ) : filteredOrders.map(o => (
+                    <tr key={o.id}>
+                      <td className="order-id">{o.id}</td>
+                      <td><strong>{o.customer}</strong></td>
+                      <td>{o.product}</td>
+                      <td>{o.date}</td>
+                      <td>
+                        <span className={`status-badge status-${o.status}`}>
+                          {ORDER_STATUSES[o.status]?.label || o.status}
+                        </span>
+                      </td>
+                      <td><strong>{formatPrice(o.amount)}</strong></td>
+                      <td>
+                        <div className="action-btns">
+                          <button className="btn btn-secondary btn-sm" onClick={() => { setSelectedOrder(o); setShowOrderModal(true); }}>Ko'rish</button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -217,27 +545,236 @@ export default function AdminPage() {
           <div className="animate-fadeIn">
             <div className="admin-header"><h1>Platform sozlamalari</h1></div>
             <div className="settings-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
-              {[
-                {title:'Komissiya sozlamalari', fields:[{label:"Standart komissiya (%)",val:"8"},{label:"Premium komissiya (%)",val:"5"}]},
-                {title:'Yetkazib berish',        fields:[{label:"Standart narx (so'm)",val:"30000"},{label:"Bepul chegara (so'm)",val:"500000"}]},
-                {title:'Email sozlamalari',      fields:[{label:"SMTP server",val:"smtp.gmail.com"},{label:"Port",val:"587"}]},
-                {title:'SMS xabarnomalar',       fields:[{label:"Eskiz API key",val:"****"},{label:"Sender nomi",val:"HUNARMAND"}]},
-              ].map(s=>(
-                <div key={s.title} className="admin-card" style={{padding:24}}>
-                  <h3 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,marginBottom:16}}>{s.title}</h3>
-                  {s.fields.map(f=>(
-                    <div key={f.label} className="form-group" style={{marginBottom:12}}>
-                      <label className="form-label">{f.label}</label>
-                      <input className="form-input" defaultValue={f.val}/>
-                    </div>
-                  ))}
-                  <button className="btn btn-primary btn-sm">Saqlash</button>
+              <form onSubmit={e => handleSaveSettings(e, 'Komissiya sozlamalari')} className="admin-card" style={{padding:24}}>
+                <h3 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,marginBottom:16}}>Komissiya sozlamalari</h3>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Standart komissiya (%)</label>
+                  <input className="form-input" value={settings.commissionStandard} onChange={e => setSettings(prev => ({ ...prev, commissionStandard: e.target.value }))} required />
                 </div>
-              ))}
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Premium komissiya (%)</label>
+                  <input className="form-input" value={settings.commissionPremium} onChange={e => setSettings(prev => ({ ...prev, commissionPremium: e.target.value }))} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-sm">Saqlash</button>
+              </form>
+
+              <form onSubmit={e => handleSaveSettings(e, 'Yetkazib berish')} className="admin-card" style={{padding:24}}>
+                <h3 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,marginBottom:16}}>Yetkazib berish</h3>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Standart narx (so'm)</label>
+                  <input className="form-input" value={settings.shippingStandard} onChange={e => setSettings(prev => ({ ...prev, shippingStandard: e.target.value }))} required />
+                </div>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Bepul chegara (so'm)</label>
+                  <input className="form-input" value={settings.shippingFreeLimit} onChange={e => setSettings(prev => ({ ...prev, shippingFreeLimit: e.target.value }))} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-sm">Saqlash</button>
+              </form>
+
+              <form onSubmit={e => handleSaveSettings(e, 'Email sozlamalari')} className="admin-card" style={{padding:24}}>
+                <h3 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,marginBottom:16}}>Email sozlamalari</h3>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">SMTP server</label>
+                  <input className="form-input" value={settings.smtpServer} onChange={e => setSettings(prev => ({ ...prev, smtpServer: e.target.value }))} required />
+                </div>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Port</label>
+                  <input className="form-input" value={settings.smtpPort} onChange={e => setSettings(prev => ({ ...prev, smtpPort: e.target.value }))} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-sm">Saqlash</button>
+              </form>
+
+              <form onSubmit={e => handleSaveSettings(e, 'SMS xabarnomalar')} className="admin-card" style={{padding:24}}>
+                <h3 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,marginBottom:16}}>SMS xabarnomalar</h3>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Eskiz API key</label>
+                  <input className="form-input" type="password" value={settings.smsApiKey} onChange={e => setSettings(prev => ({ ...prev, smsApiKey: e.target.value }))} required />
+                </div>
+                <div className="form-group" style={{marginBottom:12}}>
+                  <label className="form-label">Sender nomi</label>
+                  <input className="form-input" value={settings.smsSenderName} onChange={e => setSettings(prev => ({ ...prev, smsSenderName: e.target.value }))} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-sm">Saqlash</button>
+              </form>
             </div>
           </div>
         )}
       </main>
+
+      {/* ── Toasts Container ── */}
+      <div className="toasts-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast toast-${t.type}`}>
+            {t.type === 'success' && <CheckCircle2 size={16} color="var(--success)"/>}
+            {t.type === 'error' && <AlertTriangle size={16} color="var(--error)"/>}
+            {t.type === 'info' && <CheckCircle2 size={16} color="var(--info)"/>}
+            <span>{t.message}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── User Detail Modal ── */}
+      {showUserModal && selectedUser && (
+        <div className="admin-modal-overlay" onClick={() => setShowUserModal(false)}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Foydalanuvchi ma'lumotlari</h3>
+              <button className="admin-modal-close" onClick={() => setShowUserModal(false)}><XCircle size={18}/></button>
+            </div>
+            <div className="admin-modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="avatar avatar-md" style={{ width: 50, height: 50, fontSize: 20, display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg-secondary)', borderRadius:'50%' }}>{selectedUser.name[0]}</div>
+                  <div>
+                    <strong style={{ fontSize: 16 }}>{selectedUser.name}</strong>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>ID: {selectedUser.id}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedUser.email}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Rol</span>
+                    <p style={{ marginTop: 2 }}><span className={`badge ${selectedUser.role==='craftsman'?'badge-brand':'badge-info'}`}>{selectedUser.role==='craftsman'?'Hunarmand':'Mijoz'}</span></p>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Holat</span>
+                    <p style={{ marginTop: 2 }}><span className={`badge ${selectedUser.status==='active'?'badge-success':'badge-error'}`}>{selectedUser.status==='active'?'Faol':'Bloklangan'}</span></p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Qo'shilgan sana</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedUser.joined}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="admin-modal-footer">
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowUserModal(false)}>Yopish</button>
+              <button className={`btn btn-${selectedUser.status === 'active' ? 'error' : 'success'} btn-sm`} onClick={() => { handleToggleUserStatus(selectedUser.id); setShowUserModal(false); }}>
+                {selectedUser.status === 'active' ? 'Bloklash' : 'Blokdan chiqarish'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Craftsman Detail Modal ── */}
+      {showCraftsmanModal && selectedCraftsman && (
+        <div className="admin-modal-overlay" onClick={() => setShowCraftsmanModal(false)}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Hunarmand ma'lumotlari</h3>
+              <button className="admin-modal-close" onClick={() => setShowCraftsmanModal(false)}><XCircle size={18}/></button>
+            </div>
+            <div className="admin-modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <strong style={{ fontSize: 16 }}>{selectedCraftsman.name}</strong>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Sohasi: {selectedCraftsman.specialty} · Tajribasi: {selectedCraftsman.yearsExp} yil</p>
+                </div>
+                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bio</span>
+                  <p style={{ fontSize: 13, lineHeight: '1.4', marginTop: 4 }}>{selectedCraftsman.bio || "Bio kiritilmagan."}</p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Viloyat / Shahar</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedCraftsman.region} / {selectedCraftsman.city || selectedCraftsman.region}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Aloqa (WhatsApp)</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedCraftsman.whatsapp || "Kiritilmagan"}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mahsulotlar soni</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedCraftsman.totalProducts}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Reyting</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>⭐ {selectedCraftsman.rating} ({selectedCraftsman.reviewCount} ta sharh)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="admin-modal-footer">
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowCraftsmanModal(false)}>Yopish</button>
+              {!selectedCraftsman.isVerified && (
+                <button className="btn btn-primary btn-sm" onClick={() => { handleVerifyCraftsman(selectedCraftsman.id); setShowCraftsmanModal(false); }}>
+                  Tasdiqlash
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Order Detail Modal ── */}
+      {showOrderModal && selectedOrder && (
+        <div className="admin-modal-overlay" onClick={() => setShowOrderModal(false)}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Buyurtma tafsilotlari - {selectedOrder.id}</h3>
+              <button className="admin-modal-close" onClick={() => setShowOrderModal(false)}><XCircle size={18}/></button>
+            </div>
+            <div className="admin-modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mijoz</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.customer}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Sana</span>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.date}</p>
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mahsulot</span>
+                  <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.product}</p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Summa</span>
+                    <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--brand-600)' }}>{formatPrice(selectedOrder.amount)}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Joriy Holat</span>
+                    <div style={{ marginTop: 4 }}>
+                      <span className={`status-badge status-${selectedOrder.status}`}>
+                        {ORDER_STATUSES[selectedOrder.status]?.label || selectedOrder.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: '8px' }}>Holatni yangilash:</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {Object.entries(ORDER_STATUSES).map(([key, val]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`order-filter-btn ${selectedOrder.status === key ? 'active' : ''}`}
+                        onClick={() => handleUpdateOrderStatus(selectedOrder.id, key)}
+                      >
+                        {val.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="admin-modal-footer">
+              <button className="btn btn-primary btn-sm" onClick={() => setShowOrderModal(false)}>Yopish</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

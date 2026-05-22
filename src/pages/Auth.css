@@ -62,10 +62,89 @@
 .role-btn span { font-size: 11px; color: var(--text-muted); }
 
 /* Demo hints */
-.demo-hints { margin-top: 20px; padding: 14px; background: var(--bg-secondary); border-radius: var(--radius-md); }
-.demo-hint-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
-.demo-hints { display: flex; flex-wrap: wrap; gap: 6px; }
-.demo-btn { padding: 5px 12px; border-radius: var(--radius-full); border: 1.5px solid var(--border-medium); font-size: 12px; font-weight: 500; color: var(--text-secondary); transition: all 0.2s; }
-.demo-btn:hover { border-color: var(--brand-300); background: var(--brand-50); color: var(--brand-600); }
+.demo-hints { 
+  display: flex; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  margin-top: 20px; 
+  padding: 14px; 
+  background: var(--bg-secondary); 
+  border-radius: var(--radius-md); 
+}
+.demo-hint-title { 
+  font-size: 11px; 
+  font-weight: 600; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px; 
+  color: var(--text-muted); 
+  margin: 0; 
+  margin-right: 4px;
+}
+.demo-btn { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px;
+  padding: 6px 14px; 
+  border-radius: var(--radius-full); 
+  border: 1.5px solid var(--border-medium); 
+  background: var(--bg-primary);
+  font-size: 12px; 
+  font-weight: 500; 
+  color: var(--text-secondary); 
+  transition: all 0.2s; 
+  cursor: pointer;
+}
+.demo-btn:hover { 
+  border-color: var(--brand-300); 
+  background: var(--brand-50); 
+  color: var(--brand-600); 
+}
 
 @media (max-width: 1024px) { .auth-visual { display: none; } .auth-layout { grid-template-columns: 1fr; } .auth-form-panel { padding: 40px 24px; min-height: 100vh; } }
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--bg-primary, #fff);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-xl, 0 10px 25px -5px rgba(0,0,0,0.1));
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}

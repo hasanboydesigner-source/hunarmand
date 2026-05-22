@@ -262,6 +262,24 @@ export default function ProductDetailPage() {
           </div>
         </div>
       )}
+      {/* Mobile Sticky Action Bar */}
+      <div className="pd-mobile-sticky-bar">
+        <button 
+          className={`pd-msb-wish-btn ${wished ? 'active' : ''}`} 
+          onClick={handleWishlist}
+          aria-label="Sevimlilarga qo'shish"
+        >
+          <Heart size={20} fill={wished ? "#ef4444" : "none"} color={wished ? "#ef4444" : "currentColor"} />
+        </button>
+        <div className="pd-msb-actions">
+          <button className="btn btn-primary pd-msb-action-btn" onClick={handleAddToCart} disabled={product.inStock===0}>
+            <ShoppingCart size={17} /> Savatga
+          </button>
+          <button className="btn btn-secondary pd-msb-action-btn" onClick={handleBuyNow} disabled={product.inStock===0}>
+            <Zap size={17} /> Hozir sotib ol
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

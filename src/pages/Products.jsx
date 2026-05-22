@@ -4,12 +4,14 @@ import { MOCK_PRODUCTS, CATEGORIES, REGIONS, SORT_OPTIONS, formatPrice } from '.
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { Filter, Grid3X3, List, SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
+import { ProductCardSkeleton } from '../components/Skeletons';
 import './Products.css';
 
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState('grid');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const category = params.get('category') || '';
   const region = params.get('region') || '';
@@ -17,6 +19,14 @@ export default function ProductsPage() {
   const q = params.get('q') || '';
   const minPrice = Number(params.get('minPrice') || 0);
   const maxPrice = Number(params.get('maxPrice') || 3000000);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [category, region, sort, q, minPrice, maxPrice]);
 
   const set = (key, val) => {
     const next = new URLSearchParams(params);
@@ -185,7 +195,13 @@ export default function ProductsPage() {
           </div>
 
           {/* Results */}
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="products-grid">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="no-results">
               <span className="no-results-icon">🔍</span>
               <h3>Mahsulot topilmadi</h3>

@@ -117,7 +117,7 @@ export default function Header() {
                   <Link to="/profile/orders" className="dropdown-item" onClick={() => setProfileOpen(false)}>
                     <Package size={15} /> Buyurtmalarim
                   </Link>
-                  <Link to="/profile" className="dropdown-item" onClick={() => setProfileOpen(false)}>
+                  <Link to={user?.role === 'craftsman' ? '/dashboard?tab=settings' : '/profile'} className="dropdown-item" onClick={() => setProfileOpen(false)}>
                     <User size={15} /> Profil
                   </Link>
                   <div className="dropdown-divider" />

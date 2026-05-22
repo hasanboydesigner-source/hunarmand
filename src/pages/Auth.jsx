@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/useStore';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, CheckCircle2, X } from 'lucide-react';
 import { FiUser, FiShield } from 'react-icons/fi';
 import { GiPaintedPottery } from 'react-icons/gi';
 import './Auth.css';
@@ -15,6 +15,9 @@ export default function AuthPage() {
   const [role, setRole] = useState(defaultRole);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
@@ -26,12 +29,31 @@ export default function AuthPage() {
     if (!loginForm.email || !loginForm.password) { toast.error("Barcha maydonlarni to'ldiring"); return; }
     setLoading(true);
     await new Promise(r => setTimeout(r, 900));
+    
     // Mock login — in real app, call API
-    const mockUser = { id:'u1', name:'Demo Foydalanuvchi', email: loginForm.email, role: loginForm.email.includes('admin')?'admin': loginForm.email.includes('craft')?'craftsman':'customer' };
+    let mockUser;
+    const email = loginForm.email.toLowerCase();
+    
+    if (email === 'akbar@demo.com') {
+      mockUser = { id: 'c1', name: 'Akbar Nazarov', email, role: 'craftsman' };
+    } else if (email === 'malohat@demo.com') {
+      mockUser = { id: 'c2', name: 'Malohat Qodirov', email, role: 'craftsman' };
+    } else if (email === 'jamshid@demo.com') {
+      mockUser = { id: 'c3', name: 'Jamshid Umarov', email, role: 'craftsman' };
+    } else if (email === 'sherzod@demo.com') {
+      mockUser = { id: 'c4', name: 'Sherzod Tursunov', email, role: 'craftsman' };
+    } else if (email.includes('craft')) {
+      mockUser = { id: 'c1', name: 'Akbar Nazarov', email, role: 'craftsman' };
+    } else if (email.includes('admin')) {
+      mockUser = { id: 'a1', name: 'Admin', email, role: 'admin' };
+    } else {
+      mockUser = { id: 'u1', name: 'Demo Foydalanuvchi', email, role: 'customer' };
+    }
+    
     login(mockUser, 'mock-jwt-token');
     toast.success(`Xush kelibsiz, ${mockUser.name}!`);
     setLoading(false);
-    navigate(mockUser.role === 'admin' ? '/admin' : mockUser.role === 'craftsman' ? '/dashboard' : '/');
+    navigate(mockUser.role === 'admin' ? '/admin' : mockUser.role === 'craftsman' ? '/dashboard?tab=settings' : '/');
   };
 
   const handleRegister = async (e) => {
@@ -40,11 +62,12 @@ export default function AuthPage() {
     if (registerForm.password.length < 6) { toast.error("Parol kamida 6 ta belgi bo'lishi kerak"); return; }
     setLoading(true);
     await new Promise(r => setTimeout(r, 900));
-    const mockUser = { id:'u2', name: registerForm.name, email: registerForm.email, role };
+    
+    const mockUser = { id: 'u_' + Date.now(), name: registerForm.name, email: registerForm.email, role };
     login(mockUser, 'mock-jwt-token');
     toast.success("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
     setLoading(false);
-    navigate(role === 'craftsman' ? '/dashboard' : '/');
+    navigate(role === 'craftsman' ? '/dashboard?tab=settings' : '/');
   };
 
   return (
@@ -113,7 +136,7 @@ export default function AuthPage() {
 
                 <div className="auth-options">
                   <label className="remember-me"><input type="checkbox"/> Eslab qolish</label>
-                  <Link to="/auth/forgot-password" className="forgot-link">Parolni unutdingizmi?</Link>
+                  <button type="button" className="forgot-link" style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }} onClick={() => setShowForgotModal(true)}>Parolni unutdingizmi?</button>
                 </div>
 
                 <button className="btn btn-primary btn-lg auth-submit" type="submit" disabled={loading}>
@@ -137,7 +160,10 @@ export default function AuthPage() {
                 <div className="demo-hints">
                   <p className="demo-hint-title">Demo kirish:</p>
                   <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'user@demo.com',password:'demo123'})}><FiUser size={13}/> Mijoz</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'craft@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Hunarmand</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'akbar@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Akbar</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'malohat@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Malohat</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'jamshid@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Jamshid</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'sherzod@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Sherzod</button>
                   <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'admin@demo.com',password:'demo123'})}><FiShield size={13}/> Admin</button>
                 </div>
               </form>
@@ -218,6 +244,43 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+      
+      {showForgotModal && (
+        <div className="modal-overlay" onClick={() => setShowForgotModal(false)}>
+          <div className="modal-content animate-scaleIn" style={{ maxWidth: 400, padding: 24 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ marginBottom: 16 }}>
+              <h3 style={{ fontSize: 20, margin: 0, fontFamily: 'Inter, sans-serif' }}>Parolni tiklash</h3>
+              <button className="modal-close" onClick={() => setShowForgotModal(false)}><X size={20}/></button>
+            </div>
+            <div className="modal-body">
+              <p style={{marginBottom: 20, color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.5}}>
+                Elektron pochta manzilingizni kiriting, biz sizga parolni tiklash havolasini yuboramiz.
+              </p>
+              <div className="form-group" style={{ marginBottom: 20 }}>
+                <label className="form-label">Email manzil</label>
+                <div className="input-icon-wrap">
+                  <Mail size={16} className="input-icon"/>
+                  <input className="form-input input-with-icon" type="email" placeholder="email@example.com"
+                    value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)}/>
+                </div>
+              </div>
+              <button 
+                className="btn btn-primary" 
+                style={{width: '100%', justifyContent: 'center'}}
+                onClick={() => {
+                  if(!forgotEmail) { toast.error("Emailni kiriting"); return; }
+                  if(!forgotEmail.includes('@')) { toast.error("Noto'g'ri email formati"); return; }
+                  toast.success("Tiklash havolasi emailga yuborildi!");
+                  setShowForgotModal(false);
+                  setForgotEmail('');
+                }}
+              >
+                Yuborish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

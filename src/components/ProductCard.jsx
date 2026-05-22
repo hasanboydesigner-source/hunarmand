@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star, ShoppingCart, Eye, Zap } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '../store/useStore';
 import { formatPrice, getDiscount, getInitials } from '../data/constants';
@@ -6,6 +6,12 @@ import toast from 'react-hot-toast';
 import './ProductCard.css';
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/products/${product.id}`);
+  };
+
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
   const wished = has(product.id);
@@ -33,15 +39,14 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
   if (viewMode === 'list') {
     return (
-      <Link
-        to={`/products/${product.id}`}
+      <div
+        onClick={handleCardClick}
         className="product-card-list"
       >
         <div className="pcl-image">
-          <img 
-            src={product.image} 
-            alt={product.title} 
-            loading="lazy"
+          <img
+            src={product.image}
+            alt={product.title}
           />
           {discount > 0 && (
             <span className="pc-discount-badge">
@@ -58,13 +63,13 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               </span>
             )}
           </div>
-          
+
           <h3 className="pcl-title">{product.title}</h3>
 
           <p className="pcl-desc">
             {product.description?.slice(0, 100)}...
           </p>
-          
+
           <div className="pc-craftsman">
             <div className="avatar avatar-sm">{getInitials(product.craftsman?.name)}</div>
             <span>{product.craftsman?.name}</span>
@@ -74,7 +79,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         <div className="pcl-actions">
           <div className="pc-rating">
             <div className="stars" style={{ display: "flex", gap: "2px" }}>
-              {[1,2,3,4,5].map((s) => (
+              {[1, 2, 3, 4, 5].map((s) => (
                 <Star key={s} size={12} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
               ))}
             </div>
@@ -87,36 +92,35 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               <p className="pc-original">{formatPrice(product.originalPrice)}</p>
             )}
           </div>
-          <button 
-            className="btn btn-primary btn-sm" 
+          <button
+            className="btn btn-primary btn-sm"
             onClick={handleAddToCart}
           >
             <ShoppingCart size={14} /> Savatga
           </button>
-          <button 
-            className={`btn btn-icon ${wished ? 'wished' : 'btn-ghost'}`} 
+          <button
+            className={`btn btn-icon ${wished ? 'wished' : 'btn-ghost'}`}
             onClick={handleWishlist}
           >
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
           </button>
         </div>
-      </Link>
+      </div>
     );
   }
 
   return (
-    <Link
-      to={`/products/${product.id}`}
+    <div
+      onClick={handleCardClick}
       className="product-card"
     >
       <div className="pc-image-wrap">
-        <img 
-          src={product.image} 
-          alt={product.title} 
-          loading="lazy" 
-          className="pc-image" 
+        <img
+          src={product.image}
+          alt={product.title}
+          className="pc-image"
         />
-        
+
         {/* Badges */}
         <div className="pc-badges">
           {discount > 0 && (
@@ -138,9 +142,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
         {/* Actions overlay */}
         <div className="pc-overlay">
-          <button 
-            className={`pc-action-btn ${wished ? 'active-wish' : ''}`} 
-            onClick={handleWishlist} 
+          <button
+            className={`pc-action-btn ${wished ? 'active-wish' : ''}`}
+            onClick={handleWishlist}
             title="Sevimlilarga"
           >
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
@@ -172,7 +176,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
         <div className="pc-rating">
           <div className="stars">
-            {[1,2,3,4,5].map((s) => (
+            {[1, 2, 3, 4, 5].map((s) => (
               <Star key={s} size={12} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
             ))}
           </div>
@@ -198,6 +202,6 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           </button>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
