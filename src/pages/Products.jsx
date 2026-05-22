@@ -7,6 +7,7 @@ import { Filter, Grid3X3, List, SlidersHorizontal, X, ChevronDown, Search } from
 import { motion, AnimatePresence } from 'framer-motion';
 import './Products.css';
 
+// Senior-level animation presets
 const gridVariants = {
   hidden: { opacity: 0 },
   show: {
@@ -25,11 +26,35 @@ const gridVariants = {
   }
 };
 
+const filterContentVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04
+    }
+  }
+};
+
+const filterItemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: "spring", stiffness: 150, damping: 14 } 
+  }
+};
+
+const springTransition = {
+  type: "spring",
+  stiffness: 120,
+  damping: 16
+};
+
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState('grid');
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 3000000]);
 
   const category = params.get('category') || '';
   const region = params.get('region') || '';
@@ -75,18 +100,34 @@ export default function ProductsPage() {
     <div className="products-page page-with-header">
       {/* Page Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -25 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="products-page-header"
       >
         <div className="container">
           <div className="pph-inner">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+            >
               <h1>Barcha mahsulotlar</h1>
-              <p>{filtered.length} ta mahsulot topildi</p>
-            </div>
-            <div className="pph-search">
+              <motion.p
+                key={filtered.length}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {filtered.length} ta mahsulot topildi
+              </motion.p>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.05 }}
+              className="pph-search"
+            >
               <Search size={16} />
               <input
                 className="pph-search-input"
@@ -94,7 +135,7 @@ export default function ProductsPage() {
                 value={q}
                 onChange={(e) => set('q', e.target.value)}
               />
-            </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>
@@ -102,95 +143,148 @@ export default function ProductsPage() {
       <div className="container products-layout">
         {/* Sidebar Filters */}
         <motion.aside
-          initial={{ opacity: 0, x: -25 }}
+          initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           className={`filters-sidebar ${filtersOpen ? 'open' : ''}`}
         >
           <div className="filters-header">
             <h3><Filter size={16} /> Filtrlar</h3>
             {activeFilters.length > 0 && (
-              <button className="clear-filters" onClick={clearAll}>Tozalash</button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="clear-filters" 
+                onClick={clearAll}
+              >
+                Tozalash
+              </motion.button>
             )}
           </div>
 
           {/* Active Filters */}
-          {activeFilters.length > 0 && (
-            <div className="active-filters">
-              {activeFilters.map((f) => (
-                <span key={f.key} className="active-filter-chip">
-                   {f.label} <button onClick={() => set(f.key, '')}><X size={12} /></button>
-                </span>
-              ))}
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {activeFilters.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="active-filters"
+                style={{ overflow: "hidden" }}
+              >
+                <AnimatePresence>
+                  {activeFilters.map((f) => (
+                    <motion.span 
+                      key={f.key} 
+                      initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                      className="active-filter-chip"
+                    >
+                      {f.label} 
+                      <button onClick={() => set(f.key, '')}><X size={12} /></button>
+                    </motion.span>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Category Filter */}
           <FilterGroup title="Kategoriya">
             <div className="filter-options">
-              <label className="filter-option">
+              <motion.label variants={filterItemVariants} className="filter-option">
                 <input type="radio" name="cat" checked={!category} onChange={() => set('category', '')} />
                 <span>Barchasi</span>
-              </label>
+              </motion.label>
               {CATEGORIES.map((c) => (
-                <label key={c.id} className="filter-option">
+                <motion.label key={c.id} variants={filterItemVariants} className="filter-option">
                   <input type="radio" name="cat" checked={category===c.id} onChange={() => set('category', c.id)} />
-                  <span><span className="cat-icon-sm"><CategoryIcon name={c.icon} size={13} /></span> {c.label}</span>
-                </label>
+                  <span>
+                    <span className="cat-icon-sm"><CategoryIcon name={c.icon} size={13} /></span> 
+                    {c.label}
+                  </span>
+                </motion.label>
               ))}
             </div>
           </FilterGroup>
 
           {/* Region Filter */}
           <FilterGroup title="Hudud">
-            <select className="form-input form-select" value={region} onChange={(e) => set('region', e.target.value)}>
+            <motion.select 
+              variants={filterItemVariants} 
+              className="form-input form-select" 
+              value={region} 
+              onChange={(e) => set('region', e.target.value)}
+            >
               <option value="">Barcha hududlar</option>
               {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
+            </motion.select>
           </FilterGroup>
 
           {/* Price Filter */}
           <FilterGroup title="Narx oralig'i">
-            <div className="price-inputs">
+            <motion.div variants={filterItemVariants} className="price-inputs">
               <input type="number" className="form-input" placeholder="Min" defaultValue={minPrice}
                 onBlur={(e) => set('minPrice', e.target.value)} />
               <span>—</span>
               <input type="number" className="form-input" placeholder="Max" defaultValue={maxPrice}
                 onBlur={(e) => set('maxPrice', e.target.value)} />
-            </div>
+            </motion.div>
           </FilterGroup>
 
           {/* Rating */}
           <FilterGroup title="Reyting">
             {[5,4,3].map((r) => (
-              <label key={r} className="filter-option">
+              <motion.label key={r} variants={filterItemVariants} className="filter-option">
                 <input type="radio" name="rating" />
                 <span>{'⭐'.repeat(r)} va yuqori</span>
-              </label>
+              </motion.label>
             ))}
           </FilterGroup>
         </motion.aside>
 
         {/* Main content */}
         <motion.main
-          initial={{ opacity: 0, x: 25 }}
+          initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
           className="products-main"
         >
           {/* Toolbar */}
           <div className="products-toolbar">
-            <button className="btn btn-secondary btn-sm mobile-filter-btn" onClick={() => setFiltersOpen(!filtersOpen)}>
+            <motion.button 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={springTransition}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="btn btn-secondary btn-sm mobile-filter-btn" 
+              onClick={() => setFiltersOpen(!filtersOpen)}
+            >
               <SlidersHorizontal size={15} /> Filtrlar {activeFilters.length > 0 && `(${activeFilters.length})`}
-            </button>
+            </motion.button>
             <div className="toolbar-right">
-              <select className="form-input sort-select" value={sort} onChange={(e) => set('sort', e.target.value)}>
+              <motion.select 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...springTransition, delay: 0.05 }}
+                className="form-input sort-select" 
+                value={sort} 
+                onChange={(e) => set('sort', e.target.value)}
+              >
                 {SORT_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-              </select>
-              <div className="view-toggle">
+              </motion.select>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ ...springTransition, delay: 0.1 }}
+                className="view-toggle"
+              >
                 <button className={`view-btn ${view==='grid'?'active':''}`} onClick={() => setView('grid')}><Grid3X3 size={16} /></button>
                 <button className={`view-btn ${view==='list'?'active':''}`} onClick={() => setView('list')}><List size={16} /></button>
-              </div>
+              </motion.div>
             </div>
           </div>
 
@@ -208,7 +302,14 @@ export default function ProductsPage() {
                 <span className="no-results-icon">🔍</span>
                 <h3>Mahsulot topilmadi</h3>
                 <p>Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting</p>
-                <button className="btn btn-primary" onClick={clearAll}>Filtrlarni tozalash</button>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn btn-primary" 
+                  onClick={clearAll}
+                >
+                  Filtrlarni tozalash
+                </motion.button>
               </motion.div>
             ) : (
               <motion.div
@@ -253,7 +354,14 @@ function FilterGroup({ title, children }) {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             style={{ overflow: "hidden" }}
           >
-            <div className="filter-group-body">{children}</div>
+            <motion.div 
+              variants={filterContentVariants}
+              initial="hidden"
+              animate="show"
+              className="filter-group-body"
+            >
+              {children}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
