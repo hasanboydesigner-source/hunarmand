@@ -4,6 +4,7 @@ import { MOCK_PRODUCTS, CATEGORIES, REGIONS, SORT_OPTIONS, formatPrice } from '.
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { Filter, Grid3X3, List, SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './Products.css';
 
 export default function ProductsPage() {
@@ -55,7 +56,12 @@ export default function ProductsPage() {
   return (
     <div className="products-page page-with-header">
       {/* Page Header */}
-      <div className="products-page-header">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="products-page-header"
+      >
         <div className="container">
           <div className="pph-inner">
             <div>
@@ -73,11 +79,16 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="container products-layout">
         {/* Sidebar Filters */}
-        <aside className={`filters-sidebar ${filtersOpen ? 'open' : ''}`}>
+        <motion.aside
+          initial={{ opacity: 0, x: -25 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          className={`filters-sidebar ${filtersOpen ? 'open' : ''}`}
+        >
           <div className="filters-header">
             <h3><Filter size={16} /> Filtrlar</h3>
             {activeFilters.length > 0 && (
@@ -90,7 +101,7 @@ export default function ProductsPage() {
             <div className="active-filters">
               {activeFilters.map((f) => (
                 <span key={f.key} className="active-filter-chip">
-                  {f.label} <button onClick={() => set(f.key, '')}><X size={12} /></button>
+                   {f.label} <button onClick={() => set(f.key, '')}><X size={12} /></button>
                 </span>
               ))}
             </div>
@@ -140,10 +151,15 @@ export default function ProductsPage() {
               </label>
             ))}
           </FilterGroup>
-        </aside>
+        </motion.aside>
 
         {/* Main content */}
-        <main className="products-main">
+        <motion.main
+          initial={{ opacity: 0, x: 25 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+          className="products-main"
+        >
           {/* Toolbar */}
           <div className="products-toolbar">
             <button className="btn btn-secondary btn-sm mobile-filter-btn" onClick={() => setFiltersOpen(!filtersOpen)}>
@@ -161,19 +177,32 @@ export default function ProductsPage() {
           </div>
 
           {/* Results */}
-          {filtered.length === 0 ? (
-            <div className="no-results">
-              <span className="no-results-icon">🔍</span>
-              <h3>Mahsulot topilmadi</h3>
-              <p>Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting</p>
-              <button className="btn btn-primary" onClick={clearAll}>Filtrlarni tozalash</button>
-            </div>
-          ) : (
-            <div className={view === 'grid' ? 'products-grid' : 'products-list'}>
-              {filtered.map((p) => <ProductCard key={p.id} product={p} viewMode={view} />)}
-            </div>
-          )}
-        </main>
+          <AnimatePresence mode="popLayout">
+            {filtered.length === 0 ? (
+              <motion.div
+                key="no-results"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="no-results"
+              >
+                <span className="no-results-icon">🔍</span>
+                <h3>Mahsulot topilmadi</h3>
+                <p>Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting</p>
+                <button className="btn btn-primary" onClick={clearAll}>Filtrlarni tozalash</button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="products-container"
+                layout
+                className={view === 'grid' ? 'products-grid' : 'products-list'}
+              >
+                {filtered.map((p) => <ProductCard key={p.id} product={p} viewMode={view} />)}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.main>
       </div>
     </div>
   );

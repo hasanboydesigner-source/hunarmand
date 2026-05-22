@@ -3,7 +3,10 @@ import { Heart, Star, ShoppingCart, Eye, Zap } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '../store/useStore';
 import { formatPrice, getDiscount, getInitials } from '../data/constants';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import './ProductCard.css';
+
+const MotionLink = motion(Link);
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
   const addItem = useCartStore((s) => s.addItem);
@@ -33,7 +36,16 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
   if (viewMode === 'list') {
     return (
-      <Link to={`/products/${product.id}`} className="product-card-list animate-fadeIn">
+      <MotionLink
+        layout
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.97 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={{ x: 4, transition: { duration: 0.2 } }}
+        to={`/products/${product.id}`}
+        className="product-card-list"
+      >
         <div className="pcl-image">
           <img src={product.image} alt={product.title} loading="lazy" />
           {discount > 0 && <span className="pc-discount-badge">-{discount}%</span>}
@@ -70,12 +82,21 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
           </button>
         </div>
-      </Link>
+      </MotionLink>
     );
   }
 
   return (
-    <Link to={`/products/${product.id}`} className="product-card animate-fadeIn">
+    <MotionLink
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      to={`/products/${product.id}`}
+      className="product-card"
+    >
       <div className="pc-image-wrap">
         <img src={product.image} alt={product.title} loading="lazy" className="pc-image" />
         
@@ -142,6 +163,6 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           </button>
         </div>
       </div>
-    </Link>
+    </MotionLink>
   );
 }
