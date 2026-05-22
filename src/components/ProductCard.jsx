@@ -8,16 +8,16 @@ import './ProductCard.css';
 
 const MotionLink = motion(Link);
 
-// Senior-level spring transition presets
+// Spring preset for the card container entrance
 const springTransition = {
   type: "spring",
-  stiffness: 150,
-  damping: 18,
+  stiffness: 120,
+  damping: 16,
   mass: 0.8
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.96 },
+  hidden: { opacity: 0, y: 25, scale: 0.96 },
   show: {
     opacity: 1,
     y: 0,
@@ -27,13 +27,13 @@ const cardVariants = {
   exit: {
     opacity: 0,
     scale: 0.94,
-    y: 20,
-    transition: { duration: 0.25, ease: "easeInOut" }
+    y: 15,
+    transition: { duration: 0.2, ease: "easeInOut" }
   }
 };
 
 const listVariants = {
-  hidden: { opacity: 0, x: -20 },
+  hidden: { opacity: 0, x: -15 },
   show: {
     opacity: 1,
     x: 0,
@@ -43,7 +43,7 @@ const listVariants = {
     opacity: 0,
     scale: 0.97,
     x: 10,
-    transition: { duration: 0.25, ease: "easeInOut" }
+    transition: { duration: 0.2, ease: "easeInOut" }
   }
 };
 
@@ -125,8 +125,13 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               </motion.span>
             )}
           </div>
+          
           <h3 className="pcl-title">{product.title}</h3>
-          <p className="pcl-desc">{product.description?.slice(0, 100)}...</p>
+
+          <p className="pcl-desc">
+            {product.description?.slice(0, 100)}...
+          </p>
+          
           <div className="pc-craftsman">
             <div className="avatar avatar-sm">{getInitials(product.craftsman?.name)}</div>
             <span>{product.craftsman?.name}</span>
@@ -135,7 +140,11 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         </div>
         <div className="pcl-actions">
           <div className="pc-rating">
-            <Star size={13} fill="#f59e0b" color="#f59e0b" />
+            <div className="stars" style={{ display: "flex", gap: "2px" }}>
+              {[1,2,3,4,5].map((s) => (
+                <Star key={s} size={12} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
+              ))}
+            </div>
             <span>{product.rating}</span>
             <span className="review-count">({product.reviewCount})</span>
           </div>
