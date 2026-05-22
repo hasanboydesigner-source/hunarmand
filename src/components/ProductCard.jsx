@@ -18,7 +18,7 @@ const springTransition = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 25, scale: 0.96 },
-  show: {
+  visible: {
     opacity: 1,
     y: 0,
     scale: 1,
@@ -34,7 +34,7 @@ const cardVariants = {
 
 const listVariants = {
   hidden: { opacity: 0, x: -15 },
-  show: {
+  visible: {
     opacity: 1,
     x: 0,
     transition: springTransition
@@ -86,7 +86,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         layout
         variants={listVariants}
         initial="hidden"
-        animate="show"
+        animate="visible"
         exit="exit"
         whileHover={{ x: 6, transition: { duration: 0.2, ease: "easeOut" } }}
         to={`/products/${product.id}`}
@@ -182,7 +182,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
       layout
       variants={cardVariants}
       initial="hidden"
-      animate="show"
+      animate="visible"
       exit="exit"
       whileHover={{ y: -8, transition: { duration: 0.22, ease: "easeOut" } }}
       to={`/products/${product.id}`}
