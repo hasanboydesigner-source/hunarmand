@@ -3,58 +3,9 @@ import { Heart, Star, ShoppingCart, Eye, Zap } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '../store/useStore';
 import { formatPrice, getDiscount, getInitials } from '../data/constants';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
 import './ProductCard.css';
 
-const MotionLink = motion(Link);
-
-// Spring preset for the card container entrance
-const springTransition = {
-  type: "spring",
-  stiffness: 120,
-  damping: 16,
-  mass: 0.8
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 25, scale: 0.96 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: springTransition
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.94,
-    y: 15,
-    transition: { duration: 0.2, ease: "easeInOut" }
-  }
-};
-
-const listVariants = {
-  hidden: { opacity: 0, x: -15 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: springTransition
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.97,
-    x: 10,
-    transition: { duration: 0.2, ease: "easeInOut" }
-  }
-};
-
-const badgeTransition = (delay) => ({
-  type: "spring",
-  stiffness: 260,
-  damping: 15,
-  delay: delay
-});
-
-export default function ProductCard({ product, viewMode = 'grid' }) {
+export default function ProductCard({ product, viewMode = 'grid', index = 0 }) {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
   const wished = has(product.id);
@@ -80,49 +31,36 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     });
   };
 
+  // Stagger delays using native AOS attributes (delay is incremented by index)
+  const aosDelay = (index % 4) * 100;
+
   if (viewMode === 'list') {
     return (
-      <MotionLink
-        layout
-        variants={listVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        whileHover={{ x: 6, transition: { duration: 0.2, ease: "easeOut" } }}
+      <Link
+        data-aos="fade-up"
+        data-aos-delay={aosDelay}
         to={`/products/${product.id}`}
         className="product-card-list"
       >
         <div className="pcl-image">
-          <motion.img 
+          <img 
             src={product.image} 
             alt={product.title} 
             loading="lazy"
-            whileHover={{ scale: 1.08 }}
-            transition={{ duration: 0.4 }}
           />
           {discount > 0 && (
-            <motion.span 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={badgeTransition(0.1)}
-              className="pc-discount-badge"
-            >
+            <span className="pc-discount-badge">
               -{discount}%
-            </motion.span>
+            </span>
           )}
         </div>
         <div className="pcl-body">
           <div className="pcl-meta">
             <span className="pc-category">{product.category}</span>
             {product.isNew && (
-              <motion.span 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={badgeTransition(0.15)}
-                className="badge badge-success"
-              >
+              <span className="badge badge-success">
                 Yangi
-              </motion.span>
+              </span>
             )}
           </div>
           
@@ -154,102 +92,71 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               <p className="pc-original">{formatPrice(product.originalPrice)}</p>
             )}
           </div>
-          <motion.button 
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.94 }}
+          <button 
             className="btn btn-primary btn-sm" 
             onClick={handleAddToCart}
           >
             <ShoppingCart size={14} /> Savatga
-          </motion.button>
-          <motion.button 
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
-            animate={{ scale: wished ? [1, 1.25, 1] : 1 }}
-            transition={{ duration: 0.3 }}
+          </button>
+          <button 
             className={`btn btn-icon ${wished ? 'wished' : 'btn-ghost'}`} 
             onClick={handleWishlist}
           >
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
-          </motion.button>
+          </button>
         </div>
-      </MotionLink>
+      </Link>
     );
   }
 
   return (
-    <MotionLink
-      layout
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      whileHover={{ y: -8, transition: { duration: 0.22, ease: "easeOut" } }}
+    <Link
+      data-aos="fade-up"
+      data-aos-delay={aosDelay}
       to={`/products/${product.id}`}
       className="product-card"
     >
       <div className="pc-image-wrap">
-        <motion.img 
+        <img 
           src={product.image} 
           alt={product.title} 
           loading="lazy" 
           className="pc-image" 
-          whileHover={{ scale: 1.08 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
         />
         
         {/* Badges */}
         <div className="pc-badges">
           {discount > 0 && (
-            <motion.span 
-              initial={{ scale: 0, rotate: -10 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={badgeTransition(0.1)}
-              className="pc-discount-badge"
-            >
+            <span className="pc-discount-badge">
               -{discount}%
-            </motion.span>
+            </span>
           )}
           {product.isNew && (
-            <motion.span 
-              initial={{ scale: 0, rotate: 10 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={badgeTransition(0.15)}
-              className="pc-new-badge"
-            >
+            <span className="pc-new-badge">
               Yangi
-            </motion.span>
+            </span>
           )}
           {product.featured && (
-            <motion.span 
-              initial={{ scale: 0, y: -10 }}
-              animate={{ scale: 1, y: 0 }}
-              transition={badgeTransition(0.2)}
-              className="pc-featured-badge"
-            >
+            <span className="pc-featured-badge">
               <Zap size={10} />Top
-            </motion.span>
+            </span>
           )}
         </div>
 
         {/* Actions overlay */}
         <div className="pc-overlay">
-          <motion.button 
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.88 }}
-            animate={{ scale: wished ? [1, 1.25, 1] : 1 }}
-            transition={{ duration: 0.3 }}
+          <button 
             className={`pc-action-btn ${wished ? 'active-wish' : ''}`} 
             onClick={handleWishlist} 
             title="Sevimlilarga"
           >
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
-          </motion.button>
-          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+          </button>
+          <div>
             <Link to={`/products/${product.id}`} className="pc-action-btn" title="Ko'rish">
               <Eye size={16} />
             </Link>
-          </motion.div>
+          </div>
         </div>
 
         {/* Stock */}
@@ -287,9 +194,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               <p className="pc-original">{formatPrice(product.originalPrice)}</p>
             )}
           </div>
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
+          <button
             className="pc-cart-btn"
             onClick={handleAddToCart}
             disabled={product.inStock === 0}
@@ -297,9 +202,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           >
             <ShoppingCart size={16} />
             <span className="pc-cart-btn-text">Sotib olish</span>
-          </motion.button>
+          </button>
         </div>
       </div>
-    </MotionLink>
+    </Link>
   );
 }

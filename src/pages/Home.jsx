@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { CATEGORIES, MOCK_PRODUCTS, MOCK_CRAFTSMEN, formatPrice } from '../data/constants';
+import { CATEGORIES, MOCK_PRODUCTS, MOCK_CRAFTSMEN } from '../data/constants';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { ArrowRight, Shield, Truck, CreditCard, Headphones, Star, MapPin, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import './Home.css';
 
 const HERO_SLIDES = [
@@ -47,81 +46,6 @@ const STATS = [
   { end: 95000, suffix: '+', label: 'Mamnun mijoz', note: 'Xaridor sharhlari' },
   { end: 13,    suffix: '',  label: 'Viloyat',      note: 'Yetkazib berish' },
 ];
-
-// Animation variants
-const sectionHeaderVariants = {
-  hidden: { opacity: 0, y: 25 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 100, damping: 15 } 
-  }
-};
-
-const sectionStaggerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const featureItemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 130, damping: 15 } 
-  }
-};
-
-const categoryItemVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 15 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 140, damping: 14 } 
-  }
-};
-
-const craftsmanItemVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.98 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1,
-    transition: { type: "spring", stiffness: 110, damping: 15 } 
-  }
-};
-
-const heroVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15,
-      staggerChildren: 0.08,
-      delayChildren: 0.1
-    }
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    transition: { duration: 0.25 }
-  }
-};
-
-const heroChildVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 15 } }
-};
 
 function CountUp({ end, suffix = '' }) {
   const [count, setCount] = useState(0);
@@ -197,54 +121,30 @@ export default function HomePage() {
     <div className="home-page page-with-header">
       {/* ── Hero ── */}
       <section className="hero" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-        <AnimatePresence mode="wait">
-          <motion.div 
-            className="hero-bg" 
-            key={slide}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-          >
-            <img src={current.image} alt={current.title} className="hero-bg-img" />
-            <div className="hero-bg-overlay" />
-          </motion.div>
-        </AnimatePresence>
+        <div className="hero-bg">
+          <img src={current.image} alt={current.title} className="hero-bg-img" />
+          <div className="hero-bg-overlay" />
+        </div>
 
         <div className="container hero-container">
-          <div className="hero-content">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={slide}
-                variants={heroVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                <motion.div variants={heroChildVariants} className="hero-tag">{current.tag}</motion.div>
-                <motion.h1 variants={heroChildVariants} className="hero-title" style={{ whiteSpace: 'pre-line' }}>
-                  {current.title}
-                </motion.h1>
-                <motion.p variants={heroChildVariants} className="hero-subtitle">{current.subtitle}</motion.p>
-                <motion.div variants={heroChildVariants} className="hero-actions">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: "inline-block" }}>
-                    <Link to={current.ctaLink} className="btn btn-primary btn-xl">{current.cta} <ArrowRight size={18} /></Link>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: "inline-block" }}>
-                    <Link to="/craftsmen" className="btn hero-ghost-btn btn-xl">Hunarmandlar</Link>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            </AnimatePresence>
+          <div className="hero-content" data-aos="fade-up">
+            <div className="hero-tag">{current.tag}</div>
+            <h1 className="hero-title" style={{ whiteSpace: 'pre-line' }}>
+              {current.title}
+            </h1>
+            <p className="hero-subtitle">{current.subtitle}</p>
+            <div className="hero-actions">
+              <Link to={current.ctaLink} className="btn btn-primary btn-xl">{current.cta} <ArrowRight size={18} /></Link>
+              <Link to="/craftsmen" className="btn hero-ghost-btn btn-xl">Hunarmandlar</Link>
+            </div>
           </div>
         </div>
 
         {/* Slide indicators */}
         <div className="hero-dots">
           {HERO_SLIDES.map((_, i) => (
-            <motion.button 
+            <button 
               key={i} 
-              whileHover={{ scale: 1.2 }}
               className={`hero-dot ${i === slide ? 'active' : ''}`} 
               onClick={() => setSlide(i)} 
             />
@@ -255,291 +155,187 @@ export default function HomePage() {
       {/* ── Stats ── */}
       <section className="stats-section">
         <div className="container">
-          <motion.div 
-            variants={sectionStaggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="stats-row"
-          >
+          <div className="stats-row">
             {STATS.map((s, i) => (
-              <motion.div key={i} variants={featureItemVariants} className="stat-item">
+              <div 
+                key={i} 
+                className="stat-item"
+                data-aos="fade-up"
+                data-aos-delay={i * 100}
+              >
                 <div className="stat-num">
                   <CountUp end={s.end} suffix={s.suffix} />
                 </div>
                 <div className="stat-lbl">{s.label}</div>
                 <div className="stat-note">{s.note}</div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ── Features ── */}
       <section className="features-section section-sm">
         <div className="container">
-          <motion.div 
-            variants={sectionStaggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="features-grid"
-          >
+          <div className="features-grid">
             {FEATURES.map((f, i) => (
-              <motion.div 
+              <div 
                 key={i} 
-                variants={featureItemVariants} 
-                whileHover={{ y: -5 }}
                 className="feature-card"
+                data-aos="fade-up"
+                data-aos-delay={i * 100}
               >
-                <motion.div 
-                  whileHover={{ rotate: 10, scale: 1.1 }}
-                  className="feature-icon"
-                >
-                  {f.icon}
-                </motion.div>
+                <div className="feature-icon">{f.icon}</div>
                 <div>
                   <h4>{f.title}</h4>
                   <p>{f.desc}</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ── Categories ── */}
       <section className="section">
         <div className="container">
-          <motion.div 
-            variants={sectionHeaderVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="section-heading"
-          >
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Browse by craft</p>
             <h2>Hunarmandchilik turlari</h2>
             <p>O'zbek an'anaviy hunarmandchiligining ko'p qirrali dunyosini kashf eting</p>
-          </motion.div>
-          <motion.div 
-            variants={sectionStaggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="categories-grid"
-          >
-            {CATEGORIES.map((cat) => (
-              <motion.div 
+          </div>
+          <div className="categories-grid">
+            {CATEGORIES.map((cat, i) => (
+              <Link 
                 key={cat.id} 
-                variants={categoryItemVariants}
-                whileHover={{ y: -6, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                to={`/products?category=${cat.id}`} 
+                className="category-card"
+                data-aos="fade-up"
+                data-aos-delay={(i % 4) * 100}
               >
-                <Link to={`/products?category=${cat.id}`} className="category-card">
-                  <div className="category-icon" style={{ background: cat.color + '20', color: cat.color }}>
-                    <CategoryIcon name={cat.icon} size={24} />
-                  </div>
-                  <div className="category-info">
-                    <h4>{cat.label}</h4>
-                    <p>{cat.labelRu}</p>
-                  </div>
-                  <ChevronRight size={16} className="category-arrow" />
-                </Link>
-              </motion.div>
+                <div className="category-icon" style={{ background: cat.color + '20', color: cat.color }}>
+                  <CategoryIcon name={cat.icon} size={24} />
+                </div>
+                <div className="category-info">
+                  <h4>{cat.label}</h4>
+                  <p>{cat.labelRu}</p>
+                </div>
+                <ChevronRight size={16} className="category-arrow" />
+              </Link>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ── Featured Products ── */}
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
-          <motion.div 
-            variants={sectionHeaderVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="section-heading"
-          >
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Handpicked</p>
             <h2>Tanlangan mahsulotlar</h2>
             <p>Platformamizning eng mashhur va yuqori baholangan buyumlari</p>
-          </motion.div>
+          </div>
           
-          <motion.div 
-            variants={sectionStaggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="products-grid"
-          >
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
-          </motion.div>
+          <div className="products-grid">
+            {featured.map((p, idx) => <ProductCard key={p.id} product={p} index={idx} />)}
+          </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="section-footer"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/products" className="btn btn-secondary btn-lg">
-                Barcha mahsulotlar <ArrowRight size={16} />
-              </Link>
-            </motion.div>
-          </motion.div>
+          <div className="section-footer" data-aos="fade-up">
+            <Link to="/products" className="btn btn-secondary btn-lg">
+              Barcha mahsulotlar <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* ── Craftsmen ── */}
       <section className="section">
         <div className="container">
-          <motion.div 
-            variants={sectionHeaderVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="section-heading"
-          >
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Meet the artisans</p>
             <h2>Mashhur hunarmandlar</h2>
             <p>Platformamizning eng iqtidorli va tajribali ustalari</p>
-          </motion.div>
+          </div>
           
-          <motion.div 
-            variants={sectionStaggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="craftsmen-grid"
-          >
-            {MOCK_CRAFTSMEN.map((c) => (
-              <motion.div 
+          <div className="craftsmen-grid">
+            {MOCK_CRAFTSMEN.map((c, i) => (
+              <Link 
                 key={c.id} 
-                variants={craftsmanItemVariants}
-                whileHover={{ y: -8, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                to={`/craftsmen/${c.slug}`} 
+                className="craftsman-card"
+                data-aos="fade-up"
+                data-aos-delay={i * 100}
               >
-                <Link to={`/craftsmen/${c.slug}`} className="craftsman-card">
-                  <div className="craftsman-cover">
-                    <img src={c.coverImage} alt={c.name} />
-                    <div className="craftsman-cover-overlay" />
-                    {c.isVerified && <span className="verified-badge">✓ Tasdiqlangan</span>}
-                  </div>
-                  <div className="craftsman-body">
-                    <div className="craftsman-avatar-wrap">
-                      <div className="avatar avatar-lg craftsman-avatar">
-                        {c.name.split(' ').map(n=>n[0]).join('')}
-                      </div>
-                    </div>
-                    <h3>{c.name}</h3>
-                    <div className="craftsman-meta">
-                      <span><MapPin size={12} /> {c.region}</span>
-                      <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {c.rating} ({c.reviewCount})</span>
-                    </div>
-                    <p className="craftsman-specialty">
-                      {CATEGORIES.find(cat => cat.id === c.specialty)?.icon} {CATEGORIES.find(cat => cat.id === c.specialty)?.label}
-                    </p>
-                    <div className="craftsman-stats-row">
-                      <div className="cs-stat"><strong>{c.totalProducts}</strong><span>Mahsulot</span></div>
-                      <div className="cs-stat"><strong>{c.totalSales.toLocaleString()}</strong><span>Sotuv</span></div>
-                      <div className="cs-stat"><strong>{c.yearsExp}</strong><span>Yil tajriba</span></div>
+                <div className="craftsman-cover">
+                  <img src={c.coverImage} alt={c.name} />
+                  <div className="craftsman-cover-overlay" />
+                  {c.isVerified && <span className="verified-badge">✓ Tasdiqlangan</span>}
+                </div>
+                <div className="craftsman-body">
+                  <div className="craftsman-avatar-wrap">
+                    <div className="avatar avatar-lg craftsman-avatar">
+                      {c.name.split(' ').map(n=>n[0]).join('')}
                     </div>
                   </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="section-footer"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/craftsmen" className="btn btn-secondary btn-lg">
-                Barcha hunarmandlar <ArrowRight size={16} />
+                  <h3>{c.name}</h3>
+                  <div className="craftsman-meta">
+                    <span><MapPin size={12} /> {c.region}</span>
+                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {c.rating} ({c.reviewCount})</span>
+                  </div>
+                  <p className="craftsman-specialty">
+                    {CATEGORIES.find(cat => cat.id === c.specialty)?.icon} {CATEGORIES.find(cat => cat.id === c.specialty)?.label}
+                  </p>
+                  <div className="craftsman-stats-row">
+                    <div className="cs-stat"><strong>{c.totalProducts}</strong><span>Mahsulot</span></div>
+                    <div className="cs-stat"><strong>{c.totalSales.toLocaleString()}</strong><span>Sotuv</span></div>
+                    <div className="cs-stat"><strong>{c.yearsExp}</strong><span>Yil tajriba</span></div>
+                  </div>
+                </div>
               </Link>
-            </motion.div>
-          </motion.div>
+            ))}
+          </div>
+          
+          <div className="section-footer" data-aos="fade-up">
+            <Link to="/craftsmen" className="btn btn-secondary btn-lg">
+              Barcha hunarmandlar <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* ── New Arrivals ── */}
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
-          <motion.div 
-            variants={sectionHeaderVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="section-heading"
-          >
+          <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">Just arrived</p>
             <h2>Yangi mahsulotlar</h2>
-          </motion.div>
+          </div>
           
-          <motion.div 
-            variants={sectionStaggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="products-grid"
-          >
-            {newest.map((p) => <ProductCard key={p.id} product={p} />)}
-          </motion.div>
+          <div className="products-grid">
+            {newest.map((p, idx) => <ProductCard key={p.id} product={p} index={idx} />)}
+          </div>
         </div>
       </section>
 
       {/* ── CTA Banner ── */}
       <section className="cta-section">
         <div className="container">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ type: "spring", stiffness: 80, damping: 16 }}
-            className="cta-card"
-          >
-            <motion.div 
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 100, damping: 15 }}
-              className="cta-content"
-            >
+          <div className="cta-card" data-aos="zoom-in-up">
+            <div className="cta-content">
               <p className="eyebrow" style={{ color: 'var(--brand-300)' }}>Join the platform</p>
               <h2>Hunarmand sifatida ro'yxatdan o'ting</h2>
               <p>O'z buyumlaringizni millionlab xaridorlarga taqdim eting. Ro'yxatdan o'tish bepul!</p>
               <div className="cta-actions">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: "inline-block" }}>
-                  <Link to="/auth/register?role=craftsman" className="btn btn-primary btn-xl">Hunarmand bo'ling</Link>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: "inline-block" }}>
-                  <Link to="/about" className="btn hero-ghost-btn btn-lg">Batafsil bilish</Link>
-                </motion.div>
+                <Link to="/auth/register?role=craftsman" className="btn btn-primary btn-xl">Hunarmand bo'ling</Link>
+                <Link to="/about" className="btn hero-ghost-btn btn-lg">Batafsil bilish</Link>
               </div>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 40, rotate: 10 }}
-              whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 100, damping: 15 }}
-              className="cta-decor"
-            >
+            </div>
+            <div className="cta-decor">
               <div className="cta-circle c1" />
               <div className="cta-circle c2" />
-              <motion.div 
-                animate={{ y: [0, -12, 0] }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                className="cta-emoji"
-              >
-                🏺
-              </motion.div>
-            </motion.div>
-          </motion.div>
+              <div className="cta-emoji">🏺</div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
