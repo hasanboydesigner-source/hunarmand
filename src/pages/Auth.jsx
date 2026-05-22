@@ -77,8 +77,8 @@ export default function AuthPage() {
         <div className="auth-visual">
           <div className="auth-visual-content">
             <div className="auth-logo">
-              <div className="logo-icon"><span>H</span></div>
-              <span className="logo-primary">Hunarmand Bozor</span>
+              <div className="logo-icon"><span>E</span></div>
+              <span className="logo-primary">E-Hunarmand</span>
             </div>
             <h2>O'zbek hunarmandchiligini dunyoga tanishtiring</h2>
             <p>Minglab mijozlarga o'zingizning qo'l ishlaringizni taqdim eting</p>

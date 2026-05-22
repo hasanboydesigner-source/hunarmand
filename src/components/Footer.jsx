@@ -12,10 +12,9 @@ export default function Footer() {
       <div className="footer-main container">
         <div className="footer-brand">
           <Link to="/" className="footer-logo">
-            <div className="logo-icon"><span>H</span></div>
+            <div className="logo-icon"><span>E</span></div>
             <div className="logo-text">
-              <span className="logo-primary">Hunarmand</span>
-              <span className="logo-sub">Bozor</span>
+              <span className="logo-primary">E-Hunarmand</span>
             </div>
           </Link>
           <p className="footer-desc">
@@ -67,7 +66,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
-          <p>© {year} Hunarmand Bozor. Barcha huquqlar himoyalangan.</p>
+          <p>© {year} E-Hunarmand. Barcha huquqlar himoyalangan.</p>
           <div className="footer-bottom-links">
             <Link to="/terms">Foydalanish shartlari</Link>
             <Link to="/privacy">Maxfiylik</Link>

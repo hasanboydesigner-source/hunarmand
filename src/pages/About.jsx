@@ -31,9 +31,9 @@ export default function AboutPage() {
       <section className="about-hero">
         <div className="about-hero-bg" />
         <div className="container about-hero-content">
-          <div className="about-logo-icon"><GiPaintedPottery size={36} /></div>
+          <div className="about-logo-icon"><span>E</span></div>
           <span className="eyebrow">Bizning Hikoyamiz</span>
-          <h1>Hunarmand Bozor</h1>
+          <h1>E-Hunarmand</h1>
           <p>O'zbekistonning boy hunarmandchilik merosini zamonaviy texnologiyalar orqali butun dunyoga taqdim etuvchi platforma</p>
           <div className="about-hero-actions">
             <Link to="/products" className="btn btn-primary">Mahsulotlarni ko'rish <ArrowRight size={15} /></Link>
@@ -61,7 +61,7 @@ export default function AboutPage() {
             <span className="eyebrow">Bizning maqsadimiz</span>
             <h2>O'zbek hunarmandchiligini<br />dunyoga tanitamiz</h2>
             <p>
-              2020-yilda tashkil etilgan Hunarmand Bozor O'zbekistonning turli burchaklaridagi mohir ustalarni
+              2020-yilda tashkil etilgan E-Hunarmand O'zbekistonning turli burchaklaridagi mohir ustalarni
               xaridorlar bilan to'g'ridan-to'g'ri bog'laydigan platforma hisoblanadi.
             </p>
             <p>
@@ -87,7 +87,7 @@ export default function AboutPage() {
         <div className="container">
           <div className="section-header-center">
             <span className="eyebrow">Qadriyatlarimiz</span>
-            <h2>Nima uchun Hunarmand Bozor?</h2>
+            <h2>Nima uchun E-Hunarmand?</h2>
           </div>
           <div className="about-values-grid">
             {VALUES.map(v => (
@@ -132,7 +132,7 @@ export default function AboutPage() {
             <div className="about-contact-card">
               <Mail size={22} />
               <h4>Email</h4>
-              <p>info@hunarmand.uz</p>
+              <p>info@ehunarmand.uz</p>
             </div>
             <div className="about-contact-card">
               <Phone size={22} />

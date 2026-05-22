@@ -53,11 +53,10 @@ export default function Header() {
         {/* Logo */}
         <Link to="/" className="header-logo">
           <div className="logo-icon">
-            <GiPaintedPottery size={22} />
+            <span>E</span>
           </div>
           <div className="logo-text">
-            <span className="logo-primary">Hunarmand</span>
-            <span className="logo-sub">Bozor</span>
+            <span className="logo-primary">E-Hunarmand</span>
           </div>
         </Link>
 
