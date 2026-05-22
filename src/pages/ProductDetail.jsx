@@ -177,7 +177,7 @@ export default function ProductDetailPage() {
 
           {/* Guarantees */}
           <div className="pd-guarantees">
-            <div className="pd-guarantee"><Truck size={16} /><span>Toshkent bo'ylab bepul yetkazib berish</span></div>
+            <div className="pd-guarantee"><Truck size={16} /><span>Namangan bo'ylab bepul yetkazib berish</span></div>
             <div className="pd-guarantee"><RotateCcw size={16} /><span>14 kun ichida qaytarish mumkin</span></div>
             <div className="pd-guarantee"><Shield size={16} /><span>Sifat kafolati berilgan</span></div>
           </div>
