@@ -5,7 +5,7 @@ import { formatPrice, getDiscount, getInitials } from '../data/constants';
 import toast from 'react-hot-toast';
 import './ProductCard.css';
 
-export default function ProductCard({ product, viewMode = 'grid', index = 0 }) {
+export default function ProductCard({ product, viewMode = 'grid' }) {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
   const wished = has(product.id);
@@ -31,14 +31,9 @@ export default function ProductCard({ product, viewMode = 'grid', index = 0 }) {
     });
   };
 
-  // Stagger delays using native AOS attributes (delay is incremented by index)
-  const aosDelay = (index % 4) * 100;
-
   if (viewMode === 'list') {
     return (
       <Link
-        data-aos="fade-up"
-        data-aos-delay={aosDelay}
         to={`/products/${product.id}`}
         className="product-card-list"
       >
@@ -111,8 +106,6 @@ export default function ProductCard({ product, viewMode = 'grid', index = 0 }) {
 
   return (
     <Link
-      data-aos="fade-up"
-      data-aos-delay={aosDelay}
       to={`/products/${product.id}`}
       className="product-card"
     >

@@ -1,14 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
 import ScrollToTop from './components/ScrollToTop';
-
-// AOS
-import AOS from 'aos';
-import 'aos/dist/aos.css';
 
 // Pages
 import HomePage from './pages/Home';
@@ -28,20 +23,6 @@ import AdminPage from './pages/Admin';
 function AppContent() {
   const location = useLocation();
   const isDashboardOrAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/dashboard');
-
-  useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-out-cubic',
-      once: true,
-      offset: 60,
-    });
-  }, []);
-
-  useEffect(() => {
-    // Refresh AOS anchors and calculations when changing pages
-    AOS.refresh();
-  }, [location.pathname]);
 
   return (
     <div className="app-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

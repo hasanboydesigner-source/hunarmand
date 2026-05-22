@@ -127,7 +127,7 @@ export default function HomePage() {
         </div>
 
         <div className="container hero-container">
-          <div className="hero-content" data-aos="fade-up">
+          <div className="hero-content">
             <div className="hero-tag">{current.tag}</div>
             <h1 className="hero-title" style={{ whiteSpace: 'pre-line' }}>
               {current.title}
@@ -160,8 +160,6 @@ export default function HomePage() {
               <div 
                 key={i} 
                 className="stat-item"
-                data-aos="fade-up"
-                data-aos-delay={i * 100}
               >
                 <div className="stat-num">
                   <CountUp end={s.end} suffix={s.suffix} />
@@ -182,8 +180,6 @@ export default function HomePage() {
               <div 
                 key={i} 
                 className="feature-card"
-                data-aos="fade-up"
-                data-aos-delay={i * 100}
               >
                 <div className="feature-icon">{f.icon}</div>
                 <div>
@@ -199,19 +195,17 @@ export default function HomePage() {
       {/* ── Categories ── */}
       <section className="section">
         <div className="container">
-          <div className="section-heading" data-aos="fade-up">
+          <div className="section-heading">
             <p className="eyebrow">Browse by craft</p>
             <h2>Hunarmandchilik turlari</h2>
             <p>O'zbek an'anaviy hunarmandchiligining ko'p qirrali dunyosini kashf eting</p>
           </div>
           <div className="categories-grid">
-            {CATEGORIES.map((cat, i) => (
+            {CATEGORIES.map((cat) => (
               <Link 
                 key={cat.id} 
                 to={`/products?category=${cat.id}`} 
                 className="category-card"
-                data-aos="fade-up"
-                data-aos-delay={(i % 4) * 100}
               >
                 <div className="category-icon" style={{ background: cat.color + '20', color: cat.color }}>
                   <CategoryIcon name={cat.icon} size={24} />
@@ -230,17 +224,17 @@ export default function HomePage() {
       {/* ── Featured Products ── */}
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
-          <div className="section-heading" data-aos="fade-up">
+          <div className="section-heading">
             <p className="eyebrow">Handpicked</p>
             <h2>Tanlangan mahsulotlar</h2>
             <p>Platformamizning eng mashhur va yuqori baholangan buyumlari</p>
           </div>
           
           <div className="products-grid">
-            {featured.map((p, idx) => <ProductCard key={p.id} product={p} index={idx} />)}
+            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
 
-          <div className="section-footer" data-aos="fade-up">
+          <div className="section-footer">
             <Link to="/products" className="btn btn-secondary btn-lg">
               Barcha mahsulotlar <ArrowRight size={16} />
             </Link>
@@ -251,20 +245,18 @@ export default function HomePage() {
       {/* ── Craftsmen ── */}
       <section className="section">
         <div className="container">
-          <div className="section-heading" data-aos="fade-up">
+          <div className="section-heading">
             <p className="eyebrow">Meet the artisans</p>
             <h2>Mashhur hunarmandlar</h2>
             <p>Platformamizning eng iqtidorli va tajribali ustalari</p>
           </div>
           
           <div className="craftsmen-grid">
-            {MOCK_CRAFTSMEN.map((c, i) => (
+            {MOCK_CRAFTSMEN.map((c) => (
               <Link 
                 key={c.id} 
                 to={`/craftsmen/${c.slug}`} 
                 className="craftsman-card"
-                data-aos="fade-up"
-                data-aos-delay={i * 100}
               >
                 <div className="craftsman-cover">
                   <img src={c.coverImage} alt={c.name} />
@@ -295,7 +287,7 @@ export default function HomePage() {
             ))}
           </div>
           
-          <div className="section-footer" data-aos="fade-up">
+          <div className="section-footer">
             <Link to="/craftsmen" className="btn btn-secondary btn-lg">
               Barcha hunarmandlar <ArrowRight size={16} />
             </Link>
@@ -306,13 +298,13 @@ export default function HomePage() {
       {/* ── New Arrivals ── */}
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
-          <div className="section-heading" data-aos="fade-up">
+          <div className="section-heading">
             <p className="eyebrow">Just arrived</p>
             <h2>Yangi mahsulotlar</h2>
           </div>
           
           <div className="products-grid">
-            {newest.map((p, idx) => <ProductCard key={p.id} product={p} index={idx} />)}
+            {newest.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
       </section>
@@ -320,7 +312,7 @@ export default function HomePage() {
       {/* ── CTA Banner ── */}
       <section className="cta-section">
         <div className="container">
-          <div className="cta-card" data-aos="zoom-in-up">
+          <div className="cta-card">
             <div className="cta-content">
               <p className="eyebrow" style={{ color: 'var(--brand-300)' }}>Join the platform</p>
               <h2>Hunarmand sifatida ro'yxatdan o'ting</h2>

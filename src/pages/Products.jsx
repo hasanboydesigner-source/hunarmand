@@ -54,10 +54,7 @@ export default function ProductsPage() {
   return (
     <div className="products-page page-with-header">
       {/* Page Header */}
-      <div
-        className="products-page-header"
-        data-aos="fade-down"
-      >
+      <div className="products-page-header">
         <div className="container">
           <div className="pph-inner">
             <div>
@@ -81,10 +78,7 @@ export default function ProductsPage() {
 
       <div className="container products-layout">
         {/* Sidebar Filters */}
-        <aside
-          className={`filters-sidebar ${filtersOpen ? 'open' : ''}`}
-          data-aos="fade-right"
-        >
+        <aside className={`filters-sidebar ${filtersOpen ? 'open' : ''}`}>
           <div className="filters-header">
             <h3><Filter size={16} /> Filtrlar</h3>
             {activeFilters.length > 0 && (
@@ -166,10 +160,7 @@ export default function ProductsPage() {
         </aside>
 
         {/* Main content */}
-        <main
-          className="products-main"
-          data-aos="fade-left"
-        >
+        <main className="products-main">
           {/* Toolbar */}
           <div className="products-toolbar">
             <button 
@@ -208,8 +199,8 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className={view === 'grid' ? 'products-grid' : 'products-list'}>
-              {filtered.map((p, idx) => (
-                <ProductCard key={p.id} product={p} viewMode={view} index={idx} />
+              {filtered.map((p) => (
+                <ProductCard key={p.id} product={p} viewMode={view} />
               ))}
             </div>
           )}
