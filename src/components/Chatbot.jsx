@@ -13,7 +13,7 @@ const QUICK_REPLIES = [
 ];
 
 // Robust markdown parser for images, links, bold, and newlines
-const parseMarkdown = (text) => {
+const parseMarkdown = (text, onLinkClick) => {
   const regex = /(!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\)|\*\*.*?\*\*|\n)/g;
   const parts = text.split(regex);
   
@@ -31,10 +31,19 @@ const parseMarkdown = (text) => {
       );
     }
     
-    // Check if link
+    // Check if link — close chatbot on click
     const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (linkMatch) {
-      return <Link key={i} to={linkMatch[2]} style={{ color: '#c97a22', textDecoration: 'underline', fontWeight: 600 }}>{linkMatch[1]}</Link>;
+      return (
+        <Link
+          key={i}
+          to={linkMatch[2]}
+          style={{ color: '#c97a22', textDecoration: 'underline', fontWeight: 600 }}
+          onClick={() => onLinkClick && onLinkClick()}
+        >
+          {linkMatch[1]}
+        </Link>
+      );
     }
     
     // Check if bold
@@ -339,7 +348,7 @@ export default function Chatbot() {
                   wordBreak: 'break-word',
                   border: msg.role === 'user' ? 'none' : '1px solid #ebebeb',
                 }}>
-                  {msg.role === 'user' ? msg.text : parseMarkdown(msg.text)}
+                  {msg.role === 'user' ? msg.text : parseMarkdown(msg.text, () => setIsOpen(false))}
                 </div>
               </div>
             ))}

@@ -1,26 +1,83 @@
+/* ─── Breadcrumb ─────────────────────────────────────────────── */
 .breadcrumb-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-light); padding: 8px 0; }
 .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); flex-wrap: wrap; }
 .breadcrumb a { color: var(--text-secondary); transition: color 0.2s; }
 .breadcrumb a:hover { color: var(--brand-500); }
 .breadcrumb span { color: var(--text-primary); font-weight: 500; }
 
-.pd-grid.container { padding-top: 24px; padding-bottom: 32px; }
-.pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: flex-start; }
-
-/* Gallery */
-.pd-gallery {
+/* ─── Page & Grid ────────────────────────────────────────────── */
+.pd-page {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+.pd-grid.container {
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+.pd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: flex-start;
+  /* Critical: prevent grid children from overflowing */
   min-width: 0;
   width: 100%;
 }
-.pd-main-img {
-  position: relative; border-radius: var(--radius-lg);
-  overflow: hidden; aspect-ratio: 1;
-  background: var(--bg-tertiary);
+/* Every grid child must not overflow */
+.pd-grid > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
-.pd-main-swiper { width: 100%; height: 100%; }
-.pd-main-swiper .swiper-slide { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.pd-main-swiper img { width: 100%; height: 100%; object-fit: cover; cursor: grab; }
+
+/* ─── Gallery ────────────────────────────────────────────────── */
+.pd-gallery {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.pd-main-img {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--bg-tertiary);
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Swiper – force containment at every level */
+.pd-main-swiper,
+.pd-main-swiper.swiper {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+.pd-main-swiper .swiper-wrapper {
+  /* Don't set overflow:hidden here – Swiper needs to translate it */
+  width: 100%;
+}
+.pd-main-swiper .swiper-slide {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.pd-main-swiper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: grab;
+  display: block;
+  max-width: 100%;
+}
 .pd-main-swiper img:active { cursor: grabbing; }
+
 .pd-discount-badge, .pd-new-badge {
   position: absolute; top: 14px; left: 14px;
   padding: 4px 12px; border-radius: var(--radius-full);
@@ -39,90 +96,147 @@
   z-index: 10;
 }
 .pd-wish-btn:hover, .pd-wish-btn.active { background: var(--error-light); color: var(--error); }
-.pd-thumbnails { margin-top: 12px; }
+.pd-thumbnails { margin-top: 12px; overflow: hidden; }
 .pd-thumbs-swiper { height: 72px; padding: 2px 0; }
 .pd-thumbs-swiper .swiper-slide { width: 72px !important; opacity: 0.5; transition: opacity 0.2s; cursor: pointer; border-radius: var(--radius-md); overflow: hidden; border: 2px solid transparent; }
 .pd-thumbs-swiper .swiper-slide-thumb-active { opacity: 1; border-color: var(--brand-500); }
 .pd-thumb { width: 100%; height: 100%; }
 .pd-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-/* Info */
+/* ─── Info Column ────────────────────────────────────────────── */
+.pd-info {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
 .pd-category-tag {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 12px; border-radius: var(--radius-full);
   background: var(--brand-100); color: var(--brand-700);
   font-size: 12px; font-weight: 600; margin-bottom: 10px;
+  max-width: 100%;
 }
-.pd-title { font-size: clamp(20px, 3vw, 28px); margin-bottom: 12px; line-height: 1.25; }
+.pd-title {
+  font-size: clamp(18px, 4vw, 28px);
+  margin-bottom: 12px;
+  line-height: 1.25;
+  word-break: break-word;
+}
 .pd-rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .pd-rating-num { font-size: 14px; font-weight: 700; }
 .pd-review-count, .pd-sold { font-size: 13px; color: var(--text-muted); }
 .pd-sold::before { content: '•'; margin-right: 8px; }
 
 .pd-price-block { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-.pd-price { font-size: 28px; font-weight: 800; color: var(--brand-600); }
+.pd-price { font-size: clamp(22px, 6vw, 28px); font-weight: 800; color: var(--brand-600); }
 .pd-orig-price { font-size: 16px; color: var(--text-muted); text-decoration: line-through; }
 .pd-save-badge { padding: 4px 10px; border-radius: var(--radius-full); background: var(--success-light); color: var(--success); font-size: 12px; font-weight: 700; }
 
 .pd-quick-specs { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 16px; }
-.pd-spec { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+.pd-spec { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); min-width: 0; }
+.pd-spec span { min-width: 0; overflow-wrap: break-word; }
 
-.pd-stock { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: var(--radius-md); margin-bottom: 20px; width: fit-content; }
+.pd-stock { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: var(--radius-md); margin-bottom: 20px; width: fit-content; max-width: 100%; }
 .pd-stock.in { background: var(--success-light); color: var(--success); }
 .pd-stock.low { background: var(--warning-light); color: var(--warning); }
 .pd-stock.out { background: var(--error-light); color: var(--error); }
 
 .pd-qty-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.qty-control { display: flex; align-items: center; border: 1.5px solid var(--border-medium); border-radius: var(--radius-md); overflow: hidden; }
+.qty-control { display: flex; align-items: center; border: 1.5px solid var(--border-medium); border-radius: var(--radius-md); overflow: hidden; flex-shrink: 0; }
 .qty-btn { width: 36px; height: 40px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: background 0.15s; }
 .qty-btn:hover { background: var(--bg-tertiary); }
 .qty-value { width: 44px; text-align: center; font-size: 15px; font-weight: 600; border-left: 1px solid var(--border-light); border-right: 1px solid var(--border-light); height: 40px; display: flex; align-items: center; justify-content: center; }
-.pd-actions { display: flex; gap: 10px; flex: 1; }
-.pd-action-btn { flex: 1; }
+.pd-actions { display: flex; gap: 10px; flex: 1; min-width: 0; }
+.pd-action-btn { flex: 1; min-width: 0; }
 
 .pd-guarantees { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .pd-guarantee { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
 .pd-guarantee svg { color: var(--brand-500); flex-shrink: 0; }
 
-/* Craftsman Card */
+/* ─── Craftsman Card ─────────────────────────────────────────── */
 .craftsman-card-pd {
   margin-top: 24px; padding: 20px;
   border: 1.5px solid var(--border-light);
   border-radius: var(--radius-lg);
   background: var(--bg-secondary);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
-.cc-header { display: flex; gap: 14px; margin-bottom: 14px; }
-.cc-info { flex: 1; }
-.cc-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.cc-name-row h4 { font-size: 15px; }
-.verified-icon { color: var(--success); }
+.cc-header { display: flex; gap: 14px; margin-bottom: 14px; min-width: 0; }
+.cc-info { flex: 1; min-width: 0; overflow: hidden; }
+.cc-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; min-width: 0; }
+.cc-name-row h5 { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.verified-icon { color: var(--success); flex-shrink: 0; }
 .cc-region { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
 .cc-rating { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; }
-.cc-actions { display: flex; gap: 8px; }
+
+/* Craftsman action buttons – wrap on mobile */
+.cc-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cc-actions .btn {
+  flex: 1;
+  min-width: 120px;
+  justify-content: center;
+  text-align: center;
+}
 .telegram-btn { background: #2AABEE; color: #fff; border: none; }
 .telegram-btn:hover { background: #229ED9; }
 
-/* Tabs */
-.pd-tabs-section { margin-top: 0; padding-top: 0; }
-.pd-tabs { display: flex; border-bottom: 2px solid var(--border-light); margin-bottom: 28px; gap: 4px; }
-.pd-tab { padding: 12px 20px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.pd-tabs-section { margin-top: 0; padding-top: 0; overflow: hidden; }
+.pd-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-light);
+  margin-bottom: 28px;
+  gap: 4px;
+  /* Scrollable on very small screens */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.pd-tabs::-webkit-scrollbar { display: none; }
+.pd-tab {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .pd-tab.active { color: var(--brand-600); border-bottom-color: var(--brand-500); }
 .pd-tab:hover { color: var(--text-primary); }
-.pd-tab-content { padding-bottom: 40px; }
-.specs-table { max-width: 520px; }
+.pd-tab-content {
+  padding-bottom: 40px;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Specs table – scrollable on mobile */
+.specs-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.specs-table { max-width: 520px; width: 100%; }
 .specs-table td { padding: 10px 16px; }
 .specs-table td:first-child { font-weight: 600; color: var(--text-primary); width: 160px; }
 
-/* Reviews */
+/* ─── Reviews ────────────────────────────────────────────────── */
 .reviews-summary { display: flex; align-items: center; gap: 32px; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-lg); margin-bottom: 28px; }
 .reviews-score { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .big-score { font-size: 48px; font-weight: 800; color: var(--text-primary); line-height: 1; }
-.review-item { padding: 20px; border: 1px solid var(--border-light); border-radius: var(--radius-lg); margin-bottom: 12px; }
-.review-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.review-item { padding: 20px; border: 1px solid var(--border-light); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; }
+.review-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
 .review-author-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .verified-purchase { font-size: 11px; background: var(--success-light); color: var(--success); padding: 2px 8px; border-radius: var(--radius-full); }
 .review-date { margin-left: auto; font-size: 12px; color: var(--text-muted); }
-.review-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+.review-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; word-break: break-word; }
 .review-helpful { font-size: 12px; color: var(--text-muted); }
 .no-reviews { color: var(--text-muted); text-align: center; padding: 40px; }
 
@@ -131,54 +245,126 @@
 
 .not-found { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 60vh; }
 
-/* Mobile Sticky Action Bar */
+/* ─── Mobile Sticky Action Bar ───────────────────────────────── */
 .pd-mobile-sticky-bar {
   display: none;
 }
 
+/* ─── RESPONSIVE: Mobile ─────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Hide Breadcrumbs on mobile to save vertical space */
-  .breadcrumb-bar {
-    display: none;
-  }
+  /* Hide breadcrumbs */
+  .breadcrumb-bar { display: none; }
 
-  /* Grid and Spacing */
+  /* Single column layout */
   .pd-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 0;
   }
 
   .pd-page .container {
-    padding-top: 12px;
+    padding-top: 0;
   }
 
-  /* Swiper handles horizontal thumbnails natively now */
+  /* Info column – full width, no overflow */
+  .pd-info {
+    padding: 16px 0 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 
-  /* Mobile Sticky Bar */
+  /* Price – smaller on mobile */
+  .pd-price { font-size: 24px; }
+
+  /* Craftsman card – compact on mobile */
+  .craftsman-card-pd {
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  /* Craftsman buttons: stack vertically on very small screens */
+  .cc-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cc-actions .btn {
+    min-width: unset;
+    width: 100%;
+    flex: unset;
+  }
+
+  /* Tabs – horizontally scrollable, hide scrollbar visually */
+  .pd-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0;
+    margin-bottom: 20px;
+  }
+  .pd-tabs::-webkit-scrollbar { display: none; }
+  .pd-tab { padding: 10px 16px; font-size: 13px; }
+
+  /* Tab content – prevent text overflow */
+  .pd-tab-content {
+    padding-bottom: 24px;
+    overflow-x: hidden;
+  }
+
+  /* Prose text must not overflow */
+  .prose p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+
+  /* Specs table – scrollable */
+  .specs-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -4px;
+    padding: 0 4px;
+  }
+  .specs-table { min-width: 280px; }
+
+  /* Reviews */
+  .reviews-summary {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  .big-score { font-size: 36px; }
+
+  /* Related products */
+  .pd-related { padding-bottom: 100px; }
+
+  /* ── Mobile Sticky Bar ── */
   .pd-mobile-sticky-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
+    width: 100%;
     background: var(--bg-primary);
     border-top: 1px solid var(--border-light);
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
-    padding: 10px 16px;
+    padding: 10px 12px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     z-index: 1000;
+    /* Prevent bar itself from overflowing */
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
-  /* Add extra padding to the page container bottom so sticky bar does not overlap content */
-  .pd-page {
-    padding-bottom: 76px;
-  }
+  /* Extra padding so sticky bar doesn't cover content */
+  .pd-page { padding-bottom: 80px; }
 
   /* Wishlist button in sticky bar */
   .pd-msb-wish-btn {
     width: 44px;
     height: 44px;
+    min-width: 44px;
     border-radius: var(--radius-md);
     border: 1.5px solid var(--border-medium);
     display: flex;
@@ -195,32 +381,37 @@
     color: var(--error);
   }
 
-  /* Actions inside sticky bar */
+  /* Actions inside sticky bar – equal width, no overflow */
   .pd-msb-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
-
   .pd-msb-action-btn {
     flex: 1;
+    min-width: 0;
     height: 44px;
-    font-size: 14px;
-    padding: 0 16px !important;
+    font-size: 13px;
+    padding: 0 10px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* Hide inline buy buttons on mobile since we have the sticky bar */
-  .pd-qty-row .pd-actions {
-    display: none !important;
-  }
-  .pd-qty-row {
-    margin-bottom: 12px;
-    justify-content: flex-start;
-  }
+  /* Hide inline buy buttons (sticky bar handles them) */
+  .pd-qty-row .pd-actions { display: none !important; }
+  .pd-qty-row { margin-bottom: 12px; justify-content: flex-start; }
+}
 
-  .reviews-summary {
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
+/* Extra small screens (≤ 400px) */
+@media (max-width: 400px) {
+  .pd-msb-action-btn {
+    font-size: 12px;
+    padding: 0 8px !important;
+    gap: 4px !important;
   }
+  .pd-tab { padding: 10px 12px; font-size: 12px; }
+  .cc-actions .btn { font-size: 12.5px; padding: 9px 14px; }
 }

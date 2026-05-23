@@ -233,18 +233,19 @@ export default function ProductDetailPage() {
 
       <div className="container pd-grid">
         {/* ── Left: Gallery ── */}
-        <div className="pd-gallery">
-          <div className="pd-main-img">
+        <div className="pd-gallery" style={{ minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
+          <div className="pd-main-img" style={{ overflow: 'hidden', maxWidth: '100%' }}>
             <Swiper
-              spaceBetween={10}
+              spaceBetween={0}
               navigation={false}
               thumbs={{ swiper: thumbsSwiper }}
               modules={[FreeMode, Navigation, Thumbs]}
               className="pd-main-swiper"
+              style={{ width: '100%', overflow: 'hidden' }}
             >
               {images.map((img, i) => (
-                <SwiperSlide key={i}>
-                  <img src={img} alt={`${product.title} ${i + 1}`} />
+                <SwiperSlide key={i} style={{ overflow: 'hidden', maxWidth: '100%' }}>
+                  <img src={img} alt={`${product.title} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', maxWidth: '100%' }} />
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -254,7 +255,7 @@ export default function ProductDetailPage() {
               <Heart size={20} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
             </button>
           </div>
-          <div className="pd-thumbnails">
+          <div className="pd-thumbnails" style={{ maxWidth: '100%', overflow: 'hidden' }}>
             <Swiper
               onSwiper={setThumbsSwiper}
               spaceBetween={10}
@@ -263,6 +264,7 @@ export default function ProductDetailPage() {
               watchSlidesProgress={true}
               modules={[FreeMode, Navigation, Thumbs]}
               className="pd-thumbs-swiper"
+              style={{ width: '100%', maxWidth: '100%' }}
             >
               {images.map((img, i) => (
                 <SwiperSlide key={i}>
@@ -401,16 +403,18 @@ export default function ProductDetailPage() {
           )}
 
           {activeTab === 'specs' && (
-            <table className="table specs-table">
-              <tbody>
-                <tr><td>Material</td><td>{product.material || product.materials || '-'}</td></tr>
-                <tr><td>O'lchami</td><td>{product.dimensions || '-'}</td></tr>
-                <tr><td>Og'irligi</td><td>{product.weight || '-'}</td></tr>
-                <tr><td>SKU</td><td>{product.sku || '-'}</td></tr>
-                <tr><td>Tayyorlash vaqti</td><td>{product.preparationTime || product.productionTime || '-'}</td></tr>
-                <tr><td>Kategoriya</td><td>{CATEGORIES.find(c => c.id === product.category)?.label}</td></tr>
-              </tbody>
-            </table>
+            <div className="specs-table-wrap">
+              <table className="table specs-table">
+                <tbody>
+                  <tr><td>Material</td><td>{product.material || product.materials || '-'}</td></tr>
+                  <tr><td>O'lchami</td><td>{product.dimensions || '-'}</td></tr>
+                  <tr><td>Og'irligi</td><td>{product.weight || '-'}</td></tr>
+                  <tr><td>SKU</td><td>{product.sku || '-'}</td></tr>
+                  <tr><td>Tayyorlash vaqti</td><td>{product.preparationTime || product.productionTime || '-'}</td></tr>
+                  <tr><td>Kategoriya</td><td>{CATEGORIES.find(c => c.id === product.category)?.label}</td></tr>
+                </tbody>
+              </table>
+            </div>
           )}
 
           {activeTab === 'reviews' && (
