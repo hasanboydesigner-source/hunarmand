@@ -55,17 +55,16 @@ export default function Chatbot() {
   const messagesEndRef = useRef(null);
   const location = useLocation();
 
-  // Initialize and Auto-open logic
+  const [hasGreetedUser, setHasGreetedUser] = useState(false);
+
+  // Initialize and Auto-open logic for everyone
   useEffect(() => {
-    // Determine greeting
-    const userName = user?.name ? user.name.split(' ')[0] : '';
+    // Determine default greeting
     const cats = CATEGORIES.map(c => c.name).join(', ');
-    const greeting = userName 
-      ? `Assalomu alaykum, **${userName}**! E-Hunarmand do'koniga xush kelibsiz! 🎉 Sizga asosan qanday yo'nalishdagi mahsulotlar qiziq? Bizda ${cats} bo'yicha noyob buyumlar bor.`
-      : `Assalomu alaykum! Men E-Hunarmand maxsus savdo yordamchisiman. Sizga qanday milliy hunarmandchilik mahsulotlarini tanlashda yordam bera olaman? Bizda quyidagi yo'nalishlar bor: ${cats}.`;
+    const defaultGreeting = `Assalomu alaykum! Men E-Hunarmand maxsus savdo yordamchisiman. Sizga qanday milliy hunarmandchilik mahsulotlarini tanlashda yordam bera olaman? Bizda quyidagi yo'nalishlar bor: ${cats}.`;
     
-    if (messages.length === 0) {
-      setMessages([{ role: 'ai', text: greeting }]);
+    if (messages.length === 0 && !user) {
+      setMessages([{ role: 'ai', text: defaultGreeting }]);
     }
 
     // Auto-open logic (wait 3 seconds, once per session, for everyone)
@@ -76,7 +75,26 @@ export default function Chatbot() {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [user, messages.length]);
+  }, [messages.length, user]);
+
+  // Special greeting when a user logs in / registers
+  useEffect(() => {
+    if (user && !hasGreetedUser) {
+      setHasGreetedUser(true);
+      const userName = user.name ? user.name.split(' ')[0] : '';
+      const cats = CATEGORIES.map(c => c.name).join(', ');
+      
+      const personalizedGreeting = `Assalomu alaykum, **${userName}**! 🎉 E-Hunarmand do'koniga xush kelibsiz! Bugun nimalar xarid qilishni reja qilyapsiz? Eng ko'p sotilayotgan **${cats}** bo'yicha noyob buyumlarimiz bor. Maslahat kerak bo'lsa, bemalol so'rang! 👇`;
+      
+      // Override message to the personalized one
+      setMessages([{ role: 'ai', text: personalizedGreeting }]);
+      
+      // Force open immediately for the user (only once per app load)
+      setTimeout(() => {
+        setIsOpen(true);
+      }, 1000);
+    }
+  }, [user, hasGreetedUser]);
 
   // Auto-scroll
   useEffect(() => {
