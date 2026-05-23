@@ -187,12 +187,12 @@ export default function AuthPage() {
                 {/* Demo hints */}
                 <div className="demo-hints">
                   <p className="demo-hint-title">{t('auth.demo')}</p>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'user@demo.com',password:'demo123'})}><FiUser size={13}/> Mijoz</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'akbar@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Akbar</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'malohat@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Malohat</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'jamshid@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Jamshid</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'sherzod@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Sherzod</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'admin@demo.com',password:'demo123'})}><FiShield size={13}/> Admin</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'bobur@mail.uz',password:'password'})}><FiUser size={13}/> Mijoz</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'akbar@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Akbar</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'malohat@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Malohat</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'jamshid@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Jamshid</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'zulfiya@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Zulfiya</button>
+                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'admin@demo.com',password:'password'})}><FiShield size={13}/> Admin</button>
                 </div>
               </form>
             ) : (
