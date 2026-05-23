@@ -145,10 +145,10 @@ export default function CraftsmenList() {
                 <div className="craftsman-body">
                   <div className="craftsman-avatar-wrap">
                     <div className="avatar avatar-lg craftsman-avatar">
-                      {c.name.split(' ').map(n=>n[0]).join('')}
+                      {(c.shopName || c.name).split(' ').map(n=>n[0]).join('').substring(0,2)}
                     </div>
                   </div>
-                  <h3>{c.name}</h3>
+                  <h3>{c.shopName || c.name}</h3>
                   <div className="craftsman-meta">
                     <span><MapPin size={12} /> {c.region}</span>
                     <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {c.rating} ({c.reviewCount} sharh)</span>

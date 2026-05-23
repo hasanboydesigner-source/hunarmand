@@ -99,7 +99,7 @@ export default function CraftsmanProfilePage() {
     <div className="cp-page page-with-header">
       {/* Cover */}
       <div className="cp-cover">
-        <img src={coverImage} alt={craftsman.name} />
+        <img src={coverImage} alt={craftsman.shopName || craftsman.name} />
         <div className="cp-cover-overlay" />
       </div>
 
@@ -107,7 +107,7 @@ export default function CraftsmanProfilePage() {
         <div className="cp-header-card">
           <div className="cp-avatar-wrap">
             <div className="avatar avatar-2xl cp-avatar">
-              {craftsman.name.split(' ').map(n=>n[0]).join('')}
+              {(craftsman.shopName || craftsman.name).split(' ').map(n=>n[0]).join('').substring(0,2)}
             </div>
             {craftsman.isVerified && (
               <div className="cp-verified-badge"><CheckCircle2 size={16}/></div>
@@ -115,7 +115,7 @@ export default function CraftsmanProfilePage() {
           </div>
           <div className="cp-header-info">
             <div className="cp-name-row">
-              <h1>{craftsman.name}</h1>
+              <h1>{craftsman.shopName || craftsman.name}</h1>
               {craftsman.isVerified && <span className="badge badge-success">Tasdiqlangan</span>}
             </div>
             <div className="cp-meta-row">

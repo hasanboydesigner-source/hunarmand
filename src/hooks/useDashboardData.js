@@ -52,7 +52,7 @@ export function useDashboardData(user, addToast, updateUser) {
           setProfile({
             name: d.name, email: d.email, phone: d.phone || '', bio: d.bio || '',
             shopName: d.shopName || '', whatsapp: d.whatsapp || '', region: d.region || '',
-            category: d.specialty || ''
+            category: d.specialty || '', yearsExp: d.yearsExp || 0
           });
         })
         .catch(console.error);
@@ -200,7 +200,8 @@ export function useDashboardData(user, addToast, updateUser) {
           specialty: newProfile.category,
           bio: newProfile.bio,
           shopName: newProfile.shopName,
-          whatsapp: newProfile.whatsapp
+          whatsapp: newProfile.whatsapp,
+          yearsExp: newProfile.yearsExp
         });
         addToast("Profil API orqali yangilandi!", 'success');
       } catch (err) {

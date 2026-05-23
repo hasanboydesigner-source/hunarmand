@@ -281,10 +281,10 @@ export default function ProductDetailPage() {
           {/* ── Craftsman Card ── */}
           <div className="craftsman-card-pd">
             <div className="cc-header">
-              <div className="avatar avatar-lg">{getInitials(product.craftsman?.name)}</div>
+              <div className="avatar avatar-lg">{(product.craftsman?.shopName || product.craftsman?.name || '').split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
               <div className="cc-info">
                 <div className="cc-name-row">
-                  <h4>{product.craftsman?.name}</h4>
+                  <h5>{product.craftsman?.shopName || product.craftsman?.name}</h5>
                   {product.craftsman?.isVerified && <CheckCircle2 size={15} className="verified-icon" />}
                 </div>
                 <p className="cc-region"><MapPin size={12} /> {product.craftsman?.region}</p>
