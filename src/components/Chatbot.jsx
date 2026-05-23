@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Minimize2 } from 'lucide-react';
 import { API_URL, CATEGORIES } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useStore';
@@ -24,9 +24,9 @@ const parseMarkdown = (text) => {
     const imgMatch = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (imgMatch) {
       return (
-        <div key={i} style={{ marginTop: 10, marginBottom: 10, borderRadius: 8, overflow: 'hidden', border: '1px solid #eee', background: '#fff' }}>
-          <img src={imgMatch[2]} alt={imgMatch[1]} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover', maxHeight: 200 }} />
-          {imgMatch[1] && <div style={{ padding: '6px 10px', fontSize: 12, color: '#666', borderTop: '1px solid #eee', background: '#fafafa', textAlign: 'center', fontWeight: 500 }}>{imgMatch[1]}</div>}
+        <div key={i} style={{ marginTop: 8, marginBottom: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid #eee', background: '#fff' }}>
+          <img src={imgMatch[2]} alt={imgMatch[1]} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover', maxHeight: 160 }} />
+          {imgMatch[1] && <div style={{ padding: '4px 8px', fontSize: 11, color: '#666', borderTop: '1px solid #eee', background: '#fafafa', textAlign: 'center', fontWeight: 500 }}>{imgMatch[1]}</div>}
         </div>
       );
     }
@@ -66,15 +66,13 @@ export default function Chatbot() {
 
   // Initialize and Auto-open logic for everyone
   useEffect(() => {
-    // Determine default greeting
-    const cats = CATEGORIES.map(c => c.name).join(', ');
-    const defaultGreeting = `Assalomu alaykum! Men E-Hunarmand maxsus savdo yordamchisiman. Sizga qanday milliy hunarmandchilik mahsulotlarini tanlashda yordam bera olaman? Bizda quyidagi yo'nalishlar bor: ${cats}.`;
+    const defaultGreeting = `Assalomu alaykum! Men E-Hunarmand savdo yordamchisiman. Qanday milliy hunarmandchilik mahsulotini qidirmoqdasiz?`;
     
     if (messages.length === 0 && !user) {
       setMessages([{ role: 'ai', text: defaultGreeting }]);
     }
 
-    // Auto-open logic (wait 3 seconds, once per session, for everyone)
+    // Auto-open logic (wait 3 seconds, once per session)
     if (!sessionStorage.getItem('chatbot_auto_opened')) {
       const timer = setTimeout(() => {
         setIsOpen(true);
@@ -84,22 +82,14 @@ export default function Chatbot() {
     }
   }, [messages.length, user]);
 
-  // Special greeting when a user logs in / registers
+  // Special greeting when a user logs in
   useEffect(() => {
     if (user && !hasGreetedUser) {
       setHasGreetedUser(true);
       const userName = user.name ? user.name.split(' ')[0] : '';
-      const cats = CATEGORIES.map(c => c.name).join(', ');
-      
-      const personalizedGreeting = `Assalomu alaykum, **${userName}**! 🎉 E-Hunarmand do'koniga xush kelibsiz! Bugun nimalar xarid qilishni reja qilyapsiz? Eng ko'p sotilayotgan **${cats}** bo'yicha noyob buyumlarimiz bor. Maslahat kerak bo'lsa, bemalol so'rang! 👇`;
-      
-      // Override message to the personalized one
+      const personalizedGreeting = `Assalomu alaykum, **${userName}**! 🎉 E-Hunarmand do'koniga xush kelibsiz! Bugun nimalar xarid qilishni reja qilyapsiz? Maslahat kerak bo'lsa, bemalol so'rang! 👇`;
       setMessages([{ role: 'ai', text: personalizedGreeting }]);
-      
-      // Force open immediately for the user (only once per app load)
-      setTimeout(() => {
-        setIsOpen(true);
-      }, 1000);
+      setTimeout(() => { setIsOpen(true); }, 1000);
     }
   }, [user, hasGreetedUser]);
 
@@ -110,7 +100,7 @@ export default function Chatbot() {
     }
   }, [messages, isOpen, isLoading]);
 
-  // Don't show chatbot in dashboard
+  // Don't show chatbot in dashboard/admin
   if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin')) return null;
 
   const handleSend = async (e, forcedText = null) => {
@@ -129,135 +119,260 @@ export default function Chatbot() {
       });
       setMessages(prev => [...prev, { role: 'ai', text: response.data.text }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'ai', text: "Uzur, xatolik yuz berdi. Iltimos keyinroq qayta urinib ko'ring." }]);
+      setMessages(prev => [...prev, { role: 'ai', text: "Uzur, xatolik yuz berdi. Iltimos keyinroq urinib ko'ring." }]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const hasBottomNav = !!user;
+
   return (
     <>
       <style>{`
-        @media (max-width: 768px) {
-          .chatbot-floating-btn.with-bottom-nav, 
-          .chatbot-window.with-bottom-nav {
-            bottom: 84px !important;
+        /* ── Chatbot Floating Button ── */
+        .cb-btn {
+          position: fixed;
+          bottom: 24px;
+          right: 20px;
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #c97a22, #b45309);
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 18px rgba(201,122,34,0.45);
+          border: none;
+          cursor: pointer;
+          z-index: 600;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cb-btn:hover {
+          transform: scale(1.08);
+          box-shadow: 0 6px 24px rgba(201,122,34,0.6);
+        }
+        .cb-btn.has-nav {
+          bottom: 80px;
+        }
+
+        /* ── Chatbot Window — Desktop ── */
+        .cb-window {
+          position: fixed;
+          bottom: 88px;
+          right: 20px;
+          width: 320px;
+          height: 480px;
+          max-height: calc(100vh - 88px - 72px); /* 72px = header */
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+          display: flex;
+          flex-direction: column;
+          z-index: 600;
+          overflow: hidden;
+          border: 1px solid rgba(0,0,0,0.07);
+          animation: cbSlideUp 0.25s cubic-bezier(.4,0,.2,1);
+        }
+        .cb-window.has-nav {
+          bottom: 148px;
+          max-height: calc(100vh - 148px - 72px);
+        }
+
+        @keyframes cbSlideUp {
+          from { opacity: 0; transform: translateY(14px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Mobile: to'liq kenglik, header ostiga chiqmaydi ── */
+        @media (max-width: 540px) {
+          .cb-btn {
+            bottom: 20px;
+            right: 14px;
+            width: 46px;
+            height: 46px;
           }
+          .cb-btn.has-nav {
+            bottom: 76px;
+          }
+          .cb-window {
+            right: 8px;
+            left: 8px;
+            width: auto;
+            bottom: 76px;
+            /* Tepasi: header(64) + 8px bo'shliq = 72px dan past bo'lsin */
+            max-height: calc(100vh - 76px - 72px);
+            height: auto;
+            min-height: 300px;
+          }
+          .cb-window.has-nav {
+            bottom: 140px;
+            max-height: calc(100vh - 140px - 72px);
+          }
+        }
+
+        /* Scrollbar */
+        .cb-messages::-webkit-scrollbar { width: 4px; }
+        .cb-messages::-webkit-scrollbar-track { background: transparent; }
+        .cb-messages::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+        /* Quick replies scrollbar */
+        .cb-quick::-webkit-scrollbar { display: none; }
+        
+        /* Input focus */
+        .cb-input:focus {
+          border-color: #c97a22 !important;
+          outline: none;
         }
       `}</style>
 
-      {/* Floating Button */}
+      {/* ── Floating Button ── */}
       {!isOpen && (
-        <button 
-          className={`chatbot-floating-btn ${user ? 'with-bottom-nav' : ''}`}
+        <button
+          className={`cb-btn${hasBottomNav ? ' has-nav' : ''}`}
           onClick={() => setIsOpen(true)}
-          style={{
-            position: 'fixed', bottom: '30px', right: '30px',
-            width: '60px', height: '60px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #c97a22, #b45309)', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(201,122,34,0.5)',
-            border: 'none', cursor: 'pointer', zIndex: 1000,
-            transition: 'transform 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          aria-label="Chatbot ochish"
         >
-          <MessageSquare size={28} />
+          <MessageSquare size={24} />
         </button>
       )}
 
-      {/* Chat Window */}
+      {/* ── Chat Window ── */}
       {isOpen && (
-        <div 
-          className={`chatbot-window ${user ? 'with-bottom-nav' : ''}`}
-          style={{
-          position: 'fixed', bottom: '30px', right: '30px',
-          width: '360px', height: '600px', maxHeight: '85vh',
-          background: '#fff', borderRadius: '16px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-          display: 'flex', flexDirection: 'column',
-          zIndex: 1000, overflow: 'hidden',
-          border: '1px solid rgba(0,0,0,0.08)'
-        }}>
+        <div className={`cb-window${hasBottomNav ? ' has-nav' : ''}`}
+          style={{ '--header-h': '64px' }}
+        >
+          
           {/* Header */}
           <div style={{
-            padding: '16px 20px', 
+            padding: '12px 16px',
             background: 'linear-gradient(135deg, #c97a22, #b45309)',
             color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            boxShadow: '0 4px 12px rgba(201,122,34,0.3)',
-            position: 'relative',
-            zIndex: 10
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ 
-                background: '#fff', color: '#c97a22', 
-                padding: '8px', borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.2)',
+                padding: '6px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
-                <Bot size={22} />
+                <Bot size={18} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, letterSpacing: '0.5px' }}>E-Hunarmand AI</h3>
-                <p style={{ margin: 0, fontSize: '12px', opacity: 0.9, marginTop: '2px' }}>Savdo bo'yicha yordamchi</p>
+                <div style={{ fontSize: '14px', fontWeight: 700, lineHeight: 1.2 }}>E-Hunarmand AI</div>
+                <div style={{ fontSize: '11px', opacity: 0.85, marginTop: '1px' }}>Savdo yordamchisi</div>
               </div>
             </div>
-            <button 
-              onClick={() => setIsOpen(false)} 
-              style={{ 
-                background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', 
-                cursor: 'pointer', borderRadius: '50%', width: '32px', height: '32px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 0.2s'
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                color: '#fff',
+                cursor: 'pointer',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
-              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px', background: '#f9fafb' }}>
+          <div className="cb-messages" style={{
+            flex: 1,
+            padding: '14px 12px',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            background: '#f8f9fa',
+          }}>
             {messages.map((msg, idx) => (
-              <div key={idx} style={{ 
+              <div key={idx} style={{
                 alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '88%',
-                display: 'flex', gap: '8px',
-                flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
+                maxWidth: '85%',
+                display: 'flex',
+                gap: '6px',
+                flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
+                alignItems: 'flex-end',
               }}>
-                <div style={{ 
-                  width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
-                  background: msg.role === 'user' ? '#e5e7eb' : '#fff8f0',
-                  color: msg.role === 'user' ? '#6b7280' : '#c97a22',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                }}>
-                  {msg.role === 'user' ? <User size={16}/> : <Bot size={16}/>}
-                </div>
+                {/* Avatar */}
                 <div style={{
-                  padding: '12px 16px',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                  background: msg.role === 'user' ? '#e5e7eb' : '#fff4e6',
+                  color: msg.role === 'user' ? '#6b7280' : '#c97a22',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                }}>
+                  {msg.role === 'user' ? <User size={13}/> : <Bot size={13}/>}
+                </div>
+                {/* Bubble */}
+                <div style={{
+                  padding: '10px 13px',
                   borderRadius: '14px',
                   borderTopLeftRadius: msg.role === 'ai' ? '4px' : '14px',
                   borderTopRightRadius: msg.role === 'user' ? '4px' : '14px',
-                  background: msg.role === 'user' ? 'linear-gradient(135deg, #c97a22, #b45309)' : '#fff',
-                  color: msg.role === 'user' ? '#fff' : '#222',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  fontSize: '14px', lineHeight: '1.6',
+                  background: msg.role === 'user'
+                    ? 'linear-gradient(135deg, #c97a22, #b45309)'
+                    : '#fff',
+                  color: msg.role === 'user' ? '#fff' : '#1a1a1a',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+                  fontSize: '13px',
+                  lineHeight: '1.55',
                   wordBreak: 'break-word',
-                  border: msg.role === 'user' ? 'none' : '1px solid #eaeaea'
+                  border: msg.role === 'user' ? 'none' : '1px solid #ebebeb',
                 }}>
                   {msg.role === 'user' ? msg.text : parseMarkdown(msg.text)}
                 </div>
               </div>
             ))}
+
+            {/* Loading dots */}
             {isLoading && (
-              <div style={{ alignSelf: 'flex-start', display: 'flex', gap: '8px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fff8f0', color: '#c97a22', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bot size={16}/></div>
-                <div style={{ padding: '12px 16px', borderRadius: '14px', borderTopLeftRadius: '4px', background: '#fff', color: '#888', fontSize: '13px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #eaeaea' }}>
-                  Yozmoqda...
+              <div style={{ alignSelf: 'flex-start', display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
+                <div style={{
+                  width: '24px', height: '24px', borderRadius: '50%',
+                  background: '#fff4e6', color: '#c97a22',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Bot size={13}/>
+                </div>
+                <div style={{
+                  padding: '10px 14px', borderRadius: '14px', borderTopLeftRadius: '4px',
+                  background: '#fff', border: '1px solid #ebebeb',
+                  display: 'flex', gap: '4px', alignItems: 'center',
+                }}>
+                  {[0, 1, 2].map(i => (
+                    <span key={i} style={{
+                      width: '6px', height: '6px', borderRadius: '50%',
+                      background: '#c97a22', opacity: 0.7,
+                      animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                      display: 'inline-block',
+                    }} />
+                  ))}
+                  <style>{`
+                    @keyframes dotBounce {
+                      0%, 80%, 100% { transform: translateY(0); }
+                      40% { transform: translateY(-6px); }
+                    }
+                  `}</style>
                 </div>
               </div>
             )}
@@ -266,30 +381,42 @@ export default function Chatbot() {
 
           {/* Quick Replies */}
           {messages.length === 1 && !isLoading && (
-            <div style={{ 
-              padding: '10px 20px', background: '#fff', 
-              display: 'flex', gap: '8px', overflowX: 'auto', 
-              whiteSpace: 'nowrap', borderTop: '1px solid #f3f4f6',
-              scrollbarWidth: 'none', msOverflowStyle: 'none'
-            }} className="chatbot-quick-replies">
-              <style>{`.chatbot-quick-replies::-webkit-scrollbar { display: none; }`}</style>
+            <div className="cb-quick" style={{
+              padding: '8px 12px',
+              background: '#fff',
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              borderTop: '1px solid #f0f0f0',
+              scrollbarWidth: 'none',
+            }}>
               {QUICK_REPLIES.map((reply, i) => (
                 <button
                   key={i}
                   onClick={() => handleSend(null, reply)}
                   style={{
-                    padding: '8px 14px', borderRadius: '20px',
-                    border: '1px solid #eab308', background: '#fff8f0', color: '#b45309',
-                    fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-                    transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0
+                    padding: '6px 12px',
+                    borderRadius: '16px',
+                    border: '1px solid #f0b954',
+                    background: '#fff9f0',
+                    color: '#b45309',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    transition: 'all 0.15s',
                   }}
-                  onMouseOver={(e) => {
+                  onMouseOver={e => {
                     e.currentTarget.style.background = '#c97a22';
                     e.currentTarget.style.color = '#fff';
+                    e.currentTarget.style.borderColor = '#c97a22';
                   }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = '#fff8f0';
+                  onMouseOut={e => {
+                    e.currentTarget.style.background = '#fff9f0';
                     e.currentTarget.style.color = '#b45309';
+                    e.currentTarget.style.borderColor = '#f0b954';
                   }}
                 >
                   {reply}
@@ -300,37 +427,55 @@ export default function Chatbot() {
 
           {/* Input Area */}
           <form onSubmit={handleSend} style={{
-            padding: '15px 20px', background: '#fff', borderTop: '1px solid #eee',
-            display: 'flex', gap: '10px', alignItems: 'center'
+            padding: '10px 12px',
+            background: '#fff',
+            borderTop: '1px solid #f0f0f0',
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+            flexShrink: 0,
           }}>
-            <input 
-              type="text" 
+            <input
+              className="cb-input"
+              type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={e => setInput(e.target.value)}
               placeholder="Xabar yozing..."
               style={{
-                flex: 1, padding: '12px 18px', borderRadius: '24px',
-                border: '1px solid #e5e7eb', outline: 'none', fontSize: '14px',
-                background: '#f9fafb', transition: 'border 0.2s',
+                flex: 1,
+                padding: '9px 14px',
+                borderRadius: '20px',
+                border: '1.5px solid #e5e7eb',
+                fontSize: '13px',
+                background: '#f8f9fa',
+                transition: 'border 0.2s',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#c97a22'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               disabled={isLoading}
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isLoading || !input.trim()}
               style={{
-                width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
-                background: input.trim() && !isLoading ? 'linear-gradient(135deg, #c97a22, #b45309)' : '#f3f4f6',
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                flexShrink: 0,
+                background: input.trim() && !isLoading
+                  ? 'linear-gradient(135deg, #c97a22, #b45309)'
+                  : '#f3f4f6',
                 color: input.trim() && !isLoading ? '#fff' : '#9ca3af',
-                border: 'none', cursor: input.trim() && !isLoading ? 'pointer' : 'default',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: 'none',
+                cursor: input.trim() && !isLoading ? 'pointer' : 'default',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transition: 'all 0.2s',
-                boxShadow: input.trim() && !isLoading ? '0 4px 10px rgba(201,122,34,0.3)' : 'none'
+                boxShadow: input.trim() && !isLoading
+                  ? '0 3px 10px rgba(201,122,34,0.35)'
+                  : 'none',
               }}
             >
-              <Send size={18} style={{ marginLeft: '2px' }}/>
+              <Send size={16} style={{ marginLeft: '1px' }}/>
             </button>
           </form>
         </div>

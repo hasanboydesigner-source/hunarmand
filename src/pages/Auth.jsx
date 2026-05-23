@@ -30,12 +30,17 @@ export default function AuthPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!loginForm.email || !loginForm.password) { toast.error(t('auth.fill_fields')); return; }
+    const trimmedEmail = loginForm.email.trim();
+    const trimmedPassword = loginForm.password.trim();
+    if (!trimmedEmail || !trimmedPassword) { toast.error(t('auth.fill_fields')); return; }
     setLoading(true);
     
     try {
       // ─── Haqiqiy API orqali kirish ───
-      const { data } = await axios.post(`${API_URL}/auth/login`, loginForm);
+      const { data } = await axios.post(`${API_URL}/auth/login`, {
+        email: trimmedEmail,
+        password: trimmedPassword
+      });
       
       const loggedUser = { id: data._id, name: data.name, email: data.email, role: data.role };
       login(loggedUser, data.token);

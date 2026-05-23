@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { AlertTriangle, CheckCircle2, ShieldOff } from "lucide-react";
 import "./Admin.css";
 
 // Hook
 import { useAdminData } from "../hooks/useAdminData";
+import { useAuthStore } from "../store/useStore";
 
 // Components
 import AdminSidebar from "../components/admin/AdminSidebar";
@@ -15,6 +17,8 @@ import AdminOrders from "../components/admin/AdminOrders";
 import AdminSettings from "../components/admin/AdminSettings";
 
 export default function AdminPage() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthStore();
   const [active, setActive] = useState("overview");
 
   // Toast notification state
@@ -28,6 +32,31 @@ export default function AdminPage() {
   };
 
   const adminData = useAdminData(addToast);
+
+  // Guard: faqat admin roli bo'lgan foydalanuvchilar kira oladi
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg-primary, #0f0f0f)', gap: '16px'
+      }}>
+        <ShieldOff size={56} color="#e74c3c" />
+        <h2 style={{ color: '#fff', fontSize: '24px', margin: 0 }}>Kirish taqiqlangan</h2>
+        <p style={{ color: '#aaa', margin: 0 }}>Bu sahifa faqat Admin uchun mo'ljallangan.</p>
+        <button
+          onClick={() => navigate('/auth/login')}
+          style={{
+            marginTop: '8px', padding: '12px 28px', borderRadius: '8px',
+            background: '#d4822a', color: '#fff', border: 'none',
+            fontSize: '15px', cursor: 'pointer', fontWeight: 600
+          }}
+        >
+          Admin sifatida kirish
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-page">

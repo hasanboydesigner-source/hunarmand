@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables (sensitive data)
+.env
+.env.*
+server/.env
+
+# Utility/admin scripts (not needed in production)
+server/addAdmin.js
+server/changePassword.js
+server/checkAdmin.js
+server/drop.js
+syncSold.js
+server/syncSales.js

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API_URL, ORDER_STATUSES } from '../data/constants';
 import toast from 'react-hot-toast';
 import { User, Package, Settings, LogOut, Clock, Check, Truck, XCircle } from 'lucide-react';
+import { BounceLoader } from 'react-spinners';
 import './CustomerProfile.css';
 
 export default function CustomerProfilePage() {
@@ -78,7 +79,12 @@ export default function CustomerProfilePage() {
   };
 
   if (isLoading) {
-    return <div className="page-with-header" style={{ padding: '60px', textAlign: 'center' }}>Yuklanmoqda...</div>;
+    return (
+      <div className="page-with-header" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: '16px' }}>
+        <BounceLoader color="#d4822a" size={45} />
+        <span style={{ fontFamily: 'Italiana, serif', fontSize: '18px', color: 'var(--text-primary)' }}>Yuklanmoqda...</span>
+      </div>
+    );
   }
 
   return (
