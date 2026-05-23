@@ -12,8 +12,8 @@ function Stars({ rating }) {
   );
 }
 
-export default function DashboardReviews() {
-  const avg = MOCK_REVIEWS.length ? (MOCK_REVIEWS.reduce((s, r) => s + r.rating, 0) / MOCK_REVIEWS.length).toFixed(1) : "0.0";
+export default function DashboardReviews({ reviews = [] }) {
+  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "0.0";
 
   return (
     <div className="animate-fadeIn">
@@ -23,14 +23,14 @@ export default function DashboardReviews() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#666' }}>
           <Star size={15} fill="#f59e0b" color="#f59e0b"/>
           <strong style={{ color: '#111' }}>{avg}</strong>
-          <span>o'rtacha reyting · {MOCK_REVIEWS.length} ta sharh</span>
+          <span>o'rtacha reyting · {reviews.length} ta sharh</span>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {MOCK_REVIEWS.length > 0 ? (
-          MOCK_REVIEWS.map(r => (
-            <div key={r.id} style={{
+        {reviews.length > 0 ? (
+          reviews.map(r => (
+            <div key={r._id || r.id || Math.random()} style={{
               background: '#fff', border: '1px solid #ebebeb',
               borderRadius: 14, padding: '18px 20px',
             }}>
@@ -40,15 +40,15 @@ export default function DashboardReviews() {
                   {/* Avatar */}
                   <div style={{
                     width: 36, height: 36, borderRadius: 10,
-                    background: r.initBg, color: r.initColor,
+                    background: '#f0f0f0', color: '#333',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 700, fontSize: 14, flexShrink: 0
                   }}>
-                    {r.initial}
+                    {r.author ? r.author[0].toUpperCase() : 'M'}
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: '#111' }}>{r.user}</span>
+                      <span style={{ fontWeight: 600, fontSize: 14, color: '#111' }}>{r.author || 'Mijoz'} ({r.productName})</span>
                       {r.verified && (
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: 3,
@@ -65,7 +65,7 @@ export default function DashboardReviews() {
                     </div>
                   </div>
                 </div>
-                <span style={{ fontSize: 12, color: '#aaa' }}>{r.date}</span>
+                <span style={{ fontSize: 12, color: '#aaa' }}>{new Date(r.createdAt || Date.now()).toLocaleDateString('uz-UZ')}</span>
               </div>
 
               {/* Review text */}
@@ -77,7 +77,7 @@ export default function DashboardReviews() {
                 marginTop: 14, paddingTop: 12, borderTop: '1px solid #f0f0f0'
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#888' }}>
-                  <ThumbsUp size={13} color="#c97a22"/> {r.helpful} ta foydali
+                  <ThumbsUp size={13} color="#c97a22"/> {r.helpful || 0} ta foydali
                 </span>
                 <button style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,

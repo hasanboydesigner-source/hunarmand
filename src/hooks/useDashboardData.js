@@ -212,10 +212,12 @@ export function useDashboardData(user, addToast, updateUser) {
 
   const handleSaveShop = handleSaveProfile;
 
+  const reviews = products.flatMap(p => p.reviews?.map(r => ({ ...r, productName: p.title, productId: p._id || p.id })) || []).sort((a,b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
+
   return {
     products, allProducts, handleSaveProduct, handleDeleteProduct,
     orders, handleUpdateOrderStatus,
     messages, handleSendReply, selectMessageThread,
-    profile, setProfile, handleSaveProfile, handleSaveShop
+    profile, setProfile, handleSaveProfile, handleSaveShop, reviews
   };
 }
