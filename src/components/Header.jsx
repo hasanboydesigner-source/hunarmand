@@ -71,9 +71,9 @@ export default function Header() {
         </nav>
 
         {/* Actions */}
-        <div className="header-actions">
+        <div className={`header-actions ${isAuthenticated ? 'is-authenticated' : ''}`}>
           <LanguageSwitcher />
-          <button className="icon-btn" onClick={openSearch} title={t('nav.search')} id="search-btn">
+          <button className="icon-btn hide-on-mobile-auth" onClick={openSearch} title={t('nav.search')} id="search-btn">
             <Search size={20} />
           </button>
           <button className="icon-btn" onClick={toggleTheme} title="Tema">
@@ -83,13 +83,13 @@ export default function Header() {
             <Heart size={20} />
             {wishCount > 0 && <span className="badge-dot">{wishCount}</span>}
           </Link>
-          <Link to="/cart" className="icon-btn icon-btn-badge" id="cart-btn">
+          <Link to="/cart" className="icon-btn icon-btn-badge hide-on-mobile-auth" id="cart-btn">
             <ShoppingCart size={20} />
             {cartCount > 0 && <span className="badge-dot">{cartCount}</span>}
           </Link>
 
           {isAuthenticated ? (
-            <div className="profile-dropdown" ref={profileRef}>
+            <div className="profile-dropdown hide-on-mobile-auth" ref={profileRef}>
               <button className="profile-trigger" onClick={() => setProfileOpen(!profileOpen)} id="profile-btn">
                 <div className="avatar avatar-sm">
                   {user?.avatar ? (

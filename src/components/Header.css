@@ -265,6 +265,9 @@
   .header-inner {
     gap: 12px;
   }
+  .is-authenticated .hide-on-mobile-auth {
+    display: none !important;
+  }
 }
 
 @media (max-width: 480px) {
