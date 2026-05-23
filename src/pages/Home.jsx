@@ -358,7 +358,7 @@ export default function HomePage() {
           </div>
           
           <div className="products-grid" data-aos="fade-up" data-aos-delay="100">
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+            {featured.map((p) => <ProductCard key={p._id || p.id} product={p} />)}
           </div>
 
           <div className="section-footer">
@@ -459,7 +459,7 @@ export default function HomePage() {
           </div>
           
           <div className="products-grid" data-aos="fade-up" data-aos-delay="100">
-            {newest.map((p) => <ProductCard key={p.id} product={p} />)}
+            {newest.map((p) => <ProductCard key={p._id || p.id} product={p} />)}
           </div>
         </div>
       </section>
