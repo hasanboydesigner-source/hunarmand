@@ -1,0 +1,21 @@
+{
+  "name": "Hunarmand",
+  "short_name": "Hunarmand",
+  "description": "Milliy hunarmandchilik mahsulotlari sotuvi va buyurtmalarni boshqarish platformasi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#c97a22",
+  "icons": [
+    {
+      "src": "/handcraft.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/handcraft.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
