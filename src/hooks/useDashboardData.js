@@ -45,7 +45,7 @@ export function useDashboardData(user, addToast, updateUser) {
   });
 
   useEffect(() => {
-    if (user?.id && !['c1','c2','c3','c4'].includes(user.id)) {
+    if (user?.id) {
       axios.get(`${API_URL}/auth/craftsmen/${user.id}`)
         .then(res => {
           const d = res.data;
@@ -66,17 +66,7 @@ export function useDashboardData(user, addToast, updateUser) {
     return cid === user?.id || p.craftsman?.id === user?.id || (cname && cname === user?.name);
   });
   
-  // For mock orders/messages, map the user name to the mock craftsmanId
-  const getMockId = (name) => {
-    if (name?.includes('Akbar')) return 'c1';
-    if (name?.includes('Malohat')) return 'c2';
-    if (name?.includes('Jamshid')) return 'c3';
-    if (name?.includes('Sherzod')) return 'c4';
-    return user?.id; // fallback
-  };
-  const mockId = getMockId(user?.name);
-
-  const orders = allOrders.filter(o => o.craftsmanId === user?.id || o.craftsmanId === mockId).map(o => ({
+  const orders = allOrders.filter(o => o.craftsmanId === user?.id).map(o => ({
     ...o,
     id: o.orderNumber || o.id || o._id,
     product: o.items && Array.isArray(o.items) ? o.items.map(i => i.title).join(', ') : o.product,
@@ -84,7 +74,7 @@ export function useDashboardData(user, addToast, updateUser) {
     date: o.createdAt ? new Date(o.createdAt).toLocaleDateString('uz-UZ') : o.date,
     amount: o.totalAmount || o.amount,
   }));
-  const messages = allMessages.filter(m => m.craftsmanId === user?.id || m.craftsmanId === mockId);
+  const messages = allMessages.filter(m => m.craftsmanId === user?.id);
 
   const handleSaveProduct = async (editingProduct, productForm) => {
     if (!productForm.title || !productForm.price || !productForm.inStock || !productForm.image) {
@@ -123,20 +113,9 @@ export function useDashboardData(user, addToast, updateUser) {
         setAllProducts(updated);
         addToast("Mahsulot muvaffaqiyatli tahrirlandi!", 'success');
       } else {
-        // Resolve real MongoDB ID if they are using a mock session
-        let realCraftsmanId = user?.id;
-        if (['c1', 'c2', 'c3', 'c4'].includes(realCraftsmanId)) {
-          const theirProduct = allProducts.find(p => typeof p.craftsman === 'object' ? p.craftsman.name === user?.name : false);
-          if (theirProduct) {
-            realCraftsmanId = theirProduct.craftsman._id;
-          } else {
-             throw new Error("Iltimos, qayta logindan o'ting! Siz hozir oflayn rejimdasiz.");
-          }
-        }
-
         const { data } = await axios.post(`${API_URL}/products`, {
           ...payload,
-          craftsmanId: realCraftsmanId
+          craftsmanId: user?.id
         });
         setAllProducts([data, ...allProducts]);
         addToast("Yangi mahsulot API orqali muvaffaqiyatli qo'shildi!", 'success');
@@ -210,7 +189,7 @@ export function useDashboardData(user, addToast, updateUser) {
     setProfile(newProfile);
     localStorage.setItem('hunarmand_profile_' + user?.id, JSON.stringify(newProfile));
     
-    if (user?.id && !['c1','c2','c3','c4'].includes(user.id)) {
+    if (user?.id) {
       try {
         await axios.put(`${API_URL}/auth/profile`, {
           userId: user.id,
@@ -227,8 +206,6 @@ export function useDashboardData(user, addToast, updateUser) {
       } catch (err) {
         addToast("Xatolik: " + (err.response?.data?.message || err.message), 'error');
       }
-    } else {
-      addToast("Oflayn profil ma'lumotlari saqlandi!", 'success');
     }
   };
 

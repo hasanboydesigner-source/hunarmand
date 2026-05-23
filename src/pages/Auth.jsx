@@ -43,21 +43,8 @@ export default function AuthPage() {
       
       navigate(data.role === 'admin' ? '/admin' : data.role === 'craftsman' ? '/dashboard?tab=settings' : '/');
     } catch (error) {
-      console.error("API xatosi, qalbaki (MOCK) tizim ishga tushdi:", error);
-      
-      // Fallback: Mock login
-      let mockUser;
-      const email = loginForm.email.toLowerCase();
-      if (email === 'akbar@demo.com' || email.includes('akbar')) mockUser = { id: 'c1', name: 'Akbar Nazarov', email, role: 'craftsman' };
-      else if (email === 'malohat@demo.com' || email.includes('malohat')) mockUser = { id: 'c2', name: 'Malohat Qodirov', email, role: 'craftsman' };
-      else if (email === 'jamshid@demo.com' || email.includes('jamshid')) mockUser = { id: 'c3', name: 'Jamshid Umarov', email, role: 'craftsman' };
-      else if (email === 'sherzod@demo.com' || email.includes('sherzod')) mockUser = { id: 'c4', name: 'Sherzod Tursunov', email, role: 'craftsman' };
-      else if (email.includes('admin')) mockUser = { id: 'a1', name: 'Admin', email, role: 'admin' };
-      else mockUser = { id: 'u1', name: 'Demo Foydalanuvchi', email, role: 'customer' };
-      
-      login(mockUser, 'mock-jwt-token');
-      toast.success(`${t('auth.welcome_mock')}, ${mockUser.name}!`);
-      navigate(mockUser.role === 'admin' ? '/admin' : mockUser.role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+      console.error("API xatosi:", error);
+      toast.error(error.response?.data?.message || t('auth.login_error') || "Tizimga kirishda xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
@@ -86,13 +73,8 @@ export default function AuthPage() {
       toast.success(t('auth.reg_success'));
       navigate(role === 'craftsman' ? '/dashboard?tab=settings' : '/');
     } catch (error) {
-      console.error("API xatosi, qalbaki (MOCK) tizim ishga tushdi:", error);
-      
-      // Fallback: Mock Register
-      const mockUser = { id: 'u_' + Date.now(), name: registerForm.name, email: registerForm.email, role };
-      login(mockUser, 'mock-jwt-token');
-      toast.success(t('auth.reg_mock'));
-      navigate(role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+      console.error("API xatosi:", error);
+      toast.error(error.response?.data?.message || t('auth.reg_error') || "Ro'yxatdan o'tishda xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
@@ -184,16 +166,6 @@ export default function AuthPage() {
                   {t('auth.no_account')} <button type="button" onClick={()=>setTab('register')}>{t('auth.register_link')}</button>
                 </p>
 
-                {/* Demo hints */}
-                <div className="demo-hints">
-                  <p className="demo-hint-title">{t('auth.demo')}</p>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'bobur@mail.uz',password:'password'})}><FiUser size={13}/> Mijoz</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'akbar@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Akbar</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'malohat@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Malohat</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'jamshid@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Jamshid</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'zulfiya@mail.uz',password:'password'})}><GiPaintedPottery size={13}/> Zulfiya</button>
-                  <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'admin@demo.com',password:'password'})}><FiShield size={13}/> Admin</button>
-                </div>
               </form>
             ) : (
               <form className="auth-form animate-fadeIn" onSubmit={handleRegister}>
