@@ -24,13 +24,6 @@ export default function DashboardSidebar({ active, setActive, unreadOrders, unre
 
   return (
     <aside className="dash-sidebar">
-      {/* Brand */}
-      <div className="dash-brand">
-        <div className="dash-brand-icon">
-          <GiPaintedPottery size={18} />
-        </div>
-        <span>Hunarmand</span>
-      </div>
 
       {/* User card */}
       <div className="dash-user-card">
