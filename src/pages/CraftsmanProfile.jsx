@@ -88,12 +88,12 @@ export default function CraftsmanProfilePage() {
   // Use first product's image as cover if craftsman has uploaded products
   const firstProductImage = products.length > 0 ? (products[0].images?.[0] || products[0].image) : null;
   const coverImage = firstProductImage || craftsman.coverImage || mockC?.coverImage || coverImageFallback;
-  const bio = craftsman.bio || mockC?.bio || "Salom! Men o'z ishimning ustasiman va mijozlarga eng yaxshi sifatdagi mahsulotlarni taqdim etishga harakat qilaman.";
-  const yearsExp = craftsman.yearsExp || mockC?.yearsExp || 5; 
-  const responseTime = craftsman.responseTime || mockC?.responseTime || '< 1 soat';
-  const totalSales = products.reduce((acc, p) => acc + (p.sold || 0), 0) || mockC?.totalSales || 12;
-  const rating = craftsman.rating || mockC?.rating || 4.9;
-  const reviewCount = craftsman.reviewCount || mockC?.reviewCount || 14;
+  const bio = craftsman.bio || "Salom! Men o'z ishimning ustasiman va mijozlarga eng yaxshi sifatdagi mahsulotlarni taqdim etishga harakat qilaman.";
+  const yearsExp = craftsman.yearsExp ?? 0; 
+  const responseTime = craftsman.responseTime || '< 1 soat';
+  const totalSales = products.length > 0 ? products.reduce((acc, p) => acc + (p.sold || 0), 0) : 0;
+  const rating = craftsman.rating ?? 0;
+  const reviewCount = craftsman.reviewCount ?? 0;
 
   return (
     <div className="cp-page page-with-header">
