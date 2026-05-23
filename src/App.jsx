@@ -8,6 +8,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
 import ScrollToTop from './components/ScrollToTop';
+import Chatbot from './components/Chatbot';
 
 // Pages
 import HomePage from './pages/Home';
@@ -105,6 +106,7 @@ function AppContent() {
       </div>
 
       {!isDashboardOrAdmin && <Footer />}
+      <Chatbot />
       <Toaster position="bottom-right" toastOptions={{ className: 'react-hot-toast-custom' }} />
     </div>
   );
