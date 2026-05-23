@@ -4,14 +4,20 @@ import axios from 'axios';
 import { MOCK_CRAFTSMEN, MOCK_PRODUCTS, CATEGORIES, API_URL } from '../data/constants';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
-import { Star, MapPin, CheckCircle2, Send, Package, ShoppingBag, Clock, Award } from 'lucide-react';
+import { Star, MapPin, CheckCircle2, Send, Package, ShoppingBag, Clock, Award, MessageCircle, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/useStore';
 import './CraftsmanProfile.css';
 
 export default function CraftsmanProfilePage() {
   const { slug } = useParams(); // slug is actually ID now
+  const { user } = useAuthStore();
   const [craftsman, setCraftsman] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,6 +101,32 @@ export default function CraftsmanProfilePage() {
   const rating = craftsman.rating ?? 0;
   const reviewCount = craftsman.reviewCount ?? 0;
 
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Xabar yuborish uchun tizimga kiring!");
+      return;
+    }
+    if (!messageText.trim()) return;
+    try {
+      setIsSendingMessage(true);
+      await axios.post(`${API_URL}/messages`, {
+        sender: user.name,
+        senderId: user.id || user._id,
+        receiverId: craftsman._id || craftsman.id,
+        text: messageText,
+        avatar: user.avatar || ''
+      });
+      toast.success("Xabar muvaffaqiyatli yuborildi!");
+      setShowMessageModal(false);
+      setMessageText('');
+    } catch (err) {
+      toast.error("Xabar yuborishda xatolik yuz berdi");
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   return (
     <div className="cp-page page-with-header">
       {/* Cover */}
@@ -132,6 +164,13 @@ export default function CraftsmanProfilePage() {
             </div>
           </div>
           <div className="cp-actions">
+            <button 
+              onClick={() => setShowMessageModal(true)} 
+              className="btn btn-secondary btn-lg"
+              style={{ marginRight: '10px' }}
+            >
+              <MessageCircle size={17}/> Xabar yozish
+            </button>
             <a href={`https://t.me/${craftsman.telegram || 'E_Hunarmand_bot'}`} target="_blank" rel="noreferrer" className="btn telegram-btn btn-lg">
               <Send size={17}/> Telegram
             </a>
@@ -175,6 +214,40 @@ export default function CraftsmanProfilePage() {
           </main>
         </div>
       </div>
+
+      {/* Message Modal */}
+      {showMessageModal && (
+        <div className="modal-overlay" onClick={() => setShowMessageModal(false)}>
+          <div className="modal-content animate-zoomIn" onClick={e => e.stopPropagation()} style={{maxWidth: '400px'}}>
+            <div className="modal-header">
+              <h3>Xabar yuborish</h3>
+              <button className="close-btn" onClick={() => setShowMessageModal(false)}><X size={20}/></button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={handleSendMessage}>
+                <div className="form-group">
+                  <label className="form-label">Kimga: {craftsman.shopName || craftsman.name}</label>
+                  <textarea 
+                    className="form-input" 
+                    rows={4} 
+                    placeholder="Xabaringiz matni..."
+                    value={messageText}
+                    onChange={e => setMessageText(e.target.value)}
+                    autoFocus
+                    required
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowMessageModal(false)}>Yopish</button>
+                  <button type="submit" className="btn btn-primary" disabled={isSendingMessage || !messageText.trim()}>
+                    {isSendingMessage ? 'Yuborilmoqda...' : 'Yuborish'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

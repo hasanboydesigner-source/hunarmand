@@ -8,7 +8,7 @@ import 'swiper/css/thumbs';
 import 'swiper/css/free-mode';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MOCK_PRODUCTS, MOCK_REVIEWS, CATEGORIES, formatPrice, getDiscount, getInitials, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
-import { useCartStore, useWishlistStore } from '../store/useStore';
+import { useCartStore, useWishlistStore, useAuthStore } from '../store/useStore';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import toast from 'react-hot-toast';
@@ -29,6 +29,7 @@ export default function ProductDetailPage() {
   
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
+  const { user } = useAuthStore();
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('desc');
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -36,6 +37,9 @@ export default function ProductDetailPage() {
   // Review Form
   const [reviewForm, setReviewForm] = useState({ rating: 5, author: '', text: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const enrichProductWithCraftsman = (pData) => {
     if (!pData) return pData;
@@ -148,6 +152,67 @@ export default function ProductDetailPage() {
     toast(wished ? 'Sevimlilardan olib tashlandi' : "Sevimlilarga qo'shildi", { icon: wished ? '💔' : '❤️' });
   };
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Iltimos, sharh qoldirish uchun tizimga kiring!");
+      return;
+    }
+    if (!reviewForm.text.trim()) {
+      toast.error("Sharh matnini kiriting!");
+      return;
+    }
+    try {
+      setIsSubmittingReview(true);
+      await axios.post(`${API_URL}/products/${product._id || product.id}/reviews`, {
+        author: user.name || 'Mijoz',
+        rating: reviewForm.rating,
+        text: reviewForm.text
+      });
+      toast.success("Sharhingiz muvaffaqiyatli saqlandi!");
+      setReviewForm({ rating: 5, author: '', text: '' });
+      setProduct(prev => ({
+        ...prev,
+        reviews: [...(prev.reviews || []), {
+          _id: Date.now(), author: user.name || 'Mijoz', rating: reviewForm.rating, text: reviewForm.text, createdAt: new Date().toISOString()
+        }],
+        reviewCount: (prev.reviewCount || 0) + 1,
+        rating: prev.rating // For simplicity, we can just keep previous rating or recalculate it, backend updates it though.
+      }));
+    } catch (err) {
+      toast.error("Sharh saqlashda xatolik yuz berdi");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Xabar yuborish uchun tizimga kiring!");
+      return;
+    }
+    if (!messageText.trim()) return;
+    try {
+      setIsSendingMessage(true);
+      await axios.post(`${API_URL}/messages`, {
+        sender: user.name,
+        senderId: user.id || user._id,
+        receiverId: product.craftsman?._id || product.craftsman?.id || product.craftsman,
+        text: messageText,
+        productId: product._id || product.id,
+        avatar: user.avatar || ''
+      });
+      toast.success("Xabar muvaffaqiyatli yuborildi!");
+      setShowMessageModal(false);
+      setMessageText('');
+    } catch (err) {
+      toast.error("Xabar yuborishda xatolik yuz berdi");
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   const craftsmanCat = CATEGORIES.find((c) => c.id === product.craftsman?.specialty || c.id === product.category);
 
   return (
@@ -213,8 +278,8 @@ export default function ProductDetailPage() {
         {/* ── Right: Info ── */}
         <div className="pd-info">
           <div className="pd-category-tag">
-            <span className="cat-icon-sm"><CategoryIcon name={CATEGORIES.find(c => c.id === product.category)?.icon} size={13} /></span>
-            {CATEGORIES.find(c => c.id === product.category)?.label}
+            <span className="cat-icon-sm"><CategoryIcon name={CATEGORIES.find(c => c.id.toLowerCase() === product.category?.toLowerCase())?.icon} size={13} /></span>
+            {CATEGORIES.find(c => c.id.toLowerCase() === product.category?.toLowerCase())?.label || product.category}
           </div>
           <h1 className="pd-title">{product.title}</h1>
 
@@ -295,7 +360,13 @@ export default function ProductDetailPage() {
               </div>
             </div>
             <div className="cc-actions">
-              <Link to={`/craftsmen/${product.craftsman?._id || product.craftsman?.id}`} className="btn btn-secondary btn-sm">
+              <button 
+                onClick={() => setShowMessageModal(true)} 
+                className="btn btn-secondary btn-sm"
+              >
+                <MessageCircle size={13} /> Xabar yozish
+              </button>
+              <Link to={`/craftsmen/${product.craftsman?._id || product.craftsman?.id}`} className="btn btn-primary btn-sm">
                 <ExternalLink size={13} /> Do'konni ko'rish
               </Link>
               <a 
@@ -389,46 +460,28 @@ export default function ProductDetailPage() {
                     />
                   ))}
                 </div>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="Ismingiz" 
-                  value={reviewForm.author}
-                  onChange={e => setReviewForm(prev => ({ ...prev, author: e.target.value }))}
-                  style={{ marginBottom: '10px' }}
-                />
-                <textarea 
-                  className="form-input" 
-                  placeholder="Fikringizni yozing..." 
-                  rows={4}
-                  value={reviewForm.text}
-                  onChange={e => setReviewForm(prev => ({ ...prev, text: e.target.value }))}
-                  style={{ marginBottom: '10px' }}
-                />
-                <button 
-                  className="btn btn-primary" 
-                  disabled={isSubmittingReview || !reviewForm.author || !reviewForm.text}
-                  onClick={async () => {
-                    setIsSubmittingReview(true);
-                    try {
-                      await axios.post(`${API_URL}/products/${product._id || product.id}/reviews`, reviewForm);
-                      toast.success("Sharhingiz qabul qilindi!");
-                      setReviewForm({ rating: 5, author: '', text: '' });
-                      // Add optimistic update
-                      const updatedProduct = { ...product };
-                      updatedProduct.reviews = [...(updatedProduct.reviews || []), { ...reviewForm, createdAt: new Date() }];
-                      updatedProduct.reviewCount = updatedProduct.reviews.length;
-                      updatedProduct.rating = updatedProduct.reviews.reduce((a, b) => a + b.rating, 0) / updatedProduct.reviewCount;
-                      setProduct(updatedProduct);
-                    } catch (err) {
-                      toast.error("Sharh yuborishda xatolik yuz berdi");
-                    } finally {
-                      setIsSubmittingReview(false);
-                    }
-                  }}
-                >
-                  {isSubmittingReview ? "Yuborilmoqda..." : "Sharh qoldirish"}
-                </button>
+                {user ? (
+                  <form onSubmit={handleReviewSubmit}>
+                    <textarea 
+                      className="form-input" 
+                      placeholder="Fikringizni yozing..." 
+                      rows={4}
+                      value={reviewForm.text}
+                      onChange={e => setReviewForm(prev => ({ ...prev, text: e.target.value }))}
+                      style={{ marginBottom: '10px' }}
+                      required
+                    />
+                    <button 
+                      type="submit"
+                      className="btn btn-primary" 
+                      disabled={isSubmittingReview || !reviewForm.text.trim()}
+                    >
+                      {isSubmittingReview ? "Yuborilmoqda..." : "Sharh qoldirish"}
+                    </button>
+                  </form>
+                ) : (
+                  <p>Sharh qoldirish uchun tizimga kiring.</p>
+                )}
               </div>
             </div>
           )}
@@ -462,6 +515,40 @@ export default function ProductDetailPage() {
           </button>
         </div>
       </div>
+
+      {/* Message Modal */}
+      {showMessageModal && (
+        <div className="modal-overlay" onClick={() => setShowMessageModal(false)}>
+          <div className="modal-content animate-zoomIn" onClick={e => e.stopPropagation()} style={{maxWidth: '400px'}}>
+            <div className="modal-header">
+              <h3>Xabar yuborish</h3>
+              <button className="close-btn" onClick={() => setShowMessageModal(false)}><X size={20}/></button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={handleSendMessage}>
+                <div className="form-group">
+                  <label className="form-label">Kimga: {product.craftsman?.shopName || product.craftsman?.name}</label>
+                  <textarea 
+                    className="form-input" 
+                    rows={4} 
+                    placeholder="Xabaringiz matni..."
+                    value={messageText}
+                    onChange={e => setMessageText(e.target.value)}
+                    autoFocus
+                    required
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowMessageModal(false)}>Yopish</button>
+                  <button type="submit" className="btn btn-primary" disabled={isSendingMessage || !messageText.trim()}>
+                    {isSendingMessage ? 'Yuborilmoqda...' : 'Yuborish'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
