@@ -103,12 +103,16 @@ export default function DashboardPage() {
 
   const [selectedMsg, setSelectedMsg] = useState(null);
 
+  // Counts
+  const unreadOrdersCount = dashData.orders?.filter(o => o.status === 'pending').length || 0;
+  const unreadMessagesCount = dashData.messages?.filter(m => m.unread || !m.isRead).length || 0;
+
   // Mobile nav items
   const NAV_MOBILE = [
     { id: 'overview',  label: 'Umumiy',    emoji: '📊' },
     { id: 'products',  label: 'Mahsulot',  emoji: '📦' },
-    { id: 'orders',    label: 'Buyurtma',  emoji: '🛍️' },
-    { id: 'messages',  label: 'Xabar',     emoji: '💬', badge: 1 },
+    { id: 'orders',    label: 'Buyurtma',  emoji: '🛍️', badge: unreadOrdersCount },
+    { id: 'messages',  label: 'Xabar',     emoji: '💬', badge: unreadMessagesCount },
     { id: 'settings',  label: 'Profil',    emoji: '⚙️' },
   ];
 
@@ -127,13 +131,23 @@ export default function DashboardPage() {
       {/* Mobile sidebar overlay */}
       <div className={`dash-sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)}>
         <div onClick={e => e.stopPropagation()} style={{ height: '100%' }}>
-          <DashboardSidebar active={active} setActive={(tab) => { setActive(tab); setMobileMenuOpen(false); }}/>
+          <DashboardSidebar 
+            active={active} 
+            setActive={(tab) => { setActive(tab); setMobileMenuOpen(false); }}
+            unreadOrders={unreadOrdersCount}
+            unreadMessages={unreadMessagesCount}
+          />
         </div>
       </div>
 
       {/* Desktop Sidebar */}
       <div className="dash-sidebar-desktop">
-        <DashboardSidebar active={active} setActive={setActive}/>
+        <DashboardSidebar 
+          active={active} 
+          setActive={setActive}
+          unreadOrders={unreadOrdersCount}
+          unreadMessages={unreadMessagesCount}
+        />
       </div>
 
       {/* Main */}
