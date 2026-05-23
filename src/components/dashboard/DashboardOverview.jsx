@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -16,9 +17,31 @@ const STATUS_COLORS = {
 
 export default function DashboardOverview({ products = [], orders = [] }) {
   const { user } = useAuthStore();
+  const [showNotifications, setShowNotifications] = useState(false);
   
   const activeProductsCount = products.length;
   const activeOrdersCount = orders.length;
+  
+  // Calculate notifications
+  const pendingOrders = orders.filter(o => o.status === 'pending');
+  const lowStock = products.filter(p => p.inStock <= 5);
+  
+  const notifications = [
+    ...pendingOrders.map(o => ({
+      id: o._id || o.id,
+      type: 'order',
+      title: 'Yangi buyurtma',
+      desc: `${o.orderNumber || o.id} • ${formatPrice(o.amount || o.totalAmount)}`,
+      icon: <ShoppingBag size={14}/>
+    })),
+    ...lowStock.map(p => ({
+      id: p._id || p.id,
+      type: 'stock',
+      title: 'Zaxira tugamoqda',
+      desc: `${p.title} dan ${p.inStock} ta qoldi`,
+      icon: <Package size={14}/>
+    }))
+  ];
   
   const totalRevenue = orders
     .filter(o => o.status === 'delivered' || o.status === 'processing')
@@ -105,10 +128,49 @@ export default function DashboardOverview({ products = [], orders = [] }) {
           <p className="dash-page-greeting">Salom, {user?.name?.split(' ')[0] || 'Hunarmand'} 👋</p>
           <h1>Boshqaruv paneli</h1>
         </div>
-        <button className="dash-notify-btn">
-          <Bell size={15}/> Bildirishnomalar
-          <span className="dash-notify-count">{activeOrdersCount > 0 ? 1 : 0}</span>
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button className="dash-notify-btn" onClick={() => setShowNotifications(!showNotifications)}>
+            <Bell size={15}/> Bildirishnomalar
+            <span className="dash-notify-count">{notifications.length}</span>
+          </button>
+          
+          {showNotifications && (
+            <div style={{ 
+              position: 'absolute', top: '100%', right: 0, marginTop: 8, width: 320, 
+              background: '#fff', borderRadius: 12, boxShadow: '0 10px 40px rgba(0,0,0,0.1)', 
+              border: '1px solid #eee', zIndex: 50, padding: 16 
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0f0f0', paddingBottom: 10, marginBottom: 10 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Bildirishnomalar</h3>
+                <span style={{ fontSize: 11, background: '#f3f4f6', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>{notifications.length} ta yangi</span>
+              </div>
+              
+              {notifications.length === 0 ? (
+                <div style={{ padding: '20px 0', textAlign: 'center', color: '#888', fontSize: 13 }}>
+                  Sizda yangi bildirishnomalar yo'q
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
+                  {notifications.map((n, i) => (
+                    <div key={n.id || i} style={{ display: 'flex', gap: 12, padding: 10, borderRadius: 8, background: '#f9f9f9', alignItems: 'flex-start' }}>
+                      <div style={{ 
+                        background: n.type === 'order' ? '#dcfce7' : '#fff8f0', 
+                        color: n.type === 'order' ? '#15803d' : '#c97a22', 
+                        padding: 8, borderRadius: 50, display: 'flex' 
+                      }}>
+                        {n.icon}
+                      </div>
+                      <div>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#111' }}>{n.title}</p>
+                        <p style={{ margin: 0, fontSize: 12, color: '#666', marginTop: 2 }}>{n.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Metric Cards */}
