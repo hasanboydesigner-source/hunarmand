@@ -137,9 +137,19 @@ export default function Chatbot() {
 
   return (
     <>
+      <style>{`
+        @media (max-width: 768px) {
+          .chatbot-floating-btn.with-bottom-nav, 
+          .chatbot-window.with-bottom-nav {
+            bottom: 84px !important;
+          }
+        }
+      `}</style>
+
       {/* Floating Button */}
       {!isOpen && (
         <button 
+          className={`chatbot-floating-btn ${user ? 'with-bottom-nav' : ''}`}
           onClick={() => setIsOpen(true)}
           style={{
             position: 'fixed', bottom: '30px', right: '30px',
@@ -159,7 +169,9 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div style={{
+        <div 
+          className={`chatbot-window ${user ? 'with-bottom-nav' : ''}`}
+          style={{
           position: 'fixed', bottom: '30px', right: '30px',
           width: '360px', height: '600px', maxHeight: '85vh',
           background: '#fff', borderRadius: '16px',
