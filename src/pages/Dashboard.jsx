@@ -106,13 +106,15 @@ export default function DashboardPage() {
   // Counts
   const unreadOrdersCount = dashData.orders?.filter(o => o.status === 'pending').length || 0;
   const unreadMessagesCount = dashData.messages?.filter(m => m.unread || !m.isRead).length || 0;
+  const reviewsCount = dashData.reviews?.length || 0;
 
   // Mobile nav items
   const NAV_MOBILE = [
     { id: 'overview',  label: 'Umumiy',    emoji: '📊' },
     { id: 'products',  label: 'Mahsulot',  emoji: '📦' },
-    { id: 'orders',    label: 'Buyurtma',  emoji: '🛍️', badge: unreadOrdersCount },
-    { id: 'messages',  label: 'Xabar',     emoji: '💬', badge: unreadMessagesCount },
+    { id: 'orders',    label: 'Buyurtma',  emoji: '🛍️', badge: unreadOrdersCount > 0 ? unreadOrdersCount : null },
+    { id: 'reviews',   label: 'Sharhlar',  emoji: '⭐', badge: reviewsCount > 0 ? reviewsCount : null },
+    { id: 'messages',  label: 'Xabar',     emoji: '💬', badge: unreadMessagesCount > 0 ? unreadMessagesCount : null },
     { id: 'settings',  label: 'Profil',    emoji: '⚙️' },
   ];
 
@@ -136,6 +138,7 @@ export default function DashboardPage() {
             setActive={(tab) => { setActive(tab); setMobileMenuOpen(false); }}
             unreadOrders={unreadOrdersCount}
             unreadMessages={unreadMessagesCount}
+            unreadReviews={reviewsCount}
           />
         </div>
       </div>
@@ -147,12 +150,13 @@ export default function DashboardPage() {
           setActive={setActive}
           unreadOrders={unreadOrdersCount}
           unreadMessages={unreadMessagesCount}
+          unreadReviews={reviewsCount}
         />
       </div>
 
       {/* Main */}
       <main className="dash-main">
-        {active === 'overview' && <DashboardOverview products={dashData.products} orders={dashData.orders}/>}
+        {active === 'overview' && <DashboardOverview products={dashData.products} orders={dashData.orders} reviews={dashData.reviews}/>}
         {active === 'products' && (
           <DashboardProducts
             products={dashData.products}

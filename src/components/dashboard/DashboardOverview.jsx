@@ -15,7 +15,7 @@ const STATUS_COLORS = {
   shipped:    { bg: '#ede9fe', color: '#5b21b6', label: 'Yuborildi' },
 };
 
-export default function DashboardOverview({ products = [], orders = [] }) {
+export default function DashboardOverview({ products = [], orders = [], reviews = [] }) {
   const { user } = useAuthStore();
   const [showNotifications, setShowNotifications] = useState(false);
   
@@ -25,8 +25,20 @@ export default function DashboardOverview({ products = [], orders = [] }) {
   // Calculate notifications
   const pendingOrders = orders.filter(o => o.status === 'pending');
   const lowStock = products.filter(p => p.inStock <= 5);
+  // Get recent reviews (within 24 hours)
+  const recentReviews = (reviews || []).filter(r => {
+    const diff = Date.now() - new Date(r.createdAt || Date.now()).getTime();
+    return diff < 24 * 60 * 60 * 1000;
+  });
   
   const notifications = [
+    ...recentReviews.map(r => ({
+      id: r._id || r.id || Math.random(),
+      type: 'review',
+      title: 'Yangi sharh qoldirildi',
+      desc: `${r.author || 'Mijoz'} - ${r.productName || 'Mahsulot'}`,
+      icon: <Star size={14}/>
+    })),
     ...pendingOrders.map(o => ({
       id: o._id || o.id,
       type: 'order',
@@ -154,8 +166,8 @@ export default function DashboardOverview({ products = [], orders = [] }) {
                   {notifications.map((n, i) => (
                     <div key={n.id || i} style={{ display: 'flex', gap: 12, padding: 10, borderRadius: 8, background: '#f9f9f9', alignItems: 'flex-start' }}>
                       <div style={{ 
-                        background: n.type === 'order' ? '#dcfce7' : '#fff8f0', 
-                        color: n.type === 'order' ? '#15803d' : '#c97a22', 
+                        background: n.type === 'order' ? '#dcfce7' : n.type === 'review' ? '#fef9c3' : '#fff8f0', 
+                        color: n.type === 'order' ? '#15803d' : n.type === 'review' ? '#b45309' : '#c97a22', 
                         padding: 8, borderRadius: 50, display: 'flex' 
                       }}>
                         {n.icon}

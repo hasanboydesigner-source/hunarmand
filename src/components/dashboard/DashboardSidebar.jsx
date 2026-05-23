@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useStore';
 import { GiPaintedPottery } from 'react-icons/gi';
 
-export default function DashboardSidebar({ active, setActive, unreadOrders, unreadMessages }) {
+export default function DashboardSidebar({ active, setActive, unreadOrders, unreadMessages, unreadReviews }) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -11,7 +11,7 @@ export default function DashboardSidebar({ active, setActive, unreadOrders, unre
     { id: 'overview',  label: 'Umumiy',      icon: <LayoutDashboard size={16}/> },
     { id: 'products',  label: 'Mahsulotlar', icon: <Package size={16}/> },
     { id: 'orders',    label: 'Buyurtmalar', icon: <ShoppingBag size={16}/>, badge: unreadOrders > 0 ? unreadOrders : null },
-    { id: 'reviews',   label: 'Sharhlar',    icon: <Star size={16}/> },
+    { id: 'reviews',   label: 'Sharhlar',    icon: <Star size={16}/>, badge: unreadReviews > 0 ? unreadReviews : null },
     { id: 'messages',  label: 'Xabarlar',    icon: <MessageCircle size={16}/>, badge: unreadMessages > 0 ? unreadMessages : null },
     { id: 'settings',  label: 'Sozlamalar',  icon: <Settings size={16}/> },
   ];
