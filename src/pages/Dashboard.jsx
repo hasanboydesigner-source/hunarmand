@@ -305,7 +305,7 @@ export default function DashboardPage() {
         <div className="admin-modal-overlay" onClick={() => setShowOrderModal(false)}>
           <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 600 }}>
             <div className="admin-modal-header" style={{ paddingBottom: 16 }}>
-              <h3 style={{ fontSize: 18 }}>Buyurtma tafsilotlari - {selectedOrder.id}</h3>
+              <h3 style={{ fontSize: 18 }}>Buyurtma tafsilotlari - {selectedOrder.orderNumber || selectedOrder.id}</h3>
               <button className="admin-modal-close" onClick={() => setShowOrderModal(false)}><XCircle size={18}/></button>
             </div>
             
@@ -314,18 +314,24 @@ export default function DashboardPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, paddingBottom: 16, borderBottom: '1px solid #f0f0f0' }}>
                 <div>
                   <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>MIJOZ</span>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>{selectedOrder.customer}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>
+                    {typeof selectedOrder.customer === 'object' ? selectedOrder.customer?.name : selectedOrder.customer}
+                  </div>
                 </div>
                 <div>
                   <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>SANA</span>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>{selectedOrder.date}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>
+                    {selectedOrder.date || (selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString('uz-UZ') : '')}
+                  </div>
                 </div>
               </div>
 
               {/* Product */}
               <div style={{ padding: '16px 0', borderBottom: '1px solid #f0f0f0' }}>
                 <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>MAHSULOT</span>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>{selectedOrder.product}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>
+                  {selectedOrder.product || (selectedOrder.items && selectedOrder.items.map(i => `${i.title} (x${i.quantity})`).join(', '))}
+                </div>
               </div>
 
               {/* Amount & Status */}
@@ -333,7 +339,7 @@ export default function DashboardPage() {
                 <div>
                   <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>JAMI SUMMA</span>
                   <div style={{ fontSize: 18, fontWeight: 700, color: '#c97a22', marginTop: 4 }}>
-                    {selectedOrder.amount ? selectedOrder.amount.toLocaleString() + " so'm" : '—'}
+                    {(selectedOrder.amount || selectedOrder.totalAmount) ? (selectedOrder.amount || selectedOrder.totalAmount).toLocaleString() + " so'm" : '—'}
                   </div>
                 </div>
                 <div>
@@ -367,7 +373,7 @@ export default function DashboardPage() {
                       <button
                         key={st.id}
                         onClick={() => {
-                          dashData.handleUpdateOrderStatus(selectedOrder.id, st.id);
+                          dashData.handleUpdateOrderStatus(selectedOrder._id || selectedOrder.id, st.id);
                           setSelectedOrder({...selectedOrder, status: st.id});
                         }}
                         style={{

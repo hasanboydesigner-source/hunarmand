@@ -98,11 +98,11 @@ export default function DashboardOrders({ orders, openOrderDetails }) {
               ) : filtered.map(o => {
                 const st = STATUS_META[o.status] || STATUS_META.pending;
                 return (
-                  <tr key={o.id}>
-                    <td style={{ fontFamily: 'monospace', fontSize: 12.5, color: '#666', fontWeight: 600 }}>{o.id}</td>
-                    <td style={{ fontWeight: 500, color: '#111' }}>{o.product}</td>
-                    <td style={{ color: '#555' }}>{o.customer}</td>
-                    <td style={{ color: '#888', fontSize: 13 }}>{o.date}</td>
+                  <tr key={o._id || o.id}>
+                    <td style={{ fontFamily: 'monospace', fontSize: 12.5, color: '#666', fontWeight: 600 }}>{o.id || o.orderNumber}</td>
+                    <td style={{ fontWeight: 500, color: '#111' }}>{o.product || (o.items && o.items[0]?.title)}</td>
+                    <td style={{ color: '#555' }}>{typeof o.customer === 'object' ? o.customer?.name : o.customer}</td>
+                    <td style={{ color: '#888', fontSize: 13 }}>{o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('uz-UZ') : '')}</td>
                     <td>
                       <span style={{
                         background: st.bg, color: st.color,
@@ -113,7 +113,7 @@ export default function DashboardOrders({ orders, openOrderDetails }) {
                         {st.icon} {st.label}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 700, color: '#111' }}>{formatPrice(o.amount)}</td>
+                    <td style={{ fontWeight: 700, color: '#111' }}>{formatPrice(o.amount || o.totalAmount)}</td>
                     <td>
                       <button
                         className="btn btn-secondary btn-sm"
