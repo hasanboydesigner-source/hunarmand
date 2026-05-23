@@ -22,6 +22,11 @@ const orderSchema = new mongoose.Schema(
       city: { type: String, required: true },
       street: { type: String, required: true },
     },
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+    },
     items: [orderItemSchema],
     craftsmanId: {
       type: mongoose.Schema.Types.ObjectId,

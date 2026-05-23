@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCartStore } from '../store/useStore';
+import { useCartStore, useAuthStore } from '../store/useStore';
 import { formatPrice, API_URL } from '../data/constants';
 import { CheckCircle2, ChevronRight, CreditCard, Truck, ClipboardList } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -23,6 +23,7 @@ const PAYMENT_METHODS = [
 
 export default function CheckoutPage() {
   const { items, clearCart } = useCartStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [payMethod, setPayMethod] = useState('payme');
@@ -67,6 +68,7 @@ export default function CheckoutPage() {
       const promises = craftsmanIds.map(cId => {
         return axios.post(`${API_URL}/orders`, {
           customer: address,
+          customerId: user?.id,
           items: ordersByCraftsman[cId].items,
           craftsmanId: cId,
           totalAmount: ordersByCraftsman[cId].totalAmount,

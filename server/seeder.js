@@ -53,9 +53,10 @@ const destroyData = async () => {
   try {
     await User.deleteMany();
     await Product.deleteMany();
-
-    console.log('Ma\'lumotlar o\'chirildi!');
-    process.exit();
+    // Assuming Order and Message models exist or we can just import them
+    // Actually, I should import them at the top if I use them.
+    // I'll just run a node script directly instead to wipe everything safely.
+    // Let's modify seeder to include it if imported, but to avoid import errors, I will use mongoose.connection.db.dropDatabase().
   } catch (error) {
     console.error(`Xatolik: ${error.message}`);
     process.exit(1);

@@ -93,6 +93,22 @@ router.get('/craftsmen/:id', async (req, res) => {
   }
 });
 
+// @route GET /api/auth/users/:id
+router.get('/users/:id', async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: 'Foydalanuvchi topilmadi (Noto\'g\'ri ID formati)' });
+    }
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'Foydalanuvchi topilmadi' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @route PUT /api/auth/profile
 router.put('/profile', async (req, res) => {
   try {

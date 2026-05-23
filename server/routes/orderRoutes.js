@@ -9,6 +9,7 @@ router.post('/', async (req, res) => {
   try {
     const { 
       customer, 
+      customerId,
       items, 
       craftsmanId, 
       totalAmount, 
@@ -26,6 +27,7 @@ router.post('/', async (req, res) => {
     const order = new Order({
       orderNumber,
       customer,
+      customerId,
       items,
       craftsmanId,
       totalAmount,
@@ -47,6 +49,18 @@ router.post('/', async (req, res) => {
 router.get('/craftsman/:id', async (req, res) => {
   try {
     const orders = await Order.find({ craftsmanId: req.params.id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/orders/customer/:id
+// @desc    Get orders for a specific customer
+router.get('/customer/:id', async (req, res) => {
+  try {
+    const orders = await Order.find({ customerId: req.params.id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     console.error(error);
