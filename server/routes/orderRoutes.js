@@ -43,7 +43,12 @@ router.post('/', async (req, res) => {
     if (items && items.length > 0) {
       for (const item of items) {
         if (item.product) {
-          await Product.findByIdAndUpdate(item.product, { $inc: { sold: item.quantity || 1 } });
+          await Product.findByIdAndUpdate(item.product, { 
+            $inc: { 
+              sold: item.quantity || 1,
+              inStock: -(item.quantity || 1)
+            } 
+          });
         }
       }
     }
