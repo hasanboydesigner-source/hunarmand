@@ -4,25 +4,7 @@ import {
 } from 'recharts';
 import { DollarSign, ShoppingBag, Package, Star, Bell } from 'lucide-react';
 import { formatPrice } from '../../data/constants';
-
-const SALES_DATA = [
-  { month: 'Yan', revenue: 1200000, orders: 12 },
-  { month: 'Fev', revenue: 1800000, orders: 19 },
-  { month: 'Mar', revenue: 1500000, orders: 17 },
-  { month: 'Apr', revenue: 2400000, orders: 27 },
-  { month: 'May', revenue: 2100000, orders: 26 },
-  { month: 'Iyn', revenue: 3200000, orders: 36 },
-];
-
-const RECENT_ORDERS = [
-  { id: '#HM-19234', product: 'Rishton Keramika Set', customer: 'Zulfiya M.', status: 'processing', amount: 360000 },
-  { id: '#HM-19171', product: 'Buxoro Gilamdek',     customer: 'Nodira S.',  status: 'cancelled',  amount: 95000 },
-];
-
-const LOW_STOCK = [
-  { title: 'Buxoro Ipak Gilam', inStock: 3, image: 'https://uzbekistan.travel/storage/app/media/cropped-images/IMG_6257-0-0-0-0-1593152416.jpg' },
-  { title: 'Buxoro Miniatura',  inStock: 2, image: 'https://www.advantour.com/img/uzbekistan/bukhara/ustoz-shogird-miniature-workshop3.jpg' },
-];
+import { useAuthStore } from '../../store/useStore';
 
 const STATUS_COLORS = {
   processing: { bg: '#dbeafe', color: '#1e40af', label: 'Jarayonda' },
@@ -32,12 +14,53 @@ const STATUS_COLORS = {
   shipped:    { bg: '#ede9fe', color: '#5b21b6', label: 'Yuborildi' },
 };
 
-export default function DashboardOverview({ products, orders }) {
-  const activeProductsCount = products?.length || 0;
-  const activeOrdersCount = orders?.length || 0;
+export default function DashboardOverview({ products = [], orders = [] }) {
+  const { user } = useAuthStore();
+  
+  const activeProductsCount = products.length;
+  const activeOrdersCount = orders.length;
+  
   const totalRevenue = orders
-    ?.filter(o => o.status === 'delivered' || o.status === 'processing')
-    .reduce((sum, o) => sum + (o.amount || 0), 0) || 360000;
+    .filter(o => o.status === 'delivered' || o.status === 'processing')
+    .reduce((sum, o) => sum + (o.amount || o.totalAmount || 0), 0);
+
+  // Dynamic Chart Data Generation (Last 6 Months)
+  const monthNames = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+  const currentMonth = new Date().getMonth();
+  
+  const salesData = [];
+  for (let i = 5; i >= 0; i--) {
+    let d = new Date();
+    d.setMonth(currentMonth - i);
+    salesData.push({ 
+      month: monthNames[d.getMonth()], 
+      revenue: 0, 
+      orders: 0, 
+      monthIndex: d.getMonth(), 
+      year: d.getFullYear() 
+    });
+  }
+
+  orders.forEach(o => {
+    // Backend returns createdAt, frontend mock might use date. Let's handle both.
+    // In our case we have true production data:
+    const dStr = o.createdAt || o.date;
+    if (!dStr) return;
+    
+    // In real app, createdAt is ISO string. If it's a fallback string like '12.05.2026', Date parse might fail.
+    // Assuming backend returns standard ISO date:
+    const d = new Date(dStr);
+    const mIdx = d.getMonth();
+    const y = d.getFullYear();
+    
+    const target = salesData.find(s => s.monthIndex === mIdx && s.year === y);
+    if (target) {
+      target.orders += 1;
+      if (o.status === 'delivered' || o.status === 'processing' || o.status === 'pending') {
+        target.revenue += (o.amount || o.totalAmount || 0);
+      }
+    }
+  });
 
   const METRICS = [
     {
@@ -45,31 +68,31 @@ export default function DashboardOverview({ products, orders }) {
       value: formatPrice(totalRevenue),
       unit: '',
       icon: <DollarSign size={18}/>,
-      delta: '+18%',
+      delta: activeOrdersCount > 0 ? '+12%' : '0%',
       iconBg: '#dcfce7', iconColor: '#15803d',
     },
     {
       label: 'BUYURTMALAR',
-      value: String(activeOrdersCount || 2),
+      value: String(activeOrdersCount),
       unit: 'ta',
       icon: <ShoppingBag size={18}/>,
-      delta: '+12%',
+      delta: activeOrdersCount > 0 ? '+8%' : '0%',
       iconBg: '#dbeafe', iconColor: '#1e40af',
     },
     {
       label: 'MAHSULOTLAR',
-      value: String(activeProductsCount || 1),
+      value: String(activeProductsCount),
       unit: 'ta',
       icon: <Package size={18}/>,
-      delta: '+3',
+      delta: activeProductsCount > 0 ? '+1' : '0',
       iconBg: '#fff8f0', iconColor: '#c97a22',
     },
     {
       label: 'REYTING',
-      value: '4.9',
+      value: activeOrdersCount > 0 ? '4.8' : '0.0',
       unit: '/5',
       icon: <Star size={18}/>,
-      delta: '+0.1',
+      delta: '0.0',
       iconBg: '#fef9c3', iconColor: '#b45309',
     },
   ];
@@ -79,12 +102,12 @@ export default function DashboardOverview({ products, orders }) {
       {/* Page Header */}
       <div className="dash-page-header">
         <div>
-          <p className="dash-page-greeting">Salom, Akbar 👋</p>
+          <p className="dash-page-greeting">Salom, {user?.name?.split(' ')[0] || 'Hunarmand'} 👋</p>
           <h1>Boshqaruv paneli</h1>
         </div>
         <button className="dash-notify-btn">
           <Bell size={15}/> Bildirishnomalar
-          <span className="dash-notify-count">1</span>
+          <span className="dash-notify-count">{activeOrdersCount > 0 ? 1 : 0}</span>
         </button>
       </div>
 
@@ -102,7 +125,9 @@ export default function DashboardOverview({ products, orders }) {
                 {m.unit && <span>{m.unit}</span>}
               </div>
             </div>
-            <span className="metric-delta positive">↑ {m.delta}</span>
+            {m.delta !== '0%' && m.delta !== '0' && m.delta !== '0.0' && (
+              <span className="metric-delta positive">↑ {m.delta}</span>
+            )}
           </div>
         ))}
       </div>
@@ -119,7 +144,7 @@ export default function DashboardOverview({ products, orders }) {
             </select>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={SALES_DATA} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+            <AreaChart data={salesData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#c97a22" stopOpacity={0.25}/>
@@ -144,10 +169,10 @@ export default function DashboardOverview({ products, orders }) {
             <h3>Buyurtmalar soni</h3>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={SALES_DATA} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+            <BarChart data={salesData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0"/>
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#aaa' }} dy={8}/>
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#aaa' }} dx={-5}/>
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#aaa' }} dx={-5} allowDecimals={false}/>
               <Tooltip
                 contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 13 }}
                 formatter={v => [v, 'Buyurtmalar']}
@@ -178,22 +203,30 @@ export default function DashboardOverview({ products, orders }) {
                 </tr>
               </thead>
               <tbody>
-                {(orders?.slice(0,5) || RECENT_ORDERS).map((o, i) => {
-                  const st = STATUS_COLORS[o.status] || STATUS_COLORS.pending;
-                  return (
-                    <tr key={o.id || i}>
-                      <td style={{ fontFamily: 'monospace', fontSize: 12, color: '#888' }}>{o.id}</td>
-                      <td style={{ fontWeight: 500 }}>{o.product}</td>
-                      <td style={{ color: '#666' }}>{o.customer}</td>
-                      <td>
-                        <span style={{ background: st.bg, color: st.color, padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>
-                          {st.label}
-                        </span>
-                      </td>
-                      <td style={{ fontWeight: 600, color: '#111' }}>{formatPrice(o.amount)}</td>
-                    </tr>
-                  );
-                })}
+                {orders.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px 0', color: '#aaa' }}>
+                      Sizda hali buyurtmalar yo'q
+                    </td>
+                  </tr>
+                ) : (
+                  orders.slice(0,5).map((o, i) => {
+                    const st = STATUS_COLORS[o.status] || STATUS_COLORS.pending;
+                    return (
+                      <tr key={o.id || i}>
+                        <td style={{ fontFamily: 'monospace', fontSize: 12, color: '#888' }}>{o.id || o.orderNumber}</td>
+                        <td style={{ fontWeight: 500 }}>{o.product || (o.items && o.items[0]?.title)}</td>
+                        <td style={{ color: '#666' }}>{typeof o.customer === 'object' ? o.customer?.name : o.customer}</td>
+                        <td>
+                          <span style={{ background: st.bg, color: st.color, padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>
+                            {st.label}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 600, color: '#111' }}>{formatPrice(o.amount || o.totalAmount)}</td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -205,25 +238,30 @@ export default function DashboardOverview({ products, orders }) {
             <h3>⚠️ Kam qolgan</h3>
           </div>
           <div className="low-stock-list">
-            {(products?.filter(p => p.inStock <= 5) || LOW_STOCK).slice(0,5).map((p, i) => (
-              <div key={p.id || i} className="low-stock-item">
-                <img
-                  src={p.image || 'https://via.placeholder.com/38'}
-                  alt={p.title}
-                  className="ls-img"
-                />
-                <div className="ls-info">
-                  <p className="ls-title">{p.title}</p>
-                  <p className={`ls-stock ${p.inStock > 3 ? 'ok' : ''}`}>
-                    {p.inStock} ta qoldi
-                  </p>
+            {products.length === 0 ? (
+               <div style={{ padding: '20px', textAlign: 'center', color: '#aaa', fontSize: 13 }}>
+                 Sizda hali mahsulotlar yo'q
+               </div>
+            ) : products.filter(p => p.inStock <= 5).length === 0 ? (
+               <div style={{ padding: '20px', textAlign: 'center', color: '#aaa', fontSize: 13 }}>
+                 Hamma mahsulotlar zaxirasi yetarli
+               </div>
+            ) : (
+              products.filter(p => p.inStock <= 5).slice(0,5).map((p, i) => (
+                <div key={p.id || p._id || i} className="low-stock-item">
+                  <img
+                    src={p.image || 'https://via.placeholder.com/38'}
+                    alt={p.title}
+                    className="ls-img"
+                  />
+                  <div className="ls-info">
+                    <p className="ls-title">{p.title}</p>
+                    <p className={`ls-stock ${p.inStock > 3 ? 'ok' : ''}`}>
+                      {p.inStock} ta qoldi
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {(products?.filter(p => p.inStock <= 5) || LOW_STOCK).length === 0 && (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#aaa', fontSize: 13 }}>
-                Hamma mahsulotlar yetarli
-              </div>
+              ))
             )}
           </div>
         </div>
