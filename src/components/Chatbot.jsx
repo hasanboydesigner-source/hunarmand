@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
-import { API_URL } from '../data/constants';
+import { API_URL, CATEGORIES } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
+import { useAuthStore } from '../store/useStore';
 
 // Simple markdown link parser to render links
 const parseMarkdownLinks = (text) => {
@@ -35,14 +36,37 @@ const parseMarkdownLinks = (text) => {
 };
 
 export default function Chatbot() {
+  const { user } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: 'ai', text: "Assalomu alaykum! Men E-Hunarmand do'konining maxsus savdo yordamchisiman. Sizga qanday milliy hunarmandchilik mahsulotlarini tanlashda yordam bera olaman? 😊" }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const location = useLocation();
+
+  // Initialize and Auto-open logic
+  useEffect(() => {
+    // Determine greeting
+    const userName = user?.name ? user.name.split(' ')[0] : '';
+    const cats = CATEGORIES.map(c => c.name).join(', ');
+    const greeting = userName 
+      ? `Assalomu alaykum, **${userName}**! E-Hunarmand do'koniga xush kelibsiz! 🎉 Sizga asosan qanday yo'nalishdagi mahsulotlar qiziq? Bizda ${cats} bo'yicha noyob buyumlar bor.`
+      : `Assalomu alaykum! Men E-Hunarmand maxsus savdo yordamchisiman. Sizga qanday milliy hunarmandchilik mahsulotlarini tanlashda yordam bera olaman? Bizda quyidagi yo'nalishlar bor: ${cats}.`;
+    
+    if (messages.length === 0) {
+      setMessages([{ role: 'ai', text: greeting }]);
+    }
+
+    // Auto-open if user logged in and hasn't been opened in this session
+    if (user && !sessionStorage.getItem('chatbot_auto_opened')) {
+      // slight delay for better UX
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        sessionStorage.setItem('chatbot_auto_opened', 'true');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
 
   // Auto-scroll
   useEffect(() => {
