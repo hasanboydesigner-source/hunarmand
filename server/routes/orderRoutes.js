@@ -1,5 +1,6 @@
 import express from 'express';
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 
 const router = express.Router();
 
@@ -37,6 +38,16 @@ router.post('/', async (req, res) => {
     });
 
     const createdOrder = await order.save();
+
+    // Increment sold count for each product in the order
+    if (items && items.length > 0) {
+      for (const item of items) {
+        if (item.product) {
+          await Product.findByIdAndUpdate(item.product, { $inc: { sold: item.quantity || 1 } });
+        }
+      }
+    }
+
     res.status(201).json(createdOrder);
   } catch (error) {
     console.error(error);
