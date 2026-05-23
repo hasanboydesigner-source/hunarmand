@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
 import ScrollToTop from './components/ScrollToTop';
 import Chatbot from './components/Chatbot';
+import MobileBottomNav from './components/MobileBottomNav';
+import { useAuthStore } from './store/useStore';
 
 // Pages
 import HomePage from './pages/Home';
@@ -57,6 +59,7 @@ function AppContent() {
   const location = useLocation();
   const isDashboardOrAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/dashboard');
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     AOS.init({
@@ -74,7 +77,7 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="app-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className={`app-container ${user && !isDashboardOrAdmin ? 'has-bottom-nav' : ''}`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <GlobalLoader isLoading={isAppLoading} />
       <ScrollToTop />
       {/* Global Components - hidden on admin & dashboard */}
@@ -107,6 +110,7 @@ function AppContent() {
 
       {!isDashboardOrAdmin && <Footer />}
       <Chatbot />
+      <MobileBottomNav />
       <Toaster position="bottom-right" toastOptions={{ className: 'react-hot-toast-custom' }} />
     </div>
   );
