@@ -9,7 +9,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/products/${product.id}`);
+    navigate(`/products/${product._id || product.id}`);
   };
 
   const addItem = useCartStore((s) => s.addItem);
@@ -150,7 +150,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
           </button>
           <div>
-            <Link to={`/products/${product.id}`} className="pc-action-btn" title="Ko'rish">
+            <Link to={`/products/${product._id || product.id}`} className="pc-action-btn" title="Ko'rish">
               <Eye size={16} />
             </Link>
           </div>

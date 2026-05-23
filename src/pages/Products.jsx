@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { MOCK_PRODUCTS, CATEGORIES, REGIONS, SORT_OPTIONS, formatPrice } from '../data/constants';
+import { MOCK_PRODUCTS, CATEGORIES, REGIONS, SORT_OPTIONS, formatPrice, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
+import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { Filter, Grid3X3, List, SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
@@ -20,13 +21,75 @@ export default function ProductsPage() {
   const minPrice = Number(params.get('minPrice') || 0);
   const maxPrice = Number(params.get('maxPrice') || 3000000);
 
+  const [allProducts, setAllProducts] = useState([]);
+  
+  const enrichProductWithCraftsman = (pData) => {
+    if (!pData) return pData;
+    const c = pData.craftsman;
+    if (!c) return pData;
+
+    const name = typeof c === 'object' ? c.name : '';
+    const specialty = pData.category || '';
+    
+    const mockC = MOCK_CRAFTSMEN?.find(mc => 
+      mc.name?.toLowerCase() === name.toLowerCase() ||
+      (specialty && mc.specialty?.toLowerCase() === specialty.toLowerCase())
+    );
+
+    const coverImageFallback = specialty === 'keramika'
+      ? 'https://holiday-golightly.com/wp-content/uploads/2023/08/DSC0207-1024x683.jpg'
+      : specialty === 'gilam'
+      ? 'https://central-asia.guide/wp-content/uploads/2024/12/Uzbek-carpet-veawing-1024x682.jpg'
+      : specialty === 'zargarlik'
+      ? 'https://api.society.uz/media/news/photo_2024-05-06_12-35-19_2.webp'
+      : specialty === 'yogoch'
+      ? 'https://minio.tbcbank.uz/web-tbcbank-uz-strapi-admin-cms/uploads/1-kokand.jpeg'
+      : specialty === 'to\'qimachilik' || specialty === 'to\'qimachilik'
+      ? 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80'
+      : specialty === 'naqqoshlik'
+      ? 'https://www.advantour.com/img/uzbekistan/bukhara/ustoz-shogird-miniature-workshop3.jpg'
+      : specialty === 'misgarlik'
+      ? 'https://api.society.uz/media/news/BQ8A4028.webp'
+      : 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&q=80';
+
+    const enrichedCraftsman = typeof c === 'object' ? {
+      ...c,
+      coverImage: c.coverImage || mockC?.coverImage || coverImageFallback,
+      rating: c.rating || mockC?.rating || 4.8,
+      reviewCount: c.reviewCount || mockC?.reviewCount || 15,
+      totalSales: c.totalSales || mockC?.totalSales || 24,
+      yearsExp: c.yearsExp || mockC?.yearsExp || 5,
+      responseTime: c.responseTime || mockC?.responseTime || '< 2 soat',
+      totalProducts: c.totalProducts || mockC?.totalProducts || 8,
+    } : c;
+
+    return {
+      ...pData,
+      rating: pData.rating || mockC?.rating || 5,
+      reviewCount: pData.reviewCount || mockC?.reviewCount || 12,
+      craftsman: enrichedCraftsman
+    };
+  };
+
   useEffect(() => {
     setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 450);
-    return () => clearTimeout(timer);
-  }, [category, region, sort, q, minPrice, maxPrice]);
+    axios.get(`${API_URL}/products`)
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          const enriched = res.data.map(p => enrichProductWithCraftsman(p));
+          setAllProducts(enriched);
+        } else {
+          setAllProducts(MOCK_PRODUCTS);
+        }
+      })
+      .catch(err => {
+        console.error("API xatosi, qalbaki ma'lumotlar ishlatilmoqda:", err);
+        setAllProducts(MOCK_PRODUCTS);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const set = (key, val) => {
     const next = new URLSearchParams(params);
@@ -37,14 +100,30 @@ export default function ProductsPage() {
   const clearAll = () => setParams({});
 
   const filtered = useMemo(() => {
-    let list = [...MOCK_PRODUCTS];
+    let list = [...allProducts];
     if (q) list = list.filter(p =>
       p.title.toLowerCase().includes(q.toLowerCase()) ||
-      p.craftsman?.name.toLowerCase().includes(q.toLowerCase())
+      p.craftsman?.name?.toLowerCase().includes(q.toLowerCase())
     );
-    if (category) list = list.filter(p => p.category === category);
+    if (category) {
+      list = list.filter(p => {
+        const pCat = p.category?.toLowerCase() || '';
+        const targetCat = category.toLowerCase();
+        
+        // Find if pCat matches a label, and if so, use its ID
+        const matchedCategory = CATEGORIES.find(c => 
+          c.id === pCat || c.label.toLowerCase() === pCat
+        );
+        
+        const normalizedPCat = matchedCategory ? matchedCategory.id : pCat;
+        return normalizedPCat === targetCat;
+      });
+    }
     if (region) list = list.filter(p => p.craftsman?.region === region);
-    list = list.filter(p => p.price >= minPrice && p.price <= maxPrice);
+    list = list.filter(p => {
+      const pPrice = Number(p.price) || 0;
+      return pPrice >= minPrice && pPrice <= maxPrice;
+    });
     switch (sort) {
       case 'price_asc': list.sort((a,b) => a.price - b.price); break;
       case 'price_desc': list.sort((a,b) => b.price - a.price); break;
@@ -53,7 +132,7 @@ export default function ProductsPage() {
       default: list.sort((a,b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
     }
     return list;
-  }, [q, category, region, sort, minPrice, maxPrice]);
+  }, [allProducts, q, category, region, sort, minPrice, maxPrice]);
 
   const activeFilters = [
     category && { key: 'category', label: CATEGORIES.find(c=>c.id===category)?.label || category },

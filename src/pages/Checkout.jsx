@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/useStore';
-import { formatPrice } from '../data/constants';
+import { formatPrice, API_URL } from '../data/constants';
 import { CheckCircle2, ChevronRight, CreditCard, Truck, ClipboardList } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import './Checkout.css';
 
 const STEPS = [
@@ -33,11 +34,57 @@ export default function CheckoutPage() {
   const shipping  = delivery === 'express' ? 60000 : subtotal > 500000 ? 0 : 30000;
   const total     = subtotal + shipping;
 
-  const handleOrder = () => {
-    clearCart();
-    setOrdered(true);
-    toast.success("Buyurtmangiz qabul qilindi! ✅");
-    setTimeout(() => navigate('/profile/orders'), 3000);
+  const handleOrder = async () => {
+    try {
+      // Bitta xaridda har xil hunarmandlar bo'lishi mumkin, ularni guruhlaymiz
+      const ordersByCraftsman = {};
+      
+      items.forEach(item => {
+        const craftsmanId = typeof item.craftsman === 'object' ? (item.craftsman._id || item.craftsman.id) : item.craftsman;
+        if (!craftsmanId) return; // Hunarmandi yo'q mahsulot bo'lmasligi kerak
+        
+        if (!ordersByCraftsman[craftsmanId]) {
+          ordersByCraftsman[craftsmanId] = { items: [], totalAmount: 0 };
+        }
+        
+        ordersByCraftsman[craftsmanId].items.push({
+          product: item._id || item.id,
+          title: item.title,
+          image: item.image,
+          price: item.price,
+          quantity: item.quantity
+        });
+        ordersByCraftsman[craftsmanId].totalAmount += (item.price * item.quantity);
+      });
+
+      const craftsmanIds = Object.keys(ordersByCraftsman);
+      if (craftsmanIds.length > 0) {
+        // Yetkazib berish narxini birinchi buyurtmaga qo'shamiz (yoki hammaga bo'lib yuborish mumkin)
+        ordersByCraftsman[craftsmanIds[0]].totalAmount += shipping;
+      }
+
+      // API ga yuborish
+      const promises = craftsmanIds.map(cId => {
+        return axios.post(`${API_URL}/orders`, {
+          customer: address,
+          items: ordersByCraftsman[cId].items,
+          craftsmanId: cId,
+          totalAmount: ordersByCraftsman[cId].totalAmount,
+          paymentMethod: payMethod,
+          deliveryMethod: delivery
+        });
+      });
+
+      await Promise.all(promises);
+
+      clearCart();
+      setOrdered(true);
+      toast.success("Buyurtmangiz qabul qilindi! ✅");
+      setTimeout(() => navigate('/profile/orders'), 3000);
+    } catch (err) {
+      console.error(err);
+      toast.error("Buyurtma berishda xatolik yuz berdi");
+    }
   };
 
   if (ordered) return (

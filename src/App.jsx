@@ -23,6 +23,8 @@ import WishlistPage from './pages/Wishlist';
 import AuthPage from './pages/Auth';
 import DashboardPage from './pages/Dashboard';
 import AdminPage from './pages/Admin';
+import PrivacyPage from './pages/Privacy';
+import TermsPage from './pages/Terms';
 
 function GlobalLoader({ isLoading }) {
   const [shouldRender, setShouldRender] = useState(true);
@@ -94,6 +96,8 @@ function AppContent() {
           <Route path="/auth/register" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
         </Routes>
       </div>
 

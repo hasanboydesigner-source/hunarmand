@@ -5,53 +5,16 @@ import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
-import { CATEGORIES, MOCK_PRODUCTS, MOCK_CRAFTSMEN } from '../data/constants';
+import { CATEGORIES, MOCK_PRODUCTS, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { ArrowRight, Shield, Truck, CreditCard, Headphones, Star, MapPin, ChevronRight } from 'lucide-react';
 import { HeroSkeleton, FeatureCardSkeleton, CategoryCardSkeleton, ProductCardSkeleton } from '../components/Skeletons';
+import { useTranslation } from 'react-i18next';
 import './Home.css';
+import axios from 'axios';
 
-const HERO_SLIDES = [
-  {
-    title: "An'anaviy San'at,\nZamonaviy Bozor",
-    subtitle: "O'zbek hunarmandchiligining eng yaxshi namunalarini kashf eting. Har bir buyum — bu qo'l mehnati va sevgining mahsuli.",
-    cta: "Mahsulotlarni ko'rish",
-    ctaLink: '/products',
-    image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1600&q=80',
-    tag: '🏺 Keramika',
-  },
-  {
-    title: "Buxoroning\nIpak Gilamlari",
-    subtitle: "Asrlar davomida avloddan avlodga o'tib kelgan Buxoro gilamchilik san'ati. Har bir gilam o'z tarixiga ega.",
-    cta: "Gilamlarni ko'rish",
-    ctaLink: '/products?category=gilam',
-    image: 'https://images.unsplash.com/photo-1600166898405-da9535204843?w=1600&q=80',
-    tag: '🧶 Gilam',
-  },
-  {
-    title: "Samarqandning\nKumush San'ati",
-    subtitle: "Ming yillik zargarlik an'analarini davom ettiruvchi usta qo'llar bilan yaratilgan noyob taqinchoqlar.",
-    cta: "Zargarlikni ko'rish",
-    ctaLink: '/products?category=zargarlik',
-    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1600&q=80',
-    tag: '💍 Zargarlik',
-  },
-];
 
-const FEATURES = [
-  { icon: <Shield size={22} />, title: 'Haqiqiy buyumlar', desc: "Har bir mahsulot tekshirilgan va sertifikatlangan hunarmand tomonidan yaratilgan." },
-  { icon: <Truck size={22} />, title: 'Tez yetkazib berish', desc: "O'zbekiston bo'ylab 1-3 kun ichida yetkazib beramiz." },
-  { icon: <CreditCard size={22} />, title: "Xavfsiz to'lov", desc: "Payme, Click, Uzcard, Humo va boshqa to'lov usullari." },
-  { icon: <Headphones size={22} />, title: '24/7 yordam', desc: "Istalgan vaqt savollaringizga javob berishga tayyormiz." },
-];
-
-const STATS = [
-  { end: 2400,  suffix: '+', label: 'Hunarmand',    note: 'Tasdiqlangan usta' },
-  { end: 18000, suffix: '+', label: 'Mahsulot',     note: 'Qo\'lda yasalgan' },
-  { end: 95000, suffix: '+', label: 'Mamnun mijoz', note: 'Xaridor sharhlari' },
-  { end: 13,    suffix: '',  label: 'Viloyat',      note: 'Yetkazib berish' },
-];
 
 function CountUp({ end, suffix = '' }) {
   const [count, setCount] = useState(0);
@@ -110,16 +73,126 @@ function CountUp({ end, suffix = '' }) {
 }
 
 export default function HomePage() {
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
-  const featured = MOCK_PRODUCTS.filter((p) => p.featured);
-  const newest = MOCK_PRODUCTS.filter((p) => p.isNew);
+  const [allProducts, setAllProducts] = useState([]);
+  const [craftsmen, setCraftsmen] = useState([]);
+
+  const HERO_SLIDES = [
+    {
+      title: t('home.hero1_title'),
+      subtitle: t('home.hero1_sub'),
+      cta: t('home.hero_cta1'),
+      ctaLink: '/products',
+      image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1600&q=80',
+      tag: '🏺 ' + t('home.cat_ceramic'),
+    },
+    {
+      title: t('home.hero2_title'),
+      subtitle: t('home.hero2_sub'),
+      cta: t('home.hero_cta2'),
+      ctaLink: '/products?category=gilam',
+      image: 'https://images.unsplash.com/photo-1600166898405-da9535204843?w=1600&q=80',
+      tag: '🧶 ' + t('home.cat_carpet'),
+    },
+    {
+      title: t('home.hero3_title'),
+      subtitle: t('home.hero3_sub'),
+      cta: t('home.hero_cta3'),
+      ctaLink: '/products?category=zargarlik',
+      image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1600&q=80',
+      tag: '💍 ' + t('home.cat_jewelry'),
+    },
+  ];
+
+  const FEATURES = [
+    { icon: <Shield size={22} />, title: t('home.feat1_title'), desc: t('home.feat1_desc') },
+    { icon: <Truck size={22} />, title: t('home.feat2_title'), desc: t('home.feat2_desc') },
+    { icon: <CreditCard size={22} />, title: t('home.feat3_title'), desc: t('home.feat3_desc') },
+    { icon: <Headphones size={22} />, title: t('home.feat4_title'), desc: t('home.feat4_desc') },
+  ];
+
+  const STATS = [
+    { end: 2400,  suffix: '+', label: t('nav.craftsmen'),    note: t('home.stat1_note') },
+    { end: 18000, suffix: '+', label: t('nav.products'),     note: t('home.stat2_note') },
+    { end: 95000, suffix: '+', label: t('home.stat3_lbl'), note: t('home.stat3_note') },
+    { end: 13,    suffix: '',  label: t('home.stat4_lbl'),      note: t('home.stat4_note') },
+  ];
+
+  const enrichProductWithCraftsman = (pData) => {
+    if (!pData) return pData;
+    const c = pData.craftsman;
+    if (!c) return pData;
+
+    const name = typeof c === 'object' ? c.name : '';
+    const specialty = pData.category || '';
+    
+    const mockC = MOCK_CRAFTSMEN?.find(mc => 
+      mc.name?.toLowerCase() === name.toLowerCase() ||
+      (specialty && mc.specialty?.toLowerCase() === specialty.toLowerCase())
+    );
+
+    const coverImageFallback = specialty === 'keramika'
+      ? 'https://holiday-golightly.com/wp-content/uploads/2023/08/DSC0207-1024x683.jpg'
+      : specialty === 'gilam'
+      ? 'https://central-asia.guide/wp-content/uploads/2024/12/Uzbek-carpet-veawing-1024x682.jpg'
+      : specialty === 'zargarlik'
+      ? 'https://api.society.uz/media/news/photo_2024-05-06_12-35-19_2.webp'
+      : specialty === 'yogoch'
+      ? 'https://minio.tbcbank.uz/web-tbcbank-uz-strapi-admin-cms/uploads/1-kokand.jpeg'
+      : specialty === 'toʻqimachilik' || specialty === 'to\'qimachilik'
+      ? 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80'
+      : specialty === 'naqqoshlik'
+      ? 'https://www.advantour.com/img/uzbekistan/bukhara/ustoz-shogird-miniature-workshop3.jpg'
+      : specialty === 'misgarlik'
+      ? 'https://api.society.uz/media/news/BQ8A4028.webp'
+      : 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&q=80';
+
+    const enrichedCraftsman = typeof c === 'object' ? {
+      ...c,
+      coverImage: c.coverImage || mockC?.coverImage || coverImageFallback,
+      rating: c.rating || mockC?.rating || 4.8,
+      reviewCount: c.reviewCount || mockC?.reviewCount || 15,
+      totalSales: c.totalSales || mockC?.totalSales || 24,
+      yearsExp: c.yearsExp || mockC?.yearsExp || 5,
+      responseTime: c.responseTime || mockC?.responseTime || '< 2 soat',
+      totalProducts: c.totalProducts || mockC?.totalProducts || 8,
+    } : c;
+
+    return {
+      ...pData,
+      rating: pData.rating || mockC?.rating || 5,
+      reviewCount: pData.reviewCount || mockC?.reviewCount || 12,
+      craftsman: enrichedCraftsman
+    };
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        const [productsRes, craftsmenRes] = await Promise.all([
+          axios.get(`${API_URL}/products`).catch(() => ({ data: [] })),
+          axios.get(`${API_URL}/auth/craftsmen`).catch(() => ({ data: [] }))
+        ]);
+        
+        const productsData = productsRes.data || [];
+        const craftsmenData = craftsmenRes.data || [];
+        
+        setCraftsmen(craftsmenData.slice(0, 4));
+        
+        const enriched = productsData.map(p => enrichProductWithCraftsman(p));
+        setAllProducts(enriched);
+      } catch (err) {
+        console.error("API error fetching data in Home:", err);
+      } finally {
+        setTimeout(() => setIsLoading(false), 500); // small delay for skeletons
+      }
+    };
+    fetchData();
   }, []);
+
+  const featured = allProducts.filter((p) => p.featured || p.rating > 4.5).slice(0, 4);
+  const newest = [...allProducts].reverse().slice(0, 4);
 
   if (isLoading) {
     return (
@@ -192,7 +265,7 @@ export default function HomePage() {
                   <p className="hero-subtitle">{slideItem.subtitle}</p>
                   <div className="hero-actions">
                     <Link to={slideItem.ctaLink} className="btn btn-primary btn-xl">{slideItem.cta} <ArrowRight size={18} /></Link>
-                    <Link to="/craftsmen" className="btn hero-ghost-btn btn-xl">Hunarmandlar</Link>
+                    <Link to="/craftsmen" className="btn hero-ghost-btn btn-xl">{t('nav.craftsmen')}</Link>
                   </div>
                 </div>
               </div>
@@ -248,9 +321,9 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <div className="section-heading" data-aos="fade-up">
-            <p className="eyebrow">Browse by craft</p>
-            <h2>Hunarmandchilik turlari</h2>
-            <p>O'zbek an'anaviy hunarmandchiligining ko'p qirrali dunyosini kashf eting</p>
+            <p className="eyebrow">{t('home.cat_eyebrow')}</p>
+            <h2>{t('home.cat_title')}</h2>
+            <p>{t('home.cat_desc')}</p>
           </div>
           <div className="categories-grid">
             {CATEGORIES.map((cat, i) => (
@@ -265,8 +338,8 @@ export default function HomePage() {
                   <CategoryIcon name={cat.icon} size={24} />
                 </div>
                 <div className="category-info">
-                  <h4>{cat.label}</h4>
-                  <p>{cat.labelRu}</p>
+                  <h4>{i18n.language === 'ru' ? cat.labelRu : i18n.language === 'en' ? (cat.labelEn || cat.label) : cat.label}</h4>
+                  <p>{cat.desc || ''}</p>
                 </div>
                 <ChevronRight size={16} className="category-arrow" />
               </Link>
@@ -279,9 +352,9 @@ export default function HomePage() {
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
           <div className="section-heading" data-aos="fade-up">
-            <p className="eyebrow">Handpicked</p>
-            <h2>Tanlangan mahsulotlar</h2>
-            <p>Platformamizning eng mashhur va yuqori baholangan buyumlari</p>
+            <p className="eyebrow">{t('home.feat_prod_eyebrow')}</p>
+            <h2>{t('home.feat_prod_title')}</h2>
+            <p>{t('home.feat_prod_desc')}</p>
           </div>
           
           <div className="products-grid" data-aos="fade-up" data-aos-delay="100">
@@ -290,7 +363,7 @@ export default function HomePage() {
 
           <div className="section-footer">
             <Link to="/products" className="btn btn-secondary btn-lg">
-              Barcha mahsulotlar <ArrowRight size={16} />
+              {t('home.all_products')} <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -300,22 +373,50 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <div className="section-heading" data-aos="fade-up">
-            <p className="eyebrow">Meet the artisans</p>
-            <h2>Mashhur hunarmandlar</h2>
-            <p>Platformamizning eng iqtidorli va tajribali ustalari</p>
+            <p className="eyebrow">{t('home.crafts_eyebrow')}</p>
+            <h2>{t('home.crafts_title')}</h2>
+            <p>{t('home.crafts_desc')}</p>
           </div>
           
           <div className="craftsmen-grid" data-aos="fade-up" data-aos-delay="100">
-            {MOCK_CRAFTSMEN.map((c) => (
+            {craftsmen.map((c) => {
+              const coverImageFallback = c.specialty === 'keramika'
+                ? 'https://holiday-golightly.com/wp-content/uploads/2023/08/DSC0207-1024x683.jpg'
+                : c.specialty === 'gilam'
+                ? 'https://central-asia.guide/wp-content/uploads/2024/12/Uzbek-carpet-veawing-1024x682.jpg'
+                : c.specialty === 'zargarlik'
+                ? 'https://api.society.uz/media/news/photo_2024-05-06_12-35-19_2.webp'
+                : c.specialty === 'yogoch'
+                ? 'https://minio.tbcbank.uz/web-tbcbank-uz-strapi-admin-cms/uploads/1-kokand.jpeg'
+                : c.specialty === 'toʻqimachilik' || c.specialty === 'to\'qimachilik'
+                ? 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80'
+                : c.specialty === 'naqqoshlik'
+                ? 'https://www.advantour.com/img/uzbekistan/bukhara/ustoz-shogird-miniature-workshop3.jpg'
+                : c.specialty === 'misgarlik'
+                ? 'https://api.society.uz/media/news/BQ8A4028.webp'
+                : 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&q=80';
+
+              const theirProducts = allProducts.filter(p => {
+                const cid = typeof p.craftsman === 'object' ? p.craftsman?._id : p.craftsman;
+                return cid === c._id || cid === c.id || (typeof p.craftsman === 'object' && p.craftsman?.name === c.name);
+              });
+              
+              const theirProduct = theirProducts[0];
+              const totalProducts = theirProducts.length;
+              const totalSales = theirProducts.reduce((acc, p) => acc + (p.sold || 0), 0);
+              
+              const finalCover = theirProduct?.image || c.coverImage || coverImageFallback;
+              
+              return (
               <Link 
-                key={c.id} 
-                to={`/craftsmen/${c.slug}`} 
+                key={c._id || c.id} 
+                to={`/craftsmen/${c.slug || c._id || c.id}`} 
                 className="craftsman-card"
               >
                 <div className="craftsman-cover">
-                  <img src={c.coverImage} alt={c.name} />
+                  <img src={finalCover} alt={c.name} />
                   <div className="craftsman-cover-overlay" />
-                  {c.isVerified && <span className="verified-badge">✓ Tasdiqlangan</span>}
+                  {c.isVerified && <span className="verified-badge">✓ {t('home.verified')}</span>}
                 </div>
                 <div className="craftsman-body">
                   <div className="craftsman-avatar-wrap">
@@ -326,24 +427,24 @@ export default function HomePage() {
                   <h3>{c.name}</h3>
                   <div className="craftsman-meta">
                     <span><MapPin size={12} /> {c.region}</span>
-                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {c.rating} ({c.reviewCount})</span>
+                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {c.rating || 4.8} ({c.reviewCount || 15})</span>
                   </div>
                   <p className="craftsman-specialty">
                     {CATEGORIES.find(cat => cat.id === c.specialty)?.icon} {CATEGORIES.find(cat => cat.id === c.specialty)?.label}
                   </p>
                   <div className="craftsman-stats-row">
-                    <div className="cs-stat"><strong>{c.totalProducts}</strong><span>Mahsulot</span></div>
-                    <div className="cs-stat"><strong>{c.totalSales.toLocaleString()}</strong><span>Sotuv</span></div>
-                    <div className="cs-stat"><strong>{c.yearsExp}</strong><span>Yil tajriba</span></div>
+                    <div className="cs-stat"><strong>{totalProducts}</strong><span>{t('nav.products')}</span></div>
+                    <div className="cs-stat"><strong>{totalSales.toLocaleString()}</strong><span>{t('home.sales')}</span></div>
+                    <div className="cs-stat"><strong>{c.yearsExp || 0}</strong><span>{t('home.years_exp')}</span></div>
                   </div>
                 </div>
               </Link>
-            ))}
+            )})}
           </div>
           
           <div className="section-footer">
             <Link to="/craftsmen" className="btn btn-secondary btn-lg">
-              Barcha hunarmandlar <ArrowRight size={16} />
+              {t('home.all_craftsmen')} <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -353,8 +454,8 @@ export default function HomePage() {
       <section className="section" style={{ background: 'var(--bg-secondary)', overflow: "hidden" }}>
         <div className="container">
           <div className="section-heading" data-aos="fade-up">
-            <p className="eyebrow">Just arrived</p>
-            <h2>Yangi mahsulotlar</h2>
+            <p className="eyebrow">{t('home.new_eyebrow')}</p>
+            <h2>{t('home.new_title')}</h2>
           </div>
           
           <div className="products-grid" data-aos="fade-up" data-aos-delay="100">
@@ -368,12 +469,12 @@ export default function HomePage() {
         <div className="container">
           <div className="cta-card" data-aos="zoom-in-up">
             <div className="cta-content">
-              <p className="eyebrow" style={{ color: 'var(--brand-300)' }}>Join the platform</p>
-              <h2>Hunarmand sifatida ro'yxatdan o'ting</h2>
-              <p>O'z buyumlaringizni millionlab xaridorlarga taqdim eting. Ro'yxatdan o'tish bepul!</p>
+              <p className="eyebrow" style={{ color: 'var(--brand-300)' }}>{t('home.cta_eyebrow')}</p>
+              <h2>{t('home.cta_title')}</h2>
+              <p>{t('home.cta_desc')}</p>
               <div className="cta-actions">
-                <Link to="/auth/register?role=craftsman" className="btn btn-primary btn-xl">Hunarmand bo'ling</Link>
-                <Link to="/about" className="btn hero-ghost-btn btn-lg">Batafsil bilish</Link>
+                <Link to="/auth/register?role=craftsman" className="btn btn-primary btn-xl">{t('footer.become_craftsman')}</Link>
+                <Link to="/about" className="btn hero-ghost-btn btn-lg">{t('home.learn_more')}</Link>
               </div>
             </div>
             <div className="cta-decor">

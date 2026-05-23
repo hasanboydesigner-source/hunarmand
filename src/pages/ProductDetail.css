@@ -99,8 +99,8 @@
 .cc-region { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
 .cc-rating { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; }
 .cc-actions { display: flex; gap: 8px; }
-.whatsapp-btn { background: #25d366; color: #fff; border: none; }
-.whatsapp-btn:hover { background: #1ebe5d; }
+.telegram-btn { background: #2AABEE; color: #fff; border: none; }
+.telegram-btn:hover { background: #229ED9; }
 
 /* Tabs */
 .pd-tabs-section { margin-top: 0; padding-top: 0; }

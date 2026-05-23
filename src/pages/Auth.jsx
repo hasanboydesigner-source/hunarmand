@@ -5,9 +5,13 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, CheckCircle2, X } from 'lucide-react';
 import { FiUser, FiShield } from 'react-icons/fi';
 import { GiPaintedPottery } from 'react-icons/gi';
+import axios from 'axios';
+import { useTranslation } from 'react-i18next';
+import { MOCK_USERS, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
 import './Auth.css';
 
 export default function AuthPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const defaultTab = params.get('tab') === 'register' ? 'register' : 'login';
   const defaultRole = params.get('role') || 'customer';
@@ -26,48 +30,72 @@ export default function AuthPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!loginForm.email || !loginForm.password) { toast.error("Barcha maydonlarni to'ldiring"); return; }
+    if (!loginForm.email || !loginForm.password) { toast.error(t('auth.fill_fields')); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
     
-    // Mock login — in real app, call API
-    let mockUser;
-    const email = loginForm.email.toLowerCase();
-    
-    if (email === 'akbar@demo.com') {
-      mockUser = { id: 'c1', name: 'Akbar Nazarov', email, role: 'craftsman' };
-    } else if (email === 'malohat@demo.com') {
-      mockUser = { id: 'c2', name: 'Malohat Qodirov', email, role: 'craftsman' };
-    } else if (email === 'jamshid@demo.com') {
-      mockUser = { id: 'c3', name: 'Jamshid Umarov', email, role: 'craftsman' };
-    } else if (email === 'sherzod@demo.com') {
-      mockUser = { id: 'c4', name: 'Sherzod Tursunov', email, role: 'craftsman' };
-    } else if (email.includes('craft')) {
-      mockUser = { id: 'c1', name: 'Akbar Nazarov', email, role: 'craftsman' };
-    } else if (email.includes('admin')) {
-      mockUser = { id: 'a1', name: 'Admin', email, role: 'admin' };
-    } else {
-      mockUser = { id: 'u1', name: 'Demo Foydalanuvchi', email, role: 'customer' };
+    try {
+      // ─── Haqiqiy API orqali kirish ───
+      const { data } = await axios.post(`${API_URL}/auth/login`, loginForm);
+      
+      const loggedUser = { id: data._id, name: data.name, email: data.email, role: data.role };
+      login(loggedUser, data.token);
+      toast.success(`${t('auth.welcome')}, ${data.name}!`);
+      
+      navigate(data.role === 'admin' ? '/admin' : data.role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+    } catch (error) {
+      console.error("API xatosi, qalbaki (MOCK) tizim ishga tushdi:", error);
+      
+      // Fallback: Mock login
+      let mockUser;
+      const email = loginForm.email.toLowerCase();
+      if (email === 'akbar@demo.com' || email.includes('akbar')) mockUser = { id: 'c1', name: 'Akbar Nazarov', email, role: 'craftsman' };
+      else if (email === 'malohat@demo.com' || email.includes('malohat')) mockUser = { id: 'c2', name: 'Malohat Qodirov', email, role: 'craftsman' };
+      else if (email === 'jamshid@demo.com' || email.includes('jamshid')) mockUser = { id: 'c3', name: 'Jamshid Umarov', email, role: 'craftsman' };
+      else if (email === 'sherzod@demo.com' || email.includes('sherzod')) mockUser = { id: 'c4', name: 'Sherzod Tursunov', email, role: 'craftsman' };
+      else if (email.includes('admin')) mockUser = { id: 'a1', name: 'Admin', email, role: 'admin' };
+      else mockUser = { id: 'u1', name: 'Demo Foydalanuvchi', email, role: 'customer' };
+      
+      login(mockUser, 'mock-jwt-token');
+      toast.success(`${t('auth.welcome_mock')}, ${mockUser.name}!`);
+      navigate(mockUser.role === 'admin' ? '/admin' : mockUser.role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+    } finally {
+      setLoading(false);
     }
-    
-    login(mockUser, 'mock-jwt-token');
-    toast.success(`Xush kelibsiz, ${mockUser.name}!`);
-    setLoading(false);
-    navigate(mockUser.role === 'admin' ? '/admin' : mockUser.role === 'craftsman' ? '/dashboard?tab=settings' : '/');
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!registerForm.name || !registerForm.email || !registerForm.password) { toast.error("Barcha maydonlarni to'ldiring"); return; }
-    if (registerForm.password.length < 6) { toast.error("Parol kamida 6 ta belgi bo'lishi kerak"); return; }
+    if (!registerForm.name || !registerForm.email || !registerForm.password) { toast.error(t('auth.fill_fields')); return; }
+    if (registerForm.password.length < 6) { toast.error(t('auth.pass_length')); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
     
-    const mockUser = { id: 'u_' + Date.now(), name: registerForm.name, email: registerForm.email, role };
-    login(mockUser, 'mock-jwt-token');
-    toast.success("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-    setLoading(false);
-    navigate(role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+    try {
+      // ─── Haqiqiy API orqali ro'yxatdan o'tish ───
+      const { data } = await axios.post(`${API_URL}/auth/register`, {
+        name: registerForm.name,
+        email: registerForm.email,
+        password: registerForm.password,
+        phone: registerForm.phone,
+        region: registerForm.region,
+        role: role
+      });
+
+      const loggedUser = { id: data._id, name: data.name, email: data.email, role: data.role };
+      login(loggedUser, data.token);
+
+      toast.success(t('auth.reg_success'));
+      navigate(role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+    } catch (error) {
+      console.error("API xatosi, qalbaki (MOCK) tizim ishga tushdi:", error);
+      
+      // Fallback: Mock Register
+      const mockUser = { id: 'u_' + Date.now(), name: registerForm.name, email: registerForm.email, role };
+      login(mockUser, 'mock-jwt-token');
+      toast.success(t('auth.reg_mock'));
+      navigate(role === 'craftsman' ? '/dashboard?tab=settings' : '/');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,14 +108,14 @@ export default function AuthPage() {
               <div className="logo-icon"><span>E</span></div>
               <span className="logo-primary">E-Hunarmand</span>
             </div>
-            <h2>O'zbek hunarmandchiligini dunyoga tanishtiring</h2>
-            <p>Minglab mijozlarga o'zingizning qo'l ishlaringizni taqdim eting</p>
+            <h2>{t('auth.title_visual')}</h2>
+            <p>{t('auth.desc_visual')}</p>
             <div className="auth-features">
               {[
-                "Bepul ro'yxatdan o'tish",
-                "Xavfsiz to'lov tizimi",
-                "24/7 qo'llab-quvvatlash",
-                "Butun O'zbekiston bo'ylab yetkazib berish",
+                t('auth.feat1'),
+                t('auth.feat2'),
+                t('auth.feat3'),
+                t('auth.feat4'),
               ].map(f => (
                 <div key={f} className="auth-feature-item">
                   <CheckCircle2 size={16} /> <span>{f}</span>
@@ -105,17 +133,17 @@ export default function AuthPage() {
         <div className="auth-form-panel">
           <div className="auth-form-wrap">
             <div className="auth-tabs">
-              <button className={`auth-tab ${tab==='login'?'active':''}`} onClick={()=>setTab('login')}>Kirish</button>
-              <button className={`auth-tab ${tab==='register'?'active':''}`} onClick={()=>setTab('register')}>Ro'yxat</button>
+              <button className={`auth-tab ${tab==='login'?'active':''}`} onClick={()=>setTab('login')}>{t('auth.tab_login')}</button>
+              <button className={`auth-tab ${tab==='register'?'active':''}`} onClick={()=>setTab('register')}>{t('auth.tab_register')}</button>
             </div>
 
             {tab === 'login' ? (
               <form className="auth-form animate-fadeIn" onSubmit={handleLogin}>
-                <h2>Xush kelibsiz!</h2>
-                <p className="auth-subtitle">Hisobingizga kirish uchun ma'lumotlarni kiriting</p>
+                <h2>{t('auth.login_title')}</h2>
+                <p className="auth-subtitle">{t('auth.login_sub')}</p>
 
                 <div className="form-group">
-                  <label className="form-label">Email manzil</label>
+                  <label className="form-label">{t('auth.email')}</label>
                   <div className="input-icon-wrap">
                     <Mail size={16} className="input-icon"/>
                     <input className="form-input input-with-icon" type="email" placeholder="email@example.com"
@@ -123,10 +151,10 @@ export default function AuthPage() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Parol</label>
+                  <label className="form-label">{t('auth.password')}</label>
                   <div className="input-icon-wrap">
                     <Lock size={16} className="input-icon"/>
-                    <input className="form-input input-with-icon" type={showPass?'text':'password'} placeholder="Parolingiz"
+                    <input className="form-input input-with-icon" type={showPass?'text':'password'} placeholder={t('auth.password_placeholder')}
                       value={loginForm.password} onChange={e=>setLoginForm({...loginForm,password:e.target.value})}/>
                     <button type="button" className="input-toggle" onClick={()=>setShowPass(!showPass)}>
                       {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
@@ -135,30 +163,30 @@ export default function AuthPage() {
                 </div>
 
                 <div className="auth-options">
-                  <label className="remember-me"><input type="checkbox"/> Eslab qolish</label>
-                  <button type="button" className="forgot-link" style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }} onClick={() => setShowForgotModal(true)}>Parolni unutdingizmi?</button>
+                  <label className="remember-me"><input type="checkbox"/> {t('auth.remember')}</label>
+                  <button type="button" className="forgot-link" style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }} onClick={() => setShowForgotModal(true)}>{t('auth.forgot')}</button>
                 </div>
 
                 <button className="btn btn-primary btn-lg auth-submit" type="submit" disabled={loading}>
-                  {loading ? <span className="spinner"/> : 'Kirish'}
+                  {loading ? <span className="spinner"/> : t('auth.login_btn')}
                 </button>
 
-                <div className="auth-divider"><span>yoki</span></div>
+                <div className="auth-divider"><span>{t('auth.or')}</span></div>
 
                 <div className="social-logins">
                   <button type="button" className="social-btn google">
                     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                    Google orqali kirish
+                    {t('auth.google')}
                   </button>
                 </div>
 
                 <p className="auth-switch">
-                  Hisobingiz yo'qmi? <button type="button" onClick={()=>setTab('register')}>Ro'yxatdan o'ting</button>
+                  {t('auth.no_account')} <button type="button" onClick={()=>setTab('register')}>{t('auth.register_link')}</button>
                 </p>
 
                 {/* Demo hints */}
                 <div className="demo-hints">
-                  <p className="demo-hint-title">Demo kirish:</p>
+                  <p className="demo-hint-title">{t('auth.demo')}</p>
                   <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'user@demo.com',password:'demo123'})}><FiUser size={13}/> Mijoz</button>
                   <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'akbar@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Akbar</button>
                   <button type="button" className="demo-btn" onClick={()=>setLoginForm({email:'malohat@demo.com',password:'demo123'})}><GiPaintedPottery size={13}/> Malohat</button>
@@ -169,29 +197,29 @@ export default function AuthPage() {
               </form>
             ) : (
               <form className="auth-form animate-fadeIn" onSubmit={handleRegister}>
-                <h2>Ro'yxatdan o'tish</h2>
-                <p className="auth-subtitle">Platformamizga qo'shiling</p>
+                <h2>{t('auth.reg_title')}</h2>
+                <p className="auth-subtitle">{t('auth.reg_sub')}</p>
 
                 {/* Role selector */}
                 <div className="role-selector">
                   <button type="button" className={`role-btn ${role==='customer'?'active':''}`} onClick={()=>setRole('customer')}>
-                    <span className="role-icon"><FiUser size={28} /></span><strong>Xaridor</strong><span>Mahsulot sotib olish</span>
+                    <span className="role-icon"><FiUser size={28} /></span><strong>{t('auth.role_buyer')}</strong><span>{t('auth.role_buyer_desc')}</span>
                   </button>
                   <button type="button" className={`role-btn ${role==='craftsman'?'active':''}`} onClick={()=>setRole('craftsman')}>
-                    <span className="role-icon"><GiPaintedPottery size={28} /></span><strong>Hunarmand</strong><span>Mahsulot sotish</span>
+                    <span className="role-icon"><GiPaintedPottery size={28} /></span><strong>{t('auth.role_craftsman')}</strong><span>{t('auth.role_craftsman_desc')}</span>
                   </button>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">To'liq ism *</label>
+                  <label className="form-label">{t('auth.fullname')}</label>
                   <div className="input-icon-wrap">
                     <User size={16} className="input-icon"/>
-                    <input className="form-input input-with-icon" placeholder="Ism Familiya"
+                    <input className="form-input input-with-icon" placeholder=""
                       value={registerForm.name} onChange={e=>setRegisterForm({...registerForm,name:e.target.value})}/>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Email *</label>
+                  <label className="form-label">{t('auth.email')}</label>
                   <div className="input-icon-wrap">
                     <Mail size={16} className="input-icon"/>
                     <input className="form-input input-with-icon" type="email" placeholder="email@example.com"
@@ -199,7 +227,7 @@ export default function AuthPage() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Telefon</label>
+                  <label className="form-label">{t('auth.phone')}</label>
                   <div className="input-icon-wrap">
                     <Phone size={16} className="input-icon"/>
                     <input className="form-input input-with-icon" placeholder="+998 XX XXX XX XX"
@@ -208,22 +236,22 @@ export default function AuthPage() {
                 </div>
                 {role==='craftsman' && (
                   <div className="form-group">
-                    <label className="form-label">Viloyat</label>
+                    <label className="form-label">{t('auth.region')}</label>
                     <div className="input-icon-wrap">
                       <MapPin size={16} className="input-icon"/>
                       <select className="form-input form-select input-with-icon"
                         value={registerForm.region} onChange={e=>setRegisterForm({...registerForm,region:e.target.value})}>
-                        <option value="">Tanlang</option>
+                        <option value="">{t('auth.select')}</option>
                         {['Toshkent','Samarqand','Buxoro','Namangan','Andijon'].map(r=><option key={r}>{r}</option>)}
                       </select>
                     </div>
                   </div>
                 )}
                 <div className="form-group">
-                  <label className="form-label">Parol *</label>
+                  <label className="form-label">{t('auth.password')}</label>
                   <div className="input-icon-wrap">
                     <Lock size={16} className="input-icon"/>
-                    <input className="form-input input-with-icon" type={showPass?'text':'password'} placeholder="Kamida 6 ta belgi"
+                    <input className="form-input input-with-icon" type={showPass?'text':'password'} placeholder={t('auth.reg_pass_placeholder')}
                       value={registerForm.password} onChange={e=>setRegisterForm({...registerForm,password:e.target.value})}/>
                     <button type="button" className="input-toggle" onClick={()=>setShowPass(!showPass)}>
                       {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
@@ -232,12 +260,12 @@ export default function AuthPage() {
                 </div>
 
                 <button className="btn btn-primary btn-lg auth-submit" type="submit" disabled={loading}>
-                  {loading ? <span className="spinner"/> : "Ro'yxatdan o'tish"}
+                  {loading ? <span className="spinner"/> : t('auth.reg_btn')}
                 </button>
 
-                <p className="auth-terms">Ro'yxatdan o'tish orqali siz <Link to="/terms">Foydalanish shartlari</Link> va <Link to="/privacy">Maxfiylik siyosati</Link>ga rozilik bildirasiz.</p>
+                <p className="auth-terms">{t('auth.terms1')} <Link to="/terms">{t('auth.terms2')}</Link> {t('auth.terms3')} <Link to="/privacy">{t('auth.terms4')}</Link>{t('auth.terms5')}</p>
                 <p className="auth-switch">
-                  Hisobingiz bormi? <button type="button" onClick={()=>setTab('login')}>Kirish</button>
+                  {t('auth.have_account')} <button type="button" onClick={()=>setTab('login')}>{t('auth.login_link')}</button>
                 </p>
               </form>
             )}
@@ -249,15 +277,15 @@ export default function AuthPage() {
         <div className="modal-overlay" onClick={() => setShowForgotModal(false)}>
           <div className="modal-content animate-scaleIn" style={{ maxWidth: 400, padding: 24 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header" style={{ marginBottom: 16 }}>
-              <h3 style={{ fontSize: 20, margin: 0, fontFamily: 'Inter, sans-serif' }}>Parolni tiklash</h3>
+              <h3 style={{ fontSize: 20, margin: 0, fontFamily: 'Inter, sans-serif' }}>{t('auth.reset_title')}</h3>
               <button className="modal-close" onClick={() => setShowForgotModal(false)}><X size={20}/></button>
             </div>
             <div className="modal-body">
               <p style={{marginBottom: 20, color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.5}}>
-                Elektron pochta manzilingizni kiriting, biz sizga parolni tiklash havolasini yuboramiz.
+                {t('auth.reset_desc')}
               </p>
               <div className="form-group" style={{ marginBottom: 20 }}>
-                <label className="form-label">Email manzil</label>
+                <label className="form-label">{t('auth.email')}</label>
                 <div className="input-icon-wrap">
                   <Mail size={16} className="input-icon"/>
                   <input className="form-input input-with-icon" type="email" placeholder="email@example.com"
@@ -268,14 +296,14 @@ export default function AuthPage() {
                 className="btn btn-primary" 
                 style={{width: '100%', justifyContent: 'center'}}
                 onClick={() => {
-                  if(!forgotEmail) { toast.error("Emailni kiriting"); return; }
-                  if(!forgotEmail.includes('@')) { toast.error("Noto'g'ri email formati"); return; }
-                  toast.success("Tiklash havolasi emailga yuborildi!");
+                  if(!forgotEmail) { toast.error(t('auth.enter_email')); return; }
+                  if(!forgotEmail.includes('@')) { toast.error(t('auth.invalid_email')); return; }
+                  toast.success(t('auth.reset_sent'));
                   setShowForgotModal(false);
                   setForgotEmail('');
                 }}
               >
-                Yuborish
+                {t('auth.send')}
               </button>
             </div>
           </div>

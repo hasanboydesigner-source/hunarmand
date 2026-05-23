@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs, FreeMode } from 'swiper/modules';
 import 'swiper/css';
@@ -6,7 +7,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 import 'swiper/css/free-mode';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MOCK_PRODUCTS, MOCK_REVIEWS, CATEGORIES, formatPrice, getDiscount, getInitials } from '../data/constants';
+import { MOCK_PRODUCTS, MOCK_REVIEWS, CATEGORIES, formatPrice, getDiscount, getInitials, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
 import { useCartStore, useWishlistStore } from '../store/useStore';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
@@ -14,24 +15,119 @@ import toast from 'react-hot-toast';
 import {
   Star, Heart, ShoppingCart, Zap, Share2, Flag, MapPin,
   Package, Clock, Shield, ChevronRight, MessageCircle, ExternalLink,
-  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw
+  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send
 } from 'lucide-react';
 import './ProductDetail.css';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = MOCK_PRODUCTS.find((p) => p.id === id);
+  
+  const [product, setProduct] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('desc');
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
-  const wished = product ? has(product.id) : false;
-  const reviews = MOCK_REVIEWS.filter((r) => r.productId === id);
-  const related = MOCK_PRODUCTS.filter((p) => p.category === product?.category && p.id !== id).slice(0, 4);
+  // Review Form
+  const [reviewForm, setReviewForm] = useState({ rating: 5, author: '', text: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const enrichProductWithCraftsman = (pData) => {
+    if (!pData) return pData;
+    const c = pData.craftsman;
+    if (!c) return pData;
+
+    const name = typeof c === 'object' ? c.name : '';
+    const specialty = pData.category || '';
+    
+    const mockC = MOCK_CRAFTSMEN?.find(mc => 
+      mc.name?.toLowerCase() === name.toLowerCase() ||
+      (specialty && mc.specialty?.toLowerCase() === specialty.toLowerCase())
+    );
+
+    const coverImageFallback = specialty === 'keramika'
+      ? 'https://holiday-golightly.com/wp-content/uploads/2023/08/DSC0207-1024x683.jpg'
+      : specialty === 'gilam'
+      ? 'https://central-asia.guide/wp-content/uploads/2024/12/Uzbek-carpet-veawing-1024x682.jpg'
+      : specialty === 'zargarlik'
+      ? 'https://api.society.uz/media/news/photo_2024-05-06_12-35-19_2.webp'
+      : specialty === 'yogoch'
+      ? 'https://minio.tbcbank.uz/web-tbcbank-uz-strapi-admin-cms/uploads/1-kokand.jpeg'
+      : specialty === 'toʻqimachilik' || specialty === 'to\'qimachilik'
+      ? 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80'
+      : specialty === 'naqqoshlik'
+      ? 'https://www.advantour.com/img/uzbekistan/bukhara/ustoz-shogird-miniature-workshop3.jpg'
+      : specialty === 'misgarlik'
+      ? 'https://api.society.uz/media/news/BQ8A4028.webp'
+      : 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&q=80';
+
+    const enrichedCraftsman = typeof c === 'object' ? {
+      ...c,
+      coverImage: c.coverImage || mockC?.coverImage || coverImageFallback,
+      rating: c.rating || mockC?.rating || 4.8,
+      reviewCount: c.reviewCount || mockC?.reviewCount || 15,
+      totalSales: c.totalSales || mockC?.totalSales || 24,
+      yearsExp: c.yearsExp || mockC?.yearsExp || 5,
+      responseTime: c.responseTime || mockC?.responseTime || '< 2 soat',
+      totalProducts: c.totalProducts || mockC?.totalProducts || 8,
+    } : c;
+
+    return {
+      ...pData,
+      rating: pData.rating || mockC?.rating || 5,
+      reviewCount: pData.reviewCount || mockC?.reviewCount || 12,
+      craftsman: enrichedCraftsman
+    };
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        // Fallback for mock IDs if they start with 'p' (e.g. p1, p2) or are not 24 char mongo IDs
+        if (id.length < 10) {
+          const mockP = MOCK_PRODUCTS.find((p) => p.id === id);
+          if (mockP) {
+            setProduct(mockP);
+            setRelated(MOCK_PRODUCTS.filter(p => p.category === mockP.category && p.id !== id).slice(0, 4));
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        // Fetch from API
+        const { data: pData } = await axios.get(`${API_URL}/products/${id}`);
+        const enrichedMain = enrichProductWithCraftsman(pData);
+        setProduct(enrichedMain);
+        
+        // Fetch all products for related (simple logic for demo)
+        const { data: allData } = await axios.get(`${API_URL}/products`);
+        setRelated(allData.filter(p => p.category === pData.category && p._id !== id).map(p => enrichProductWithCraftsman(p)).slice(0, 4));
+      } catch (err) {
+        console.error("Xatolik:", err);
+        // Fallback to mock data if API fails or product not found
+        const mockP = MOCK_PRODUCTS.find((p) => p.id === id || p._id === id);
+        if (mockP) {
+          setProduct(mockP);
+          setRelated(MOCK_PRODUCTS.filter(p => p.category === mockP.category && p.id !== id && p._id !== id).slice(0, 4));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  const wished = product ? has(product._id || product.id) : false;
+  const reviews = product?.reviews || [];
   const discount = product ? getDiscount(product.price, product.originalPrice) : 0;
+
+  if (isLoading) return <div className="page-with-header" style={{ padding: '40px', textAlign: 'center' }}>Yuklanmoqda...</div>;
 
   if (!product) return (
     <div className="page-with-header not-found">
@@ -145,10 +241,10 @@ export default function ProductDetailPage() {
               <Package size={14} /> <span><strong>SKU:</strong> {product.sku}</span>
             </div>
             <div className="pd-spec">
-              <Clock size={14} /> <span><strong>Tayyorlash:</strong> {product.productionTime}</span>
+              <Clock size={14} /> <span><strong>Tayyorlash:</strong> {product.preparationTime || product.productionTime || 'Darhol'}</span>
             </div>
             <div className="pd-spec">
-              <Shield size={14} /> <span><strong>Material:</strong> {product.materials}</span>
+              <Shield size={14} /> <span><strong>Material:</strong> {product.material || product.materials || "Noma'lum"}</span>
             </div>
           </div>
 
@@ -199,15 +295,16 @@ export default function ProductDetailPage() {
               </div>
             </div>
             <div className="cc-actions">
-              <Link to={`/craftsmen/${product.craftsman?.id}`} className="btn btn-secondary btn-sm">
+              <Link to={`/craftsmen/${product.craftsman?._id || product.craftsman?.id}`} className="btn btn-secondary btn-sm">
                 <ExternalLink size={13} /> Do'konni ko'rish
               </Link>
-              <a
-                href={`https://wa.me/${product.craftsman?.whatsapp || '998901234567'}`}
-                target="_blank" rel="noreferrer"
-                className="btn btn-sm whatsapp-btn"
+              <a 
+                href={`https://t.me/${product.craftsman?.telegram || 'E_Hunarmand_bot'}`}
+                target="_blank" 
+                rel="noreferrer" 
+                className="btn btn-sm telegram-btn"
               >
-                <MessageCircle size={13} /> WhatsApp
+                <Send size={15}/> Telegram
               </a>
             </div>
           </div>
@@ -235,11 +332,11 @@ export default function ProductDetailPage() {
           {activeTab === 'specs' && (
             <table className="table specs-table">
               <tbody>
-                <tr><td>Material</td><td>{product.materials}</td></tr>
-                <tr><td>O'lchami</td><td>{product.dimensions}</td></tr>
-                <tr><td>Og'irligi</td><td>{product.weight}</td></tr>
-                <tr><td>SKU</td><td>{product.sku}</td></tr>
-                <tr><td>Tayyorlash vaqti</td><td>{product.productionTime}</td></tr>
+                <tr><td>Material</td><td>{product.material || product.materials || '-'}</td></tr>
+                <tr><td>O'lchami</td><td>{product.dimensions || '-'}</td></tr>
+                <tr><td>Og'irligi</td><td>{product.weight || '-'}</td></tr>
+                <tr><td>SKU</td><td>{product.sku || '-'}</td></tr>
+                <tr><td>Tayyorlash vaqti</td><td>{product.preparationTime || product.productionTime || '-'}</td></tr>
                 <tr><td>Kategoriya</td><td>{CATEGORIES.find(c => c.id === product.category)?.label}</td></tr>
               </tbody>
             </table>
@@ -260,24 +357,78 @@ export default function ProductDetailPage() {
                 {reviews.length === 0 ? (
                   <p className="no-reviews">Hali sharh qoldirilmagan</p>
                 ) : reviews.map((r) => (
-                  <div key={r.id} className="review-item">
+                  <div key={r._id || r.id} className="review-item">
                     <div className="review-header">
                       <div className="avatar avatar-sm">{r.author[0]}</div>
                       <div>
                         <div className="review-author-row">
                           <strong>{r.author}</strong>
-                          {r.verified && <span className="verified-purchase">✓ Tasdiqlangan xarid</span>}
                         </div>
                         <div className="stars">
                           {[1, 2, 3, 4, 5].map(s => <Star key={s} size={11} fill={s <= r.rating ? '#f59e0b' : 'none'} color="#f59e0b" />)}
                         </div>
                       </div>
-                      <span className="review-date">{r.date}</span>
+                      <span className="review-date">{new Date(r.createdAt || Date.now()).toLocaleDateString('uz-UZ')}</span>
                     </div>
                     <p className="review-text">{r.text}</p>
-                    <button className="review-helpful">👍 Foydali ({r.helpful})</button>
                   </div>
                 ))}
+              </div>
+
+              {/* Add Review Form */}
+              <div className="add-review-section" style={{ marginTop: '30px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
+                <h4 style={{ marginBottom: '15px' }}>Sharh yozish</h4>
+                <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <Star 
+                      key={s} size={24} 
+                      fill={s <= reviewForm.rating ? '#f59e0b' : 'none'} 
+                      color={s <= reviewForm.rating ? '#f59e0b' : '#d1d5db'}
+                      onClick={() => setReviewForm(prev => ({ ...prev, rating: s }))}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  ))}
+                </div>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Ismingiz" 
+                  value={reviewForm.author}
+                  onChange={e => setReviewForm(prev => ({ ...prev, author: e.target.value }))}
+                  style={{ marginBottom: '10px' }}
+                />
+                <textarea 
+                  className="form-input" 
+                  placeholder="Fikringizni yozing..." 
+                  rows={4}
+                  value={reviewForm.text}
+                  onChange={e => setReviewForm(prev => ({ ...prev, text: e.target.value }))}
+                  style={{ marginBottom: '10px' }}
+                />
+                <button 
+                  className="btn btn-primary" 
+                  disabled={isSubmittingReview || !reviewForm.author || !reviewForm.text}
+                  onClick={async () => {
+                    setIsSubmittingReview(true);
+                    try {
+                      await axios.post(`${API_URL}/products/${product._id || product.id}/reviews`, reviewForm);
+                      toast.success("Sharhingiz qabul qilindi!");
+                      setReviewForm({ rating: 5, author: '', text: '' });
+                      // Add optimistic update
+                      const updatedProduct = { ...product };
+                      updatedProduct.reviews = [...(updatedProduct.reviews || []), { ...reviewForm, createdAt: new Date() }];
+                      updatedProduct.reviewCount = updatedProduct.reviews.length;
+                      updatedProduct.rating = updatedProduct.reviews.reduce((a, b) => a + b.rating, 0) / updatedProduct.reviewCount;
+                      setProduct(updatedProduct);
+                    } catch (err) {
+                      toast.error("Sharh yuborishda xatolik yuz berdi");
+                    } finally {
+                      setIsSubmittingReview(false);
+                    }
+                  }}
+                >
+                  {isSubmittingReview ? "Yuborilmoqda..." : "Sharh qoldirish"}
+                </button>
               </div>
             </div>
           )}

@@ -35,7 +35,7 @@ export default function CartPage() {
 
   // Group by craftsman
   const byCraftsman = items.reduce((acc, item) => {
-    const key = item.craftsman?.id || 'unknown';
+    const key = item.craftsman?._id || item.craftsman?.id || 'unknown';
     if (!acc[key]) acc[key] = { craftsman: item.craftsman, items: [] };
     acc[key].items.push(item);
     return acc;
@@ -65,13 +65,13 @@ export default function CartPage() {
             <span>Jami</span>
           </div>
 
-          {Object.values(byCraftsman).map(({ craftsman, items: groupItems }) => (
-            <div key={craftsman?.id} className="craftsman-group">
+          {Object.entries(byCraftsman).map(([groupKey, { craftsman, items: groupItems }]) => (
+            <div key={groupKey} className="craftsman-group">
               <div className="craftsman-group-header">
                 <div className="avatar avatar-sm">{getInitials(craftsman?.name)}</div>
                 <strong>{craftsman?.name}</strong>
                 <span className="craftsman-group-region">• {craftsman?.region}</span>
-                <Link to={`/craftsmen/${craftsman?.id}`} className="view-shop-link">
+                <Link to={`/craftsmen/${craftsman?._id || craftsman?.id}`} className="view-shop-link">
                   <ExternalLink size={13} /> Do'konni ko'rish
                 </Link>
               </div>

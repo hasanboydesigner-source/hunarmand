@@ -3,9 +3,11 @@ import { CATEGORIES, REGIONS } from '../data/constants';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTelegram } from 'react-icons/fa6';
 import CategoryIcon from './CategoryIcon';
+import { useTranslation } from 'react-i18next';
 import './Footer.css';
 
 export default function Footer() {
+  const { t } = useTranslation();
   const year = new Date().getFullYear();
   return (
     <footer className="site-footer">
@@ -18,7 +20,7 @@ export default function Footer() {
             </div>
           </Link>
           <p className="footer-desc">
-            O'zbek an'anaviy hunarmandchiligini dunyoga tanituvchi platforma. Usta qo'llar bilan yaratilgan noyob buyumlar.
+            {t('footer.desc')}
           </p>
           <div className="footer-socials">
             <a href="#" className="social-icon" aria-label="Instagram"><FaInstagram size={18} /></a>
@@ -28,7 +30,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-links-group">
-          <h4>Kategoriyalar</h4>
+          <h4>{t('nav.categories')}</h4>
           <ul>
             {CATEGORIES.slice(0, 6).map((c) => (
               <li key={c.id}><Link to={`/products?category=${c.id}`}><span className="cat-icon-sm"><CategoryIcon name={c.icon} size={14} /></span> {c.label}</Link></li>
@@ -37,19 +39,19 @@ export default function Footer() {
         </div>
 
         <div className="footer-links-group">
-          <h4>Havolalar</h4>
+          <h4>{t('footer.links')}</h4>
           <ul>
-            <li><Link to="/about">Biz haqimizda</Link></li>
-            <li><Link to="/craftsmen">Hunarmandlar</Link></li>
-            <li><Link to="/blog">Blog</Link></li>
-            <li><Link to="/auth/register?role=craftsman">Hunarmand bo'lish</Link></li>
-            <li><Link to="/help">Yordam markazi</Link></li>
-            <li><Link to="/privacy">Maxfiylik siyosati</Link></li>
+            <li><Link to="/about">{t('nav.about')}</Link></li>
+            <li><Link to="/craftsmen">{t('nav.craftsmen')}</Link></li>
+            <li><Link to="/blog">{t('footer.blog')}</Link></li>
+            <li><Link to="/auth/register?role=craftsman">{t('footer.become_craftsman')}</Link></li>
+            <li><Link to="/help">{t('footer.help')}</Link></li>
+            <li><Link to="/privacy">{t('footer.privacy')}</Link></li>
           </ul>
         </div>
 
         <div className="footer-links-group">
-          <h4>Bog'lanish</h4>
+          <h4>{t('footer.contact')}</h4>
           <ul>
             <li className="contact-item"><MapPin size={14} /><span>Toshkent, O'zbekiston</span></li>
             <li className="contact-item"><Phone size={14} /><a href="tel:+998712345678">+998 71 234-56-78</a></li>
@@ -66,10 +68,10 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
-          <p>© {year} E-Hunarmand. Barcha huquqlar himoyalangan.</p>
+          <p>© {year} E-Hunarmand. {t('footer.rights')}</p>
           <div className="footer-bottom-links">
-            <Link to="/terms">Foydalanish shartlari</Link>
-            <Link to="/privacy">Maxfiylik</Link>
+            <Link to="/terms">{t('footer.terms')}</Link>
+            <Link to="/privacy">{t('footer.privacy')}</Link>
           </div>
         </div>
       </div>

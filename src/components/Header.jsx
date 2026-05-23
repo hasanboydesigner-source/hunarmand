@@ -7,9 +7,12 @@ import {
   User, LogOut, LayoutDashboard, Package, ChevronDown, Bell
 } from 'lucide-react';
 import { GiPaintedPottery } from 'react-icons/gi';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 import './Header.css';
 
 export default function Header() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuthStore();
   const cartCount = useCartStore((s) => s.items.reduce((a, i) => a + i.quantity, 0));
@@ -41,10 +44,10 @@ export default function Header() {
   };
 
   const navLinks = [
-    { to: '/products', label: 'Mahsulotlar' },
-    { to: '/craftsmen', label: 'Hunarmandlar' },
-    { to: '/categories', label: 'Kategoriyalar' },
-    { to: '/about', label: 'Biz haqimizda' },
+    { to: '/products', label: t('nav.products') },
+    { to: '/craftsmen', label: t('nav.craftsmen') },
+    { to: '/categories', label: t('nav.categories') },
+    { to: '/about', label: t('nav.about') },
   ];
 
   return (
@@ -69,7 +72,8 @@ export default function Header() {
 
         {/* Actions */}
         <div className="header-actions">
-          <button className="icon-btn" onClick={openSearch} title="Qidirish" id="search-btn">
+          <LanguageSwitcher />
+          <button className="icon-btn" onClick={openSearch} title={t('nav.search')} id="search-btn">
             <Search size={20} />
           </button>
           <button className="icon-btn" onClick={toggleTheme} title="Tema">
@@ -128,8 +132,8 @@ export default function Header() {
             </div>
           ) : (
             <div className="auth-buttons desktop-only">
-              <Link to="/auth/login" className="btn btn-ghost btn-sm">Kirish</Link>
-              <Link to="/auth/register" className="btn btn-primary btn-sm" id="register-btn">Ro'yxat</Link>
+              <Link to="/auth/login" className="btn btn-ghost btn-sm">{t('nav.login')}</Link>
+              <Link to="/auth/register" className="btn btn-primary btn-sm" id="register-btn">{t('nav.register')}</Link>
             </div>
           )}
 
@@ -151,8 +155,8 @@ export default function Header() {
           </nav>
           {!isAuthenticated && (
             <div className="mobile-auth">
-              <Link to="/auth/login" className="btn btn-secondary" onClick={() => setMenuOpen(false)}>Kirish</Link>
-              <Link to="/auth/register" className="btn btn-primary" onClick={() => setMenuOpen(false)}>Ro'yxat</Link>
+              <Link to="/auth/login" className="btn btn-secondary" onClick={() => setMenuOpen(false)}>{t('nav.login')}</Link>
+              <Link to="/auth/register" className="btn btn-primary" onClick={() => setMenuOpen(false)}>{t('nav.register')}</Link>
             </div>
           )}
         </div>

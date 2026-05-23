@@ -1,29 +1,32 @@
 import { Link } from 'react-router-dom';
 import { GiPaintedPottery } from 'react-icons/gi';
 import { ShieldCheck, Users, Globe, Heart, MapPin, Mail, Phone, ArrowRight, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import './About.css';
 
-const TEAM = [
-  { name: 'Jasur Karimov', role: 'Asoschisi & CEO', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80', region: 'Toshkent' },
-  { name: 'Nilufar Rashidova', role: 'Mahsulot direktori', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80', region: 'Samarqand' },
-  { name: 'Bobur Toshmatov', role: 'Texnologiyalar direktori', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80', region: 'Buxoro' },
-];
-
-const VALUES = [
-  { icon: <ShieldCheck size={24} />, title: 'Sifat kafolati', desc: 'Har bir mahsulot haqiqiy hunarmand tomonidan qo\'lda yasalgan va sifati tekshirilgan.' },
-  { icon: <Heart size={24} />, title: 'An\'anani asrash', desc: 'Yuz yillik hunarmandchilik san\'atini kelajak avlodlarga yetkazishga harakat qilamiz.' },
-  { icon: <Users size={24} />, title: 'Hunarmandlarni qo\'llash', desc: 'To\'g\'ridan-to\'g\'ri savdo orqali hunarmandlarga adolatli daromad ta\'minlaymiz.' },
-  { icon: <Globe size={24} />, title: 'Global bozor', desc: 'O\'zbek hunarmandchiligini butun dunyo bozorlariga olib chiqish maqsadida ishlaymiz.' },
-];
-
-const STATS = [
-  { value: '200+', label: 'Hunarmand' },
-  { value: '1,500+', label: 'Mahsulot' },
-  { value: '12,000+', label: 'Buyurtma' },
-  { value: '4.9', label: 'O\'rtacha reyting', suffix: '★' },
-];
-
 export default function AboutPage() {
+  const { t } = useTranslation();
+
+  const TEAM = [
+    { name: 'Jasur Karimov', role: t('about.role_ceo'), img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80', region: 'Toshkent' },
+    { name: 'Nilufar Rashidova', role: t('about.role_product'), img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80', region: 'Samarqand' },
+    { name: 'Bobur Toshmatov', role: t('about.role_tech'), img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80', region: 'Buxoro' },
+  ];
+
+  const VALUES = [
+    { icon: <ShieldCheck size={24} />, title: t('about.val1_title'), desc: t('about.val1_desc') },
+    { icon: <Heart size={24} />, title: t('about.val2_title'), desc: t('about.val2_desc') },
+    { icon: <Users size={24} />, title: t('about.val3_title'), desc: t('about.val3_desc') },
+    { icon: <Globe size={24} />, title: t('about.val4_title'), desc: t('about.val4_desc') },
+  ];
+
+  const STATS = [
+    { value: '200+', label: t('about.stat1') },
+    { value: '1,500+', label: t('about.stat2') },
+    { value: '12,000+', label: t('about.stat3') },
+    { value: '4.9', label: t('about.stat4'), suffix: '★' },
+  ];
+
   return (
     <div className="about-page page-with-header">
 
@@ -31,13 +34,12 @@ export default function AboutPage() {
       <section className="about-hero">
         <div className="about-hero-bg" />
         <div className="container about-hero-content">
-          <div className="about-logo-icon"><span>E</span></div>
-          <span className="eyebrow">Bizning Hikoyamiz</span>
+          <span className="eyebrow">{t('about.story')}</span>
           <h1>E-Hunarmand</h1>
-          <p>O'zbekistonning boy hunarmandchilik merosini zamonaviy texnologiyalar orqali butun dunyoga taqdim etuvchi platforma</p>
+          <p>{t('about.desc')}</p>
           <div className="about-hero-actions">
-            <Link to="/products" className="btn btn-primary">Mahsulotlarni ko'rish <ArrowRight size={15} /></Link>
-            <Link to="/craftsmen" className="btn btn-ghost btn-outline-white">Hunarmandlar <ArrowRight size={15} /></Link>
+            <Link to="/products" className="btn btn-primary">{t('about.view_products')} <ArrowRight size={15} /></Link>
+            <Link to="/craftsmen" className="btn btn-ghost btn-outline-white">{t('about.craftsmen')} <ArrowRight size={15} /></Link>
           </div>
         </div>
       </section>
@@ -58,25 +60,22 @@ export default function AboutPage() {
       <section className="about-mission">
         <div className="container about-mission-inner">
           <div className="about-mission-text">
-            <span className="eyebrow">Bizning maqsadimiz</span>
-            <h2>O'zbek hunarmandchiligini<br />dunyoga tanitamiz</h2>
+            <span className="eyebrow">{t('about.mission_eyebrow')}</span>
+            <h2>{t('about.mission_title')}</h2>
             <p>
-              2020-yilda tashkil etilgan E-Hunarmand O'zbekistonning turli burchaklaridagi mohir ustalarni
-              xaridorlar bilan to'g'ridan-to'g'ri bog'laydigan platforma hisoblanadi.
+              {t('about.mission_p1')}
             </p>
             <p>
-              Biz har bir hunarmandning noyob mahoratini qadrlаb, ularning san'atini saqlab qolish va
-              rivojlantirish uchun raqamli muhit yaratdik. Platforma orqali xaridor haqiqiy, qo'lda
-              yasalgan mahsulotlarni bevosita ustadan sotib oladi — vositachilarsiz.
+              {t('about.mission_p2')}
             </p>
-            <Link to="/craftsmen" className="btn btn-primary btn-sm">Hunarmandlarni toping <ArrowRight size={14} /></Link>
+            <Link to="/craftsmen" className="btn btn-primary btn-sm">{t('about.find_craftsmen')} <ArrowRight size={14} /></Link>
           </div>
           <div className="about-mission-img">
             <img src="https://tbc-ornaments.uz/wp-content/uploads/2021/11/1O5A4035@2x-1.jpg" alt="Pottery craftsman at work" />
             <div className="about-mission-badge">
               <Star size={16} fill="#f59e0b" color="#f59e0b" />
               <strong>4.9</strong>
-              <span>12,000+ xaridor bahosi</span>
+              <span>12,000+ {t('about.buyer_score')}</span>
             </div>
           </div>
         </div>
@@ -86,8 +85,8 @@ export default function AboutPage() {
       <section className="about-values">
         <div className="container">
           <div className="section-header-center">
-            <span className="eyebrow">Qadriyatlarimiz</span>
-            <h2>Nima uchun E-Hunarmand?</h2>
+            <span className="eyebrow">{t('about.values_eyebrow')}</span>
+            <h2>{t('about.values_title')}</h2>
           </div>
           <div className="about-values-grid">
             {VALUES.map(v => (
@@ -105,8 +104,8 @@ export default function AboutPage() {
       <section className="about-team">
         <div className="container">
           <div className="section-header-center">
-            <span className="eyebrow">Jamoa</span>
-            <h2>Bizning jamoa</h2>
+            <span className="eyebrow">{t('about.team_eyebrow')}</span>
+            <h2>{t('about.team_title')}</h2>
           </div>
           <div className="about-team-grid">
             {TEAM.map(m => (
@@ -125,28 +124,28 @@ export default function AboutPage() {
       <section className="about-contact">
         <div className="container about-contact-inner">
           <div className="section-header-center">
-            <span className="eyebrow">Bog'lanish</span>
-            <h2>Biz bilan muloqot qiling</h2>
+            <span className="eyebrow">{t('about.contact_eyebrow')}</span>
+            <h2>{t('about.contact_title')}</h2>
           </div>
           <div className="about-contact-grid">
             <div className="about-contact-card">
               <Mail size={22} />
-              <h4>Email</h4>
+              <h4>{t('about.email')}</h4>
               <p>info@ehunarmand.uz</p>
             </div>
             <div className="about-contact-card">
               <Phone size={22} />
-              <h4>Telefon</h4>
+              <h4>{t('about.phone')}</h4>
               <p>+998 71 123 45 67</p>
             </div>
             <div className="about-contact-card">
               <MapPin size={22} />
-              <h4>Manzil</h4>
-              <p>Toshkent sh., Yunusobod tumani</p>
+              <h4>{t('about.address')}</h4>
+              <p>{t('about.address_val')}</p>
             </div>
           </div>
           <div className="about-cta">
-            <Link to="/auth/register" className="btn btn-primary">Hunarmand sifatida qo'shiling <ArrowRight size={15} /></Link>
+            <Link to="/auth/register" className="btn btn-primary">{t('about.join_craftsman')} <ArrowRight size={15} /></Link>
           </div>
         </div>
       </section>

@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CATEGORIES, MOCK_PRODUCTS } from '../data/constants';
+import { CATEGORIES, MOCK_PRODUCTS, API_URL } from '../data/constants';
 import CategoryIcon from '../components/CategoryIcon';
+import axios from 'axios';
 import { ArrowRight, Package } from 'lucide-react';
 import './Categories.css';
 
@@ -16,6 +18,18 @@ const CATEGORY_META = {
 };
 
 export default function CategoriesPage() {
+  const [products, setProducts] = useState(MOCK_PRODUCTS);
+
+  useEffect(() => {
+    axios.get(`${API_URL}/products`)
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setProducts(res.data);
+        }
+      })
+      .catch(err => console.error("Xatolik:", err));
+  }, []);
+
   return (
     <div className="categories-page page-with-header">
       {/* Hero */}
@@ -31,7 +45,7 @@ export default function CategoriesPage() {
       <div className="cat-stats-bar">
         <div className="container cat-stats-inner">
           <div className="cat-stat"><strong>{CATEGORIES.length}</strong><span>Kategoriya</span></div>
-          <div className="cat-stat"><strong>{MOCK_PRODUCTS.length}+</strong><span>Mahsulot</span></div>
+          <div className="cat-stat"><strong>{products.length}+</strong><span>Mahsulot</span></div>
           <div className="cat-stat"><strong>4</strong><span>Hunarmand</span></div>
           <div className="cat-stat"><strong>8+</strong><span>Viloyat</span></div>
         </div>
@@ -42,7 +56,13 @@ export default function CategoriesPage() {
         <div className="cat-grid">
           {CATEGORIES.map((cat) => {
             const meta = CATEGORY_META[cat.id] || {};
-            const count = MOCK_PRODUCTS.filter(p => p.category === cat.id).length;
+            const count = products.filter(p => {
+              const pCat = p.category?.toLowerCase() || '';
+              const matchedCategory = CATEGORIES.find(c => 
+                c.id === pCat || c.label.toLowerCase() === pCat
+              );
+              return (matchedCategory ? matchedCategory.id : pCat) === cat.id;
+            }).length;
             return (
               <Link
                 key={cat.id}
