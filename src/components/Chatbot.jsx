@@ -5,6 +5,13 @@ import { API_URL, CATEGORIES } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useStore';
 
+const QUICK_REPLIES = [
+  "🎁 Sovg'a qidiryapman",
+  "🏺 Keramika mahsulotlari",
+  "💍 Zargarlik buyumlari",
+  "🚚 Yetkazib berish qanday?"
+];
+
 // Robust markdown parser for images, links, bold, and newlines
 const parseMarkdown = (text) => {
   const regex = /(!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\)|\*\*.*?\*\*|\n)/g;
@@ -106,11 +113,12 @@ export default function Chatbot() {
   // Don't show chatbot in dashboard
   if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin')) return null;
 
-  const handleSend = async (e) => {
+  const handleSend = async (e, forcedText = null) => {
     e?.preventDefault();
-    if (!input.trim()) return;
+    const textToSend = forcedText !== null ? forcedText : input;
+    if (!textToSend.trim()) return;
 
-    const userMsg = { role: 'user', text: input.trim() };
+    const userMsg = { role: 'user', text: textToSend.trim() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
@@ -243,6 +251,40 @@ export default function Chatbot() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Quick Replies */}
+          {messages.length === 1 && !isLoading && (
+            <div style={{ 
+              padding: '10px 20px', background: '#fff', 
+              display: 'flex', gap: '8px', overflowX: 'auto', 
+              whiteSpace: 'nowrap', borderTop: '1px solid #f3f4f6',
+              scrollbarWidth: 'none', msOverflowStyle: 'none'
+            }} className="chatbot-quick-replies">
+              <style>{`.chatbot-quick-replies::-webkit-scrollbar { display: none; }`}</style>
+              {QUICK_REPLIES.map((reply, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSend(null, reply)}
+                  style={{
+                    padding: '8px 14px', borderRadius: '20px',
+                    border: '1px solid #eab308', background: '#fff8f0', color: '#b45309',
+                    fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                    transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = '#c97a22';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = '#fff8f0';
+                    e.currentTarget.style.color = '#b45309';
+                  }}
+                >
+                  {reply}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Input Area */}
           <form onSubmit={handleSend} style={{
