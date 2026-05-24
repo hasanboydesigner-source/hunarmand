@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import i18n from '../i18n';
 
 /* ─── Auth Store ─────────────────────────────────────────────── */
 export const useAuthStore = create(
@@ -9,7 +10,13 @@ export const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       login: (user, token) => set({ user, token, isAuthenticated: true }),
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+      logout: () => {
+        localStorage.removeItem('i18nextLng');
+        if (i18n && i18n.changeLanguage) {
+          i18n.changeLanguage('uz');
+        }
+        set({ user: null, token: null, isAuthenticated: false });
+      },
       updateUser: (updates) => set((s) => ({ user: { ...s.user, ...updates } })),
     }),
     { name: 'hunarmand-auth' }
