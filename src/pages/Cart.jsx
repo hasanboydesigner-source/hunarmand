@@ -119,11 +119,6 @@ export default function CartPage() {
         <div className="cart-summary">
           <h3>Buyurtma xulosasi</h3>
 
-          <div className="coupon-row">
-            <input className="form-input" placeholder="Promo kod kiriting" />
-            <button className="btn btn-secondary btn-sm"><Tag size={14}/> Qo'llash</button>
-          </div>
-
           <div className="summary-lines">
             <div className="summary-line">
               <span>Mahsulotlar ({items.reduce((s,i)=>s+i.quantity,0)} ta)</span>

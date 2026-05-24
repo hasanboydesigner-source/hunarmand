@@ -57,11 +57,12 @@ export const useWishlistStore = create(
     (set, get) => ({
       items: [],
       toggle: (product) => {
-        const exists = get().items.find((i) => i.id === product.id);
-        if (exists) set((s) => ({ items: s.items.filter((i) => i.id !== product.id) }));
+        const pid = product._id || product.id;
+        const exists = get().items.find((i) => (i._id || i.id) === pid);
+        if (exists) set((s) => ({ items: s.items.filter((i) => (i._id || i.id) !== pid) }));
         else set((s) => ({ items: [...s.items, product] }));
       },
-      has: (id) => get().items.some((i) => i.id === id),
+      has: (id) => get().items.some((i) => (i._id || i.id) === id),
     }),
     { name: 'hunarmand-wishlist' }
   )

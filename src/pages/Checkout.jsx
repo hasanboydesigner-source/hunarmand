@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState({ name:'', phone:'', region:'', city:'', street:'', zip:'' });
   const [delivery, setDelivery] = useState('standard');
   const [ordered, setOrdered] = useState(false);
+  const [orderNumbers, setOrderNumbers] = useState([]);
 
   // Prefill address fields dynamically if user is logged in
   useEffect(() => {
@@ -108,25 +109,27 @@ export default function CheckoutPage() {
         ordersByCraftsman[craftsmanIds[0]].totalAmount += shipping;
       }
 
-      // API ga yuborish
-      const promises = craftsmanIds.map(cId => {
-        return axios.post(`${API_URL}/orders`, {
-          customer: address,
-          customerId: user?.id,
-          items: ordersByCraftsman[cId].items,
-          craftsmanId: cId,
-          totalAmount: ordersByCraftsman[cId].totalAmount,
-          paymentMethod: payMethod,
-          deliveryMethod: delivery
-        });
-      });
+      // API ga yuborish — response dan real orderNumber ni olamiz
+      const results = await Promise.all(
+        craftsmanIds.map(cId =>
+          axios.post(`${API_URL}/orders`, {
+            customer: address,
+            customerId: user?.id,
+            items: ordersByCraftsman[cId].items,
+            craftsmanId: cId,
+            totalAmount: ordersByCraftsman[cId].totalAmount,
+            paymentMethod: payMethod,
+            deliveryMethod: delivery
+          })
+        )
+      );
 
-      await Promise.all(promises);
-
+      const nums = results.map(r => r.data?.orderNumber || r.data?._id?.slice(-6).toUpperCase()).filter(Boolean);
+      setOrderNumbers(nums);
       clearCart();
       setOrdered(true);
       toast.success("Buyurtmangiz qabul qilindi! ✅");
-      setTimeout(() => navigate('/profile/orders'), 3000);
+      setTimeout(() => navigate('/profile/orders'), 4000);
     } catch (err) {
       console.error(err);
       toast.error("Buyurtma berishda xatolik yuz berdi");
@@ -139,7 +142,9 @@ export default function CheckoutPage() {
         <div className="success-icon"><CheckCircle2 size={72} /></div>
         <h1>Buyurtma qabul qilindi!</h1>
         <p>Buyurtmangiz muvaffaqiyatli rasmiylashtirildi. Hunarmand tez orada siz bilan bog'lanadi.</p>
-        <p className="order-num">Buyurtma #HM-{Math.floor(Math.random()*90000+10000)}</p>
+        {orderNumbers.map((num, i) => (
+          <p key={i} className="order-num">Buyurtma #{num}</p>
+        ))}
         <p className="redirect-hint">Buyurtmalar sahifasiga yo'naltirilmoqda...</p>
       </div>
     </div>

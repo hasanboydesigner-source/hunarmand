@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { BounceLoader } from 'react-spinners';
@@ -30,6 +30,23 @@ import AdminPage from './pages/Admin';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
 import CustomerProfilePage from './pages/CustomerProfile';
+
+/* ─── Route Guards ───────────────────────────────────────────── */
+function ProtectedRoute({ children, redirect = '/auth/login' }) {
+  const { isAuthenticated } = useAuthStore();
+  const location = useLocation();
+  if (!isAuthenticated) {
+    return <Navigate to={`${redirect}?redirect=${location.pathname}`} replace />;
+  }
+  return children;
+}
+
+function RoleRoute({ children, role, redirect = '/' }) {
+  const { user, isAuthenticated } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
+  if (user?.role !== role) return <Navigate to={redirect} replace />;
+  return children;
+}
 
 function GlobalLoader({ isLoading }) {
   const [shouldRender, setShouldRender] = useState(true);
@@ -88,6 +105,7 @@ function AppContent() {
       {/* Routing */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
@@ -96,16 +114,23 @@ function AppContent() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/auth/login" element={<AuthPage />} />
           <Route path="/auth/register" element={<AuthPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/profile" element={<CustomerProfilePage />} />
-          <Route path="/profile/orders" element={<CustomerProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
+
+          {/* Protected: login kerak */}
+          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><CustomerProfilePage /></ProtectedRoute>} />
+          <Route path="/profile/orders" element={<ProtectedRoute><CustomerProfilePage /></ProtectedRoute>} />
+          <Route path="/profile/messages" element={<ProtectedRoute><CustomerProfilePage /></ProtectedRoute>} />
+
+          {/* Role protected: faqat hunarmand */}
+          <Route path="/dashboard" element={<RoleRoute role="craftsman" redirect="/"><DashboardPage /></RoleRoute>} />
+
+          {/* Role protected: faqat admin */}
+          <Route path="/admin" element={<RoleRoute role="admin" redirect="/"><AdminPage /></RoleRoute>} />
         </Routes>
       </div>
 

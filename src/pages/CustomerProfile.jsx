@@ -127,6 +127,7 @@ export default function CustomerProfilePage() {
     logout();
     cachedProfile = null;
     cachedOrders = null;
+    cachedMessages = null;
     cachedUserId = null;
     toast.info("Tizimdan muvaffaqiyatli chiqdingiz! 👋");
     navigate('/');

@@ -53,77 +53,80 @@ export function useAdminData(addToast) {
         };
   });
 
-  const handleToggleUserStatus = (userId) => {
-    const updated = users.map((u) => {
-      if (u.id === userId) {
-        const newStatus = u.status === "active" ? "banned" : "active";
-        addToast(
-          newStatus === "banned"
-            ? `${u.name} bloklandi!`
-            : `${u.name} blokdan chiqarildi!`,
-          newStatus === "banned" ? "error" : "success",
-        );
-        return { ...u, status: newStatus };
-      }
-      return u;
-    });
-    setUsers(updated);
-    localStorage.setItem("hunarmand_users", JSON.stringify(updated));
-  };
-
-  const handleApproveProduct = (prodId) => {
-    const updated = products.map((p) => {
-      if (p.id === prodId) {
-        addToast(`"${p.title}" muvaffaqiyatli tasdiqlandi!`, "success");
-        return { ...p, status: "approved" };
-      }
-      return p;
-    });
-    setProducts(updated);
-    localStorage.setItem("hunarmand_products", JSON.stringify(updated));
-  };
-
-  const handleRejectProduct = (prodId) => {
-    const reason = prompt("Rad etish sababini kiriting:");
-    if (reason === null) return;
-    if (!reason.trim()) {
-      addToast("Rad etish sababi bo'sh bo'lishi mumkin emas!", "error");
-      return;
+  const handleToggleUserStatus = async (userId) => {
+    const u = users.find(u => u._id === userId || u.id === userId);
+    if (!u) return;
+    const newStatus = u.status === 'active' ? 'banned' : 'active';
+    try {
+      await axios.put(`${API_URL}/auth/users/${userId}/status`, { status: newStatus });
+      const updated = users.map(usr =>
+        (usr._id === userId || usr.id === userId) ? { ...usr, status: newStatus } : usr
+      );
+      setUsers(updated);
+      addToast(
+        newStatus === 'banned' ? `${u.name} bloklandi!` : `${u.name} blokdan chiqarildi!`,
+        newStatus === 'banned' ? 'error' : 'success'
+      );
+    } catch (err) {
+      addToast('Foydalanuvchi holatini yangilashda xatolik', 'error');
     }
-    const updated = products.map((p) => {
-      if (p.id === prodId) {
-        addToast(`"${p.title}" rad etildi. Sababi: ${reason}`, "info");
-        return { ...p, status: "rejected", rejectReason: reason };
-      }
-      return p;
-    });
-    setProducts(updated);
-    localStorage.setItem("hunarmand_products", JSON.stringify(updated));
   };
 
-  const handleDeleteProduct = (prodId) => {
-    if (
-      window.confirm(
-        "Haqiqatan ham ushbu mahsulotni platformadan o'chirmoqchisiz?",
-      )
-    ) {
-      const updated = products.filter((p) => p.id !== prodId);
+  const handleApproveProduct = async (prodId) => {
+    try {
+      await axios.put(`${API_URL}/products/${prodId}/status`, { status: 'approved' });
+      const updated = products.map(p =>
+        (p._id === prodId || p.id === prodId) ? { ...p, status: 'approved' } : p
+      );
       setProducts(updated);
-      localStorage.setItem("hunarmand_products", JSON.stringify(updated));
-      addToast("Mahsulot o'chirildi!", "info");
+      const p = products.find(p => p._id === prodId || p.id === prodId);
+      addToast(`"${p?.title}" muvaffaqiyatli tasdiqlandi!`, 'success');
+    } catch (err) {
+      addToast('Mahsulotni tasdiqlashda xatolik', 'error');
     }
   };
 
-  const handleVerifyCraftsman = (craftId) => {
-    const updated = craftsmen.map((c) => {
-      if (c.id === craftId) {
-        addToast(`"${c.name}" muvaffaqiyatli tasdiqlandi!`, "success");
-        return { ...c, isVerified: true };
+  const handleRejectProduct = async (prodId) => {
+    const reason = prompt('Rad etish sababini kiriting:');
+    if (reason === null) return;
+    if (!reason.trim()) { addToast("Rad etish sababi bo'sh bo'lishi mumkin emas!", 'error'); return; }
+    try {
+      await axios.put(`${API_URL}/products/${prodId}/status`, { status: 'rejected', rejectReason: reason });
+      const updated = products.map(p =>
+        (p._id === prodId || p.id === prodId) ? { ...p, status: 'rejected', rejectReason: reason } : p
+      );
+      setProducts(updated);
+      const p = products.find(p => p._id === prodId || p.id === prodId);
+      addToast(`"${p?.title}" rad etildi. Sababi: ${reason}`, 'info');
+    } catch (err) {
+      addToast('Rad etishda xatolik', 'error');
+    }
+  };
+
+  const handleDeleteProduct = async (prodId) => {
+    if (window.confirm("Haqiqatan ham ushbu mahsulotni platformadan o'chirmoqchisiz?")) {
+      try {
+        await axios.delete(`${API_URL}/products/${prodId}`);
+        setProducts(products.filter(p => p._id !== prodId && p.id !== prodId));
+        addToast("Mahsulot o'chirildi!", 'info');
+      } catch (err) {
+        addToast("O'chirishda xatolik yuz berdi", 'error');
       }
-      return c;
-    });
-    setCraftsmen(updated);
-    localStorage.setItem("hunarmand_craftsmen", JSON.stringify(updated));
+    }
+  };
+
+  const handleVerifyCraftsman = async (craftId) => {
+    try {
+      await axios.put(`${API_URL}/auth/craftsmen/${craftId}/verify`);
+      const updated = craftsmen.map(c =>
+        (c._id === craftId || c.id === craftId) ? { ...c, isVerified: true } : c
+      );
+      setCraftsmen(updated);
+      const c = craftsmen.find(c => c._id === craftId || c.id === craftId);
+      addToast(`"${c?.name}" muvaffaqiyatli tasdiqlandi!`, 'success');
+    } catch (err) {
+      addToast('Hunarmandni tasdiqlashda xatolik', 'error');
+    }
   };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
