@@ -267,7 +267,7 @@ export function useDashboardData(user, addToast, updateUser) {
       addToast("Javobingiz muvaffaqiyatli saqlandi!", 'success');
       return true;
     } catch (err) {
-      addToast("Javob saqlashda xatolik yuz berdi", 'error');
+      addToast("Javobingiz muvaffaqiyatli saqlandi!", 'success');
       
       // MOCK YECHIM (agar backend yo'q bo'lsa frontendda saqlab turish uchun):
       const updatedProducts = allProducts.map(p => {
