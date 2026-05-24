@@ -19,9 +19,17 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
 
   const handleSend = () => {
     if (!reply.trim()) return;
-    const newMsg = { from: false, text: reply.trim(), time: new Date().toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit' }) };
+    const text = reply.trim();
+    const newMsg = { from: false, text, time: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) };
     setLocalThread(prev => [...(prev || []), newMsg]);
     setReply('');
+    
+    if (handleSendReply) {
+      const currentThread = allMessages.find(m => m.id === active);
+      if (currentThread) {
+        handleSendReply(text, currentThread);
+      }
+    }
   };
 
   return (

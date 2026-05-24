@@ -4,13 +4,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL, ORDER_STATUSES } from '../data/constants';
 import { toast } from 'react-toastify';
-import { User, Package, Settings, LogOut, Clock, Check, Truck, XCircle } from 'lucide-react';
+import { User, Package, Settings, LogOut, Clock, Check, Truck, XCircle, MessageSquare, Send } from 'lucide-react';
 import { BounceLoader } from 'react-spinners';
 import './CustomerProfile.css';
 
 // Simple client-side cache to enable instant tab switching without full unmount reloading
 let cachedProfile = null;
 let cachedOrders = null;
+let cachedMessages = null;
 let cachedUserId = null;
 
 export default function CustomerProfilePage() {
@@ -23,8 +24,11 @@ export default function CustomerProfilePage() {
     name: '', email: '', phone: '', region: ''
   });
   const [orders, setOrders] = useState(cachedOrders || []);
+  const [messages, setMessages] = useState(cachedMessages || []);
   const [isLoading, setIsLoading] = useState(!cachedProfile);
   const [isSaving, setIsSaving] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [activeChat, setActiveChat] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -44,9 +48,10 @@ export default function CustomerProfilePage() {
         setIsLoading(true);
       }
       try {
-        const [profileRes, ordersRes] = await Promise.all([
+        const [profileRes, ordersRes, msgRes] = await Promise.all([
           axios.get(`${API_URL}/auth/users/${user?.id}`),
-          axios.get(`${API_URL}/orders/customer/${user?.id}`)
+          axios.get(`${API_URL}/orders/customer/${user?.id}`),
+          axios.get(`${API_URL}/messages/customer/${user?.id}`).catch(() => ({ data: [] }))
         ]);
         
         const p = profileRes.data;
@@ -59,9 +64,11 @@ export default function CustomerProfilePage() {
         
         setProfile(newProfile);
         setOrders(ordersRes.data);
+        setMessages(msgRes.data || []);
         
         cachedProfile = newProfile;
         cachedOrders = ordersRes.data;
+        cachedMessages = msgRes.data || [];
       } catch (error) {
         console.error("Failed to fetch customer data", error);
         toast.error("Ma'lumotlarni yuklashda xatolik yuz berdi");
@@ -88,6 +95,31 @@ export default function CustomerProfilePage() {
       toast.error(err.response?.data?.message || "Xatolik yuz berdi");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSendCustomerReply = async (craftsmanId) => {
+    if (!replyText.trim()) return;
+    try {
+      await axios.post(`${API_URL}/messages`, {
+        sender: user.name,
+        senderId: user.id || user._id,
+        receiverId: craftsmanId,
+        text: replyText,
+        avatar: user.avatar || ''
+      });
+      const newMsg = {
+        _rawTime: new Date().toISOString(),
+        senderId: user.id,
+        receiverId: craftsmanId,
+        text: replyText,
+        createdAt: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, newMsg]);
+      cachedMessages = [...messages, newMsg];
+      setReplyText('');
+    } catch (err) {
+      toast.error("Xabar yuborishda xatolik yuz berdi");
     }
   };
 
@@ -131,6 +163,12 @@ export default function CustomerProfilePage() {
               onClick={() => { setActiveTab('orders'); navigate('/profile/orders'); }}
             >
               <Package size={18} /> Mening Buyurtmalarim
+            </button>
+            <button 
+              className={`cp-nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('messages'); navigate('/profile/messages'); }}
+            >
+              <MessageSquare size={18} /> Xabarlarim
             </button>
             <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid var(--border-light)' }} />
             <button className="cp-nav-btn" style={{ color: '#dc2626' }} onClick={handleLogout}>
@@ -233,6 +271,131 @@ export default function CustomerProfilePage() {
                     </div>
                   ))
                 )}
+            </div>
+
+            <div className={`cp-tab-pane ${activeTab === 'messages' ? 'active' : ''}`}>
+              <h2>Xabarlarim</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 14, minHeight: '500px' }}>
+                <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  {(() => {
+                    const threads = {};
+                    messages.forEach(m => {
+                      const isFromMe = m.senderId === user?.id || m.sender === user?.name;
+                      const otherId = isFromMe ? m.receiverId : m.senderId;
+                      const otherName = isFromMe ? (m.receiverName || 'Hunarmand') : m.sender;
+                      if (!otherId) return;
+
+                      if (!threads[otherId]) {
+                        threads[otherId] = {
+                          id: otherId, name: otherName,
+                          initial: otherName ? otherName[0].toUpperCase() : 'H',
+                          preview: m.text,
+                          latestTime: m.createdAt || new Date().toISOString(),
+                          thread: []
+                        };
+                      }
+                      if (new Date(m.createdAt || 0) > new Date(threads[otherId].latestTime)) {
+                        threads[otherId].preview = m.text;
+                        threads[otherId].latestTime = m.createdAt || new Date().toISOString();
+                      }
+                      threads[otherId].thread.push({
+                        from: !isFromMe, text: m.text, _rawTime: m.createdAt || new Date().toISOString(),
+                        time: new Date(m.createdAt || Date.now()).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+                      });
+                    });
+                    
+                    const threadList = Object.values(threads).sort((a,b) => new Date(b.latestTime) - new Date(a.latestTime));
+                    
+                    if (threadList.length === 0) {
+                      return <div style={{ padding: 20, textAlign: 'center', color: '#888' }}>Xabarlar yo'q</div>;
+                    }
+
+                    return threadList.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          t.thread.sort((a,b) => new Date(a._rawTime) - new Date(b._rawTime));
+                          setActiveChat(t);
+                        }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '13px 14px', borderBottom: '1px solid #f5f5f5',
+                          background: activeChat?.id === t.id ? '#fff8f0' : 'transparent',
+                          textAlign: 'left', width: '100%', border: 'none',
+                          cursor: 'pointer', transition: 'background 0.15s',
+                        }}
+                      >
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f5f4f2', color: '#c97a22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                          {t.initial}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                            <span style={{ fontWeight: 600, fontSize: 13, color: '#111' }}>{t.name}</span>
+                          </div>
+                          <p style={{ fontSize: 12.5, color: '#888', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {t.preview}
+                          </p>
+                        </div>
+                      </button>
+                    ));
+                  })()}
+                </div>
+
+                <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  {activeChat ? (
+                    <>
+                      <div style={{ padding: '14px 18px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 9, background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>
+                          {activeChat.initial}
+                        </div>
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: '#111' }}>{activeChat.name}</p>
+                          <p style={{ margin: 0, fontSize: 11.5, color: '#aaa' }}>Hunarmand</p>
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {activeChat.thread.map((msg, i) => (
+                          <div key={i} style={{ alignSelf: msg.from ? 'flex-start' : 'flex-end', maxWidth: '75%' }}>
+                            <div style={{
+                              padding: '10px 14px', borderRadius: msg.from ? '4px 12px 12px 12px' : '12px 4px 12px 12px',
+                              background: msg.from ? '#f5f4f2' : '#c97a22',
+                              color: msg.from ? '#111' : '#fff',
+                              fontSize: 13.5, lineHeight: 1.55
+                            }}>
+                              {msg.text}
+                            </div>
+                            <p style={{ fontSize: 11, color: '#bbb', margin: '3px 4px 0', textAlign: msg.from ? 'left' : 'right' }}>{msg.time}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 8, padding: '12px 16px', borderTop: '1px solid #f0f0f0' }}>
+                        <input
+                          className="chat-input"
+                          placeholder="Xabar yozing..."
+                          value={replyText}
+                          onChange={e => setReplyText(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleSendCustomerReply(activeChat.id)}
+                          style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #ebebeb', outline: 'none' }}
+                        />
+                        <button
+                          onClick={() => handleSendCustomerReply(activeChat.id)}
+                          disabled={!replyText.trim()}
+                          style={{ background: '#c97a22', color: '#fff', border: 'none', borderRadius: '8px', padding: '0 16px', cursor: replyText.trim() ? 'pointer' : 'not-allowed', opacity: replyText.trim() ? 1 : 0.6 }}
+                        >
+                          <Send size={16}/>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#ccc' }}>
+                      <MessageSquare size={44} strokeWidth={1.5}/>
+                      <p style={{ fontSize: 14, margin: 0 }}>Suhbatni tanlang</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </main>
         </div>

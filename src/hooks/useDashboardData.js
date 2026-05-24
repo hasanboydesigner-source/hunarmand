@@ -196,22 +196,28 @@ export function useDashboardData(user, addToast, updateUser) {
 
   const handleSendReply = async (reply, selectedMsg) => {
     try {
-      // Actually sending a message back requires a POST to the sender, 
-      // but here we just update the local state for demonstration, or mark as read
-      await axios.put(`${API_URL}/messages/${selectedMsg._id}/read`);
+      // Backend POST request for messages
+      await axios.post(`${API_URL}/messages`, {
+        sender: user.name,
+        senderId: user.id || user._id,
+        receiverId: selectedMsg.id, // ID of the customer
+        text: reply,
+        avatar: user.avatar || ''
+      });
       
       const newMsg = {
         _id: 'rep' + Date.now(),
-        sender: 'Siz',
+        sender: user.name || 'Siz',
+        senderId: user.id,
+        receiverId: selectedMsg.id,
         text: reply,
         createdAt: new Date().toISOString(),
         isReply: true,
-        replyTo: selectedMsg.text,
       };
       
-      const updated = allMessages.map(m => m._id === selectedMsg._id ? { ...m, isRead: true } : m);
-      setAllMessages([newMsg, ...updated]);
-      addToast("Javob xati yuborildi!", 'success');
+      // We push the new message to allMessages so the thread logic rebuilds it properly
+      setAllMessages(prev => [newMsg, ...prev]);
+      addToast("Xabar muvaffaqiyatli yuborildi!", 'success');
     } catch (err) {
       addToast("Javob yuborishda xatolik yuz berdi", 'error');
     }
