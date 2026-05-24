@@ -12,19 +12,25 @@ const resources = {
   en: { translation: enTranslation }
 };
 
+// Agar foydalanuvchi avval til tanlagan bo'lsa — o'sha saqlangan til,
+// aks holda doimo O'zbek tili bilan boshlash
+const savedLang = localStorage.getItem('i18nextLng');
+const defaultLang = (savedLang && ['uz', 'ru', 'en'].includes(savedLang)) ? savedLang : 'uz';
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
+    lng: defaultLang,        // aniq til — browser detect o'tmaydi
     fallbackLng: 'uz',
     detection: {
-      order: ['localStorage', 'cookie', 'htmlTag'],
+      order: ['localStorage', 'cookie'], // htmlTag va navigator o'chirildi
       caches: ['localStorage', 'cookie']
     },
     debug: false,
     interpolation: {
-      escapeValue: false // not needed for react as it escapes by default
+      escapeValue: false
     }
   });
 
