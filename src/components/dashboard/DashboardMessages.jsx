@@ -1,15 +1,34 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send } from 'lucide-react';
 
-const MOCK_MESSAGES = [];
-
-export default function DashboardMessages({ messages, selectedMsg, selectMessageThread, handleSendReply }) {
+export default function DashboardMessages({ messages = [], selectMessageThread, handleSendReply }) {
   const [reply, setReply] = useState('');
   const [active, setActive] = useState(null);
   const [localThread, setLocalThread] = useState(null);
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const allMessages = messages?.length ? messages : MOCK_MESSAGES;
-  const unreadCount = allMessages.filter(m => m.unread).length;
+  const unreadCount = messages.filter(m => m.unread).length;
+
+  // Active thread object
+  const activeThread = messages.find(m => m.id === active);
+
+  // Auto-scroll to bottom when new message arrives
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [localThread]);
+
+  // Sync localThread when messages prop updates (e.g. after send reply)
+  useEffect(() => {
+    if (active) {
+      const updated = messages.find(m => m.id === active);
+      if (updated) {
+        setLocalThread(updated.thread || []);
+      }
+    }
+  }, [messages, active]);
 
   const handleSelect = (msg) => {
     setActive(msg.id);
@@ -17,17 +36,26 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
     if (selectMessageThread) selectMessageThread(msg);
   };
 
-  const handleSend = () => {
-    if (!reply.trim()) return;
+  const handleSend = async () => {
     const text = reply.trim();
-    const newMsg = { from: false, text, time: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) };
-    setLocalThread(prev => [...(prev || []), newMsg]);
+    if (!text || isSending) return;
+
+    // Optimistic UI: darhol chat oynasida ko'rsat
+    const optimisticMsg = {
+      from: false,
+      text,
+      time: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
+      _rawTime: new Date().toISOString()
+    };
+    setLocalThread(prev => [...(prev || []), optimisticMsg]);
     setReply('');
-    
-    if (handleSendReply) {
-      const currentThread = allMessages.find(m => m.id === active);
-      if (currentThread) {
-        handleSendReply(text, currentThread);
+
+    if (handleSendReply && activeThread) {
+      setIsSending(true);
+      try {
+        await handleSendReply(text, activeThread);
+      } finally {
+        setIsSending(false);
       }
     }
   };
@@ -46,8 +74,13 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
 
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 14, height: 'calc(100vh - 190px)' }}>
         {/* Message List */}
-        <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {allMessages.map(m => (
+        <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 14, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+          {messages.length === 0 ? (
+            <div style={{ padding: '30px 16px', textAlign: 'center', color: '#bbb' }}>
+              <MessageCircle size={32} strokeWidth={1.5} style={{ marginBottom: 8 }}/>
+              <p style={{ fontSize: 13, margin: 0 }}>Xabarlar yo'q</p>
+            </div>
+          ) : messages.map(m => (
             <button
               key={m.id}
               onClick={() => handleSelect(m)}
@@ -62,8 +95,8 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
             >
               <div style={{
                 width: 36, height: 36, borderRadius: 10,
-                background: m.initBg || '#f5f4f2',
-                color: m.initColor || '#888',
+                background: active === m.id ? '#fff0dc' : (m.initBg || '#f5f4f2'),
+                color: m.initColor || '#c97a22',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontWeight: 700, fontSize: 14, flexShrink: 0
               }}>
@@ -90,13 +123,13 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
           {active && localThread ? (
             <>
               {/* Chat header */}
-              <div style={{ padding: '14px 18px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 9, background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>
-                  {allMessages.find(m => m.id === active)?.initial}
+              <div style={{ padding: '14px 18px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: '#fff0dc', color: '#c97a22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>
+                  {activeThread?.initial}
                 </div>
                 <div>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: '#111' }}>{allMessages.find(m => m.id === active)?.user}</p>
-                  <p style={{ margin: 0, fontSize: 11.5, color: '#aaa' }}>Online</p>
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: '#111' }}>{activeThread?.user}</p>
+                  <p style={{ margin: 0, fontSize: 11.5, color: '#aaa' }}>Mijoz</p>
                 </div>
               </div>
 
@@ -105,7 +138,8 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
                 {localThread.map((msg, i) => (
                   <div key={i} style={{ alignSelf: msg.from ? 'flex-start' : 'flex-end', maxWidth: '75%' }}>
                     <div style={{
-                      padding: '10px 14px', borderRadius: msg.from ? '4px 12px 12px 12px' : '12px 4px 12px 12px',
+                      padding: '10px 14px',
+                      borderRadius: msg.from ? '4px 12px 12px 12px' : '12px 4px 12px 12px',
                       background: msg.from ? '#f5f4f2' : '#c97a22',
                       color: msg.from ? '#111' : '#fff',
                       fontSize: 13.5, lineHeight: 1.55
@@ -115,21 +149,26 @@ export default function DashboardMessages({ messages, selectedMsg, selectMessage
                     <p style={{ fontSize: 11, color: '#bbb', margin: '3px 4px 0', textAlign: msg.from ? 'left' : 'right' }}>{msg.time}</p>
                   </div>
                 ))}
+                {/* Auto-scroll anchor */}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
-              <div style={{ display: 'flex', gap: 8, padding: '12px 16px', borderTop: '1px solid #f0f0f0' }}>
+              <div style={{ display: 'flex', gap: 8, padding: '12px 16px', borderTop: '1px solid #f0f0f0', flexShrink: 0 }}>
                 <input
                   className="chat-input"
                   placeholder="Xabar yozing..."
                   value={reply}
                   onChange={e => setReply(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSend()}
+                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                  disabled={isSending}
+                  style={{ flex: 1, opacity: isSending ? 0.7 : 1 }}
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!reply.trim()}
+                  disabled={!reply.trim() || isSending}
                   className="chat-send-btn"
+                  style={{ opacity: (!reply.trim() || isSending) ? 0.5 : 1 }}
                 >
                   <Send size={16}/>
                 </button>

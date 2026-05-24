@@ -91,7 +91,16 @@ export default function CartPage() {
                     <div className="ci-qty">
                       <button className="qty-btn-sm" onClick={() => updateQuantity(item.key, item.quantity-1)}><Minus size={12}/></button>
                       <span>{item.quantity}</span>
-                      <button className="qty-btn-sm" onClick={() => updateQuantity(item.key, item.quantity+1)}><Plus size={12}/></button>
+                      <button
+                        className="qty-btn-sm"
+                        onClick={() => {
+                          if (item.inStock && item.quantity >= item.inStock) {
+                            toast.warning(`Omborda faqat ${item.inStock} ta mavjud!`, { icon: '⚠️' });
+                            return;
+                          }
+                          updateQuantity(item.key, item.quantity+1);
+                        }}
+                      ><Plus size={12}/></button>
                     </div>
                     <div className="ci-total">
                       <strong>{formatPrice(item.price * item.quantity)}</strong>

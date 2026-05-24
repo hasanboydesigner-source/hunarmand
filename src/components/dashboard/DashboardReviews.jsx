@@ -45,8 +45,8 @@ export default function DashboardReviews({ reviews = [], handleReplyReview }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {reviews.length > 0 ? (
-          reviews.map(r => (
-            <div key={r._id || r.id || Math.random()} style={{
+          reviews.map((r, idx) => (
+            <div key={r._id || r.id || `review-${idx}`} style={{
               background: '#fff', border: '1px solid #ebebeb',
               borderRadius: 14, padding: '18px 20px',
             }}>

@@ -183,10 +183,19 @@ export default function ProductDetailPage() {
       toast.error("Sharh matnini kiriting!");
       return;
     }
+    // Duplicate review check — bir foydalanuvchi bir marta sharh yoza oladi
+    const alreadyReviewed = reviews.some(
+      r => r.author === user.name || r.userId === user.id
+    );
+    if (alreadyReviewed) {
+      toast.warning("Siz bu mahsulotga allaqachon sharh qoldirgansiз!");
+      return;
+    }
     try {
       setIsSubmittingReview(true);
       await axios.post(`${API_URL}/products/${product._id || product.id}/reviews`, {
         author: user.name || 'Mijoz',
+        userId: user.id,
         rating: reviewForm.rating,
         text: reviewForm.text
       });
@@ -195,10 +204,10 @@ export default function ProductDetailPage() {
       setProduct(prev => ({
         ...prev,
         reviews: [...(prev.reviews || []), {
-          _id: Date.now(), author: user.name || 'Mijoz', rating: reviewForm.rating, text: reviewForm.text, createdAt: new Date().toISOString()
+          _id: Date.now(), author: user.name || 'Mijoz', userId: user.id, rating: reviewForm.rating, text: reviewForm.text, createdAt: new Date().toISOString()
         }],
         reviewCount: (prev.reviewCount || 0) + 1,
-        rating: prev.rating // For simplicity, we can just keep previous rating or recalculate it, backend updates it though.
+        rating: prev.rating
       }));
     } catch (err) {
       toast.error("Sharh saqlashda xatolik yuz berdi");
@@ -473,39 +482,49 @@ export default function ProductDetailPage() {
 
               {/* Add Review Form */}
               <div className="add-review-section" style={{ marginTop: '30px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
-                <h4 style={{ marginBottom: '15px' }}>Sharh yozish</h4>
-                <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <Star 
-                      key={s} size={24} 
-                      fill={s <= reviewForm.rating ? '#f59e0b' : 'none'} 
-                      color={s <= reviewForm.rating ? '#f59e0b' : '#d1d5db'}
-                      onClick={() => setReviewForm(prev => ({ ...prev, rating: s }))}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  ))}
-                </div>
-                {user ? (
-                  <form onSubmit={handleReviewSubmit}>
-                    <textarea 
-                      className="form-input" 
-                      placeholder="Fikringizni yozing..." 
-                      rows={4}
-                      value={reviewForm.text}
-                      onChange={e => setReviewForm(prev => ({ ...prev, text: e.target.value }))}
-                      style={{ marginBottom: '10px' }}
-                      required
-                    />
-                    <button 
-                      type="submit"
-                      className="btn btn-primary" 
-                      disabled={isSubmittingReview || !reviewForm.text.trim()}
-                    >
-                      {isSubmittingReview ? "Yuborilmoqda..." : "Sharh qoldirish"}
-                    </button>
-                  </form>
+                {user && reviews.some(r => r.author === user.name || r.userId === user.id) ? (
+                  <div style={{ textAlign: 'center', padding: '16px 0', color: '#888' }}>
+                    <CheckCircle2 size={28} color="#c97a22" style={{ marginBottom: 8 }}/>
+                    <p style={{ fontWeight: 600, color: '#333', marginBottom: 4 }}>Siz allaqachon sharh qoldirdingiz</p>
+                    <p style={{ fontSize: 13, margin: 0 }}>Har bir mahsulotga faqat bir marta sharh yoziladi.</p>
+                  </div>
                 ) : (
-                  <p>Sharh qoldirish uchun tizimga kiring.</p>
+                  <>
+                    <h4 style={{ marginBottom: '15px' }}>Sharh yozish</h4>
+                    <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
+                      {[1, 2, 3, 4, 5].map(s => (
+                        <Star
+                          key={s} size={24}
+                          fill={s <= reviewForm.rating ? '#f59e0b' : 'none'}
+                          color={s <= reviewForm.rating ? '#f59e0b' : '#d1d5db'}
+                          onClick={() => setReviewForm(prev => ({ ...prev, rating: s }))}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      ))}
+                    </div>
+                    {user ? (
+                      <form onSubmit={handleReviewSubmit}>
+                        <textarea
+                          className="form-input"
+                          placeholder="Fikringizni yozing..."
+                          rows={4}
+                          value={reviewForm.text}
+                          onChange={e => setReviewForm(prev => ({ ...prev, text: e.target.value }))}
+                          style={{ marginBottom: '10px' }}
+                          required
+                        />
+                        <button
+                          type="submit"
+                          className="btn btn-primary"
+                          disabled={isSubmittingReview || !reviewForm.text.trim()}
+                        >
+                          {isSubmittingReview ? "Yuborilmoqda..." : "Sharh qoldirish"}
+                        </button>
+                      </form>
+                    ) : (
+                      <p>Sharh qoldirish uchun tizimga kiring.</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
