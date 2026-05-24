@@ -1,4 +1,5 @@
-import { Star, ThumbsUp, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { Star, ThumbsUp, MessageSquare, CheckCircle2, CornerDownRight } from 'lucide-react';
 
 const MOCK_REVIEWS = [];
 
@@ -12,8 +13,23 @@ function Stars({ rating }) {
   );
 }
 
-export default function DashboardReviews({ reviews = [] }) {
+export default function DashboardReviews({ reviews = [], handleReplyReview }) {
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "0.0";
+
+  const onSubmitReply = async (r) => {
+    if (!replyText.trim() || !handleReplyReview) return;
+    setIsSubmitting(true);
+    const success = await handleReplyReview(r._id || r.id, r.productId, replyText);
+    if (success) {
+      setReplyingTo(null);
+      setReplyText('');
+    }
+    setIsSubmitting(false);
+  };
 
   return (
     <div className="animate-fadeIn">
@@ -71,6 +87,22 @@ export default function DashboardReviews({ reviews = [] }) {
               {/* Review text */}
               <p style={{ fontSize: 13.5, color: '#444', lineHeight: 1.65, margin: 0 }}>{r.text}</p>
 
+              {/* Reply Display */}
+              {r.reply && (
+                <div style={{ 
+                  marginTop: 12, padding: '10px 14px', 
+                  background: '#fff8f0', borderRadius: 8, 
+                  borderLeft: '3px solid #c97a22',
+                  display: 'flex', gap: 8
+                }}>
+                  <CornerDownRight size={16} color="#c97a22" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <strong style={{ fontSize: 13, color: '#c97a22', display: 'block', marginBottom: 2 }}>Sizning javobingiz:</strong>
+                    <p style={{ fontSize: 13, color: '#555', margin: 0, lineHeight: 1.5 }}>{r.reply}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Footer */}
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -79,16 +111,50 @@ export default function DashboardReviews({ reviews = [] }) {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#888' }}>
                   <ThumbsUp size={13} color="#c97a22"/> {r.helpful || 0} ta foydali
                 </span>
-                <button style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '6px 14px', borderRadius: 8,
-                  border: '1.5px solid #ebebeb', background: '#fff',
-                  fontSize: 12.5, fontWeight: 500, color: '#555',
-                  cursor: 'pointer', transition: 'all 0.15s'
-                }}>
-                  <MessageSquare size={13}/> Javob berish
-                </button>
+                
+                {!r.reply && (
+                  <button 
+                    onClick={() => { setReplyingTo(replyingTo === (r._id || r.id) ? null : (r._id || r.id)); setReplyText(''); }}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '6px 14px', borderRadius: 8,
+                      border: '1.5px solid #ebebeb', background: replyingTo === (r._id || r.id) ? '#f9f9f9' : '#fff',
+                      fontSize: 12.5, fontWeight: 500, color: '#555',
+                      cursor: 'pointer', transition: 'all 0.15s'
+                    }}
+                  >
+                    <MessageSquare size={13}/> {replyingTo === (r._id || r.id) ? 'Bekor qilish' : 'Javob berish'}
+                  </button>
+                )}
               </div>
+
+              {/* Reply Input Box */}
+              {replyingTo === (r._id || r.id) && !r.reply && (
+                <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start' }} className="animate-fadeIn">
+                  <textarea 
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Mijozga javob yozing..."
+                    style={{
+                      flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid #ebebeb',
+                      fontSize: 13.5, resize: 'vertical', minHeight: 60, outline: 'none', fontFamily: 'inherit'
+                    }}
+                  />
+                  <button 
+                    onClick={() => onSubmitReply(r)}
+                    disabled={isSubmitting || !replyText.trim()}
+                    style={{
+                      padding: '8px 16px', background: '#c97a22', color: '#fff',
+                      border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                      cursor: isSubmitting || !replyText.trim() ? 'not-allowed' : 'pointer',
+                      opacity: isSubmitting || !replyText.trim() ? 0.7 : 1,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {isSubmitting ? 'Yuborilmoqda...' : 'Yuborish'}
+                  </button>
+                </div>
+              )}
             </div>
           ))
         ) : (

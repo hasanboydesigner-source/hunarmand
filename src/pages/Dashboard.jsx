@@ -172,7 +172,7 @@ export default function DashboardPage() {
         {active === 'orders' && (
           <DashboardOrders orders={dashData.orders} openOrderDetails={openOrderDetails}/>
         )}
-        {active === 'reviews' && <DashboardReviews reviews={dashData.reviews}/>}
+        {active === 'reviews' && <DashboardReviews reviews={dashData.reviews} handleReplyReview={dashData.handleReplyReview} />}
         {active === 'messages' && (
           <DashboardMessages
             messages={dashData.messages}

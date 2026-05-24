@@ -74,7 +74,46 @@ export function useDashboardData(user, addToast, updateUser) {
     date: o.createdAt ? new Date(o.createdAt).toLocaleDateString('uz-UZ') : o.date,
     amount: o.totalAmount || o.amount,
   }));
-  const messages = allMessages.filter(m => m.craftsmanId === user?.id);
+  const threads = {};
+  allMessages.forEach(m => {
+    const isFromMe = m.senderId === user?.id || m.isReply || m.sender === 'Siz';
+    const otherId = isFromMe ? (m.receiverId || 'unknown') : (m.senderId || m.sender || 'unknown');
+    const otherName = isFromMe ? (m.receiverName || 'Mijoz') : (m.sender || 'Mijoz');
+    
+    if (!threads[otherId]) {
+      threads[otherId] = {
+        id: otherId,
+        user: otherName,
+        initial: otherName ? otherName[0].toUpperCase() : 'M',
+        initBg: '#fff8f0',
+        initColor: '#c97a22',
+        time: new Date(m.createdAt || Date.now()).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
+        preview: m.text,
+        unread: !m.isRead && !isFromMe,
+        latestTime: m.createdAt || new Date().toISOString(),
+        thread: []
+      };
+    }
+    
+    if (new Date(m.createdAt || 0) > new Date(threads[otherId].latestTime)) {
+       threads[otherId].preview = m.text;
+       threads[otherId].time = new Date(m.createdAt || Date.now()).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+       threads[otherId].latestTime = m.createdAt || new Date().toISOString();
+       if (!m.isRead && !isFromMe) threads[otherId].unread = true;
+    }
+    
+    threads[otherId].thread.push({
+      _rawTime: m.createdAt || new Date().toISOString(),
+      from: !isFromMe,
+      text: m.text,
+      time: new Date(m.createdAt || Date.now()).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+    });
+  });
+
+  const messages = Object.values(threads).map(t => {
+    t.thread.sort((a,b) => new Date(a._rawTime) - new Date(b._rawTime));
+    return t;
+  }).sort((a,b) => new Date(b.latestTime) - new Date(a.latestTime));
 
   const handleSaveProduct = async (editingProduct, productForm) => {
     if (!productForm.title || !productForm.price || !productForm.inStock || !productForm.image) {
@@ -209,8 +248,42 @@ export function useDashboardData(user, addToast, updateUser) {
       }
     }
   };
-
   const handleSaveShop = handleSaveProfile;
+
+  const handleReplyReview = async (reviewId, productId, replyText) => {
+    try {
+      await axios.post(`${API_URL}/products/${productId}/reviews/${reviewId}/reply`, { text: replyText });
+      
+      const updatedProducts = allProducts.map(p => {
+        if (p._id === productId || p.id === productId) {
+          const updatedReviews = p.reviews?.map(r => 
+            r._id === reviewId || r.id === reviewId ? { ...r, reply: replyText } : r
+          );
+          return { ...p, reviews: updatedReviews };
+        }
+        return p;
+      });
+      setAllProducts(updatedProducts);
+      addToast("Javobingiz muvaffaqiyatli saqlandi!", 'success');
+      return true;
+    } catch (err) {
+      addToast("Javob saqlashda xatolik yuz berdi", 'error');
+      
+      // MOCK YECHIM (agar backend yo'q bo'lsa frontendda saqlab turish uchun):
+      const updatedProducts = allProducts.map(p => {
+        if (p._id === productId || p.id === productId) {
+          const updatedReviews = p.reviews?.map(r => 
+            r._id === reviewId || r.id === reviewId ? { ...r, reply: replyText } : r
+          );
+          return { ...p, reviews: updatedReviews };
+        }
+        return p;
+      });
+      setAllProducts(updatedProducts);
+      
+      return true;
+    }
+  };
 
   const reviews = products.flatMap(p => p.reviews?.map(r => ({ ...r, productName: p.title, productId: p._id || p.id })) || []).sort((a,b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
 
@@ -218,6 +291,6 @@ export function useDashboardData(user, addToast, updateUser) {
     products, allProducts, handleSaveProduct, handleDeleteProduct,
     orders, handleUpdateOrderStatus,
     messages, handleSendReply, selectMessageThread,
-    profile, setProfile, handleSaveProfile, handleSaveShop, reviews
+    profile, setProfile, handleSaveProfile, handleSaveShop, reviews, handleReplyReview
   };
 }
