@@ -1,7 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useCartStore, useWishlistStore, useAuthStore, useUIStore } from '../store/useStore';
 import { getInitials } from '../data/constants';
+import { toast } from 'react-toastify';
 import {
   ShoppingCart, Heart, Search, Menu, X, Sun, Moon,
   User, LogOut, LayoutDashboard, Package, ChevronDown, Bell
@@ -40,6 +41,7 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     setProfileOpen(false);
+    toast.info('Tizimdan muvaffaqiyatli chiqdingiz! 👋');
     navigate('/');
   };
 
@@ -53,20 +55,14 @@ export default function Header() {
   return (
     <header className={`site-header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-inner container">
-        {/* Logo */}
         <Link to="/" className="header-logo">
-          <div className="logo-icon">
-            <span>E</span>
-          </div>
-          <div className="logo-text">
-            <span className="logo-primary">E-Hunarmand</span>
-          </div>
+          <img src="/new.png" alt="E-Hunarmand" className="logo-img" />
         </Link>
 
         {/* Desktop Nav */}
         <nav className="header-nav desktop-only">
           {navLinks.map((l) => (
-            <Link key={l.to} to={l.to} className="nav-link">{l.label}</Link>
+            <NavLink key={l.to} to={l.to} className="nav-link">{l.label}</NavLink>
           ))}
         </nav>
 
@@ -76,10 +72,10 @@ export default function Header() {
           <button className="icon-btn hide-on-mobile-auth" onClick={openSearch} title={t('nav.search')} id="search-btn">
             <Search size={20} />
           </button>
-          <button className="icon-btn" onClick={toggleTheme} title="Tema">
+          <button className="icon-btn hide-on-mobile-auth" onClick={toggleTheme} title="Tema">
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
-          <Link to="/wishlist" className="icon-btn icon-btn-badge" id="wishlist-btn">
+          <Link to="/wishlist" className="icon-btn icon-btn-badge hide-on-mobile-auth" id="wishlist-btn">
             <Heart size={20} />
             {wishCount > 0 && <span className="badge-dot">{wishCount}</span>}
           </Link>
@@ -148,9 +144,9 @@ export default function Header() {
         <div className="mobile-menu animate-slideIn">
           <nav className="mobile-nav">
             {navLinks.map((l) => (
-              <Link key={l.to} to={l.to} className="mobile-nav-link" onClick={() => setMenuOpen(false)}>
+              <NavLink key={l.to} to={l.to} className="mobile-nav-link" onClick={() => setMenuOpen(false)}>
                 {l.label}
-              </Link>
+              </NavLink>
             ))}
           </nav>
           {!isAuthenticated && (

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { MessageSquare, X, Send, Bot, User, Minimize2 } from 'lucide-react';
 import { API_URL, CATEGORIES } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
-import { useAuthStore } from '../store/useStore';
+import { useAuthStore, useUIStore } from '../store/useStore';
 
 const QUICK_REPLIES = [
   "🎁 Sovg'a qidiryapman",
@@ -64,6 +64,7 @@ const parseMarkdown = (text, onLinkClick) => {
 
 export default function Chatbot() {
   const { user } = useAuthStore();
+  const productsLoaded = useUIStore((s) => s.productsLoaded);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -73,23 +74,37 @@ export default function Chatbot() {
 
   const [hasGreetedUser, setHasGreetedUser] = useState(false);
 
-  // Initialize and Auto-open logic for everyone
+  // Initialize greeting message
   useEffect(() => {
     const defaultGreeting = `Assalomu alaykum! Men E-Hunarmand savdo yordamchisiman. Qanday milliy hunarmandchilik mahsulotini qidirmoqdasiz?`;
     
     if (messages.length === 0 && !user) {
       setMessages([{ role: 'ai', text: defaultGreeting }]);
     }
+  }, [messages.length, user]);
 
-    // Auto-open logic (wait 3 seconds, once per session)
-    if (!sessionStorage.getItem('chatbot_auto_opened')) {
+  // Auto-open logic: wait for products to load first, then open after 3 seconds (once per session)
+  useEffect(() => {
+    if (sessionStorage.getItem('chatbot_auto_opened')) return;
+
+    // If products loaded, open after short delay
+    if (productsLoaded) {
       const timer = setTimeout(() => {
         setIsOpen(true);
         sessionStorage.setItem('chatbot_auto_opened', 'true');
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [messages.length, user]);
+
+    // Fallback: if on a page that doesn't load products, auto-open after 8 seconds
+    const fallbackTimer = setTimeout(() => {
+      if (!sessionStorage.getItem('chatbot_auto_opened')) {
+        setIsOpen(true);
+        sessionStorage.setItem('chatbot_auto_opened', 'true');
+      }
+    }, 8000);
+    return () => clearTimeout(fallbackTimer);
+  }, [productsLoaded]);
 
   // Special greeting when a user logs in
   useEffect(() => {
@@ -173,7 +188,7 @@ export default function Chatbot() {
           right: 20px;
           width: 320px;
           height: 480px;
-          max-height: calc(100vh - 88px - 72px); /* 72px = header */
+          max-height: calc(100vh - 88px - 80px);
           background: #fff;
           border-radius: 16px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.18);
@@ -185,8 +200,8 @@ export default function Chatbot() {
           animation: cbSlideUp 0.25s cubic-bezier(.4,0,.2,1);
         }
         .cb-window.has-nav {
-          bottom: 148px;
-          max-height: calc(100vh - 148px - 72px);
+          bottom: 100px;
+          max-height: calc(100vh - 100px - 80px);
         }
 
         @keyframes cbSlideUp {
@@ -198,26 +213,27 @@ export default function Chatbot() {
         @media (max-width: 540px) {
           .cb-btn {
             bottom: 20px;
-            right: 14px;
-            width: 46px;
-            height: 46px;
+            right: 16px;
+            width: 48px;
+            height: 48px;
           }
           .cb-btn.has-nav {
-            bottom: 76px;
+            bottom: 80px;
           }
           .cb-window {
-            right: 8px;
-            left: 8px;
+            right: 12px;
+            left: 12px;
             width: auto;
-            bottom: 76px;
-            /* Tepasi: header(64) + 8px bo'shliq = 72px dan past bo'lsin */
-            max-height: calc(100vh - 76px - 72px);
-            height: auto;
-            min-height: 300px;
+            bottom: 16px;
+            height: 520px;
+            max-height: calc(100dvh - 16px - 80px);
+            max-height: calc(100vh - 16px - 80px);
           }
           .cb-window.has-nav {
-            bottom: 140px;
-            max-height: calc(100vh - 140px - 72px);
+            bottom: 80px;
+            height: 460px;
+            max-height: calc(100dvh - 80px - 80px);
+            max-height: calc(100vh - 80px - 80px);
           }
         }
 

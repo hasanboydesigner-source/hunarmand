@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore, useAuthStore } from '../store/useStore';
 import { formatPrice, API_URL } from '../data/constants';
 import { CheckCircle2, ChevronRight, CreditCard, Truck, ClipboardList } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import './Checkout.css';
 
@@ -30,6 +30,50 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState({ name:'', phone:'', region:'', city:'', street:'', zip:'' });
   const [delivery, setDelivery] = useState('standard');
   const [ordered, setOrdered] = useState(false);
+
+  // Prefill address fields dynamically if user is logged in
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.id) {
+        try {
+          const options = ['Toshkent', 'Samarqand', 'Buxoro', 'Namangan', 'Andijon', 'Farg\'ona', 'Xorazm'];
+          
+          // Helper to match free-text input region to available select options
+          const matchRegion = (rawRegion) => {
+            if (!rawRegion) return '';
+            const clean = rawRegion.trim().toLowerCase();
+            const found = options.find(opt => clean.includes(opt.toLowerCase()) || opt.toLowerCase().includes(clean));
+            return found || '';
+          };
+
+          // Immediately set initial fallback values from auth state
+          setAddress(prev => ({
+            ...prev,
+            name: prev.name || user.name || '',
+            phone: prev.phone || user.phone || '',
+            region: prev.region || matchRegion(user.region) || '',
+          }));
+
+          // Fetch full profile details from the database
+          const { data } = await axios.get(`${API_URL}/auth/users/${user.id}`);
+          if (data) {
+            setAddress(prev => ({
+              ...prev,
+              name: prev.name || data.name || user.name || '',
+              phone: prev.phone || data.phone || user.phone || '',
+              region: prev.region || matchRegion(data.region) || matchRegion(user.region) || '',
+              city: prev.city || data.city || '',
+              street: prev.street || data.street || data.address || '',
+            }));
+          }
+        } catch (err) {
+          console.error("Foydalanuvchi profilini yuklashda xatolik:", err);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const subtotal = items.reduce((s,i) => s + i.price * i.quantity, 0);
   const shipping  = delivery === 'express' ? 60000 : subtotal > 500000 ? 0 : 30000;

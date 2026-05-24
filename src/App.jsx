@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { BounceLoader } from 'react-spinners';
-import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
@@ -111,7 +112,7 @@ function AppContent() {
       {!isDashboardOrAdmin && <Footer />}
       <Chatbot />
       <MobileBottomNav />
-      <Toaster position="bottom-right" toastOptions={{ className: 'react-hot-toast-custom' }} />
+      <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
     </div>
   );
 }

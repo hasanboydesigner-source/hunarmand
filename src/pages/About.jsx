@@ -8,9 +8,7 @@ export default function AboutPage() {
   const { t } = useTranslation();
 
   const TEAM = [
-    { name: 'Jasur Karimov', role: t('about.role_ceo'), img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80', region: 'Toshkent' },
-    { name: 'Nilufar Rashidova', role: t('about.role_product'), img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80', region: 'Samarqand' },
-    { name: 'Bobur Toshmatov', role: t('about.role_tech'), img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80', region: 'Buxoro' },
+    { name: 'Hasanboy Nurmuhammadov', role: t('about.role_ceo'), img: '/men.jpg', region: 'Namangan' },
   ];
 
   const VALUES = [
@@ -113,7 +111,10 @@ export default function AboutPage() {
                 <img src={m.img} alt={m.name} className="about-team-img" />
                 <h3>{m.name}</h3>
                 <p className="about-team-role">{m.role}</p>
-                <span className="about-team-region"><MapPin size={12} /> {m.region}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', alignItems: 'center' }}>
+                  <span className="about-team-region" style={{ margin: 0 }}><Phone size={12} /> +998 94 371-52-71</span>
+                  <span className="about-team-region" style={{ margin: 0, textAlign: 'center' }}><MapPin size={12} /> Namangan viloyati, Chust tumani</span>
+                </div>
               </div>
             ))}
           </div>
@@ -131,12 +132,20 @@ export default function AboutPage() {
             <div className="about-contact-card">
               <Mail size={22} />
               <h4>{t('about.email')}</h4>
-              <p>info@ehunarmand.uz</p>
+              <p>
+                <a href="mailto:info@hunarmand.uz" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  info@hunarmand.uz
+                </a>
+              </p>
             </div>
             <div className="about-contact-card">
               <Phone size={22} />
               <h4>{t('about.phone')}</h4>
-              <p>+998 71 123 45 67</p>
+              <p>
+                <a href="tel:+998943715271" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  +998 94 371-52-71
+                </a>
+              </p>
             </div>
             <div className="about-contact-card">
               <MapPin size={22} />

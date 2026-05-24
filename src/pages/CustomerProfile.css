@@ -27,11 +27,11 @@
 }
 
 .cp-sidebar {
-  background: var(--bg-card);
+  background: var(--bg-primary);
   border-radius: 12px;
   padding: 20px 0;
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-light);
   height: max-content;
 }
 
@@ -53,22 +53,22 @@
 }
 
 .cp-nav-btn:hover {
-  background: rgba(201, 122, 34, 0.05);
-  color: var(--primary);
+  background: rgba(212, 130, 42, 0.05);
+  color: var(--brand-600);
 }
 
 .cp-nav-btn.active {
-  background: rgba(201, 122, 34, 0.1);
-  color: var(--primary);
-  border-left-color: var(--primary);
+  background: rgba(212, 130, 42, 0.08);
+  color: var(--brand-600);
+  border-left-color: var(--brand-500);
 }
 
 .cp-content {
-  background: var(--bg-card);
+  background: var(--bg-primary);
   border-radius: 12px;
   padding: 30px;
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-light);
 }
 
 .cp-content h2 {
@@ -77,22 +77,46 @@
   color: var(--text-primary);
 }
 
+.cp-tab-pane {
+  display: none;
+  opacity: 0;
+  animation: fadeInTab 0.3s ease forwards;
+}
+
+.cp-tab-pane.active {
+  display: block;
+}
+
+@keyframes fadeInTab {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .cp-order-card {
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 16px;
+  border: 1px solid #e1e1e1;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  background: var(--bg-secondary);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.cp-order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+  border-color: var(--brand-300);
 }
 
 .cp-order-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 16px;
 }
 
 .cp-order-id {
@@ -109,14 +133,29 @@
 .cp-order-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
   font-size: 14px;
 }
 
 .cp-order-amount {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--brand-600);
+}
+
+.cp-order-item-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border-light);
+  background: var(--bg-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.cp-order-item-img:hover {
+  transform: scale(1.08);
 }
 
 .cp-empty {
@@ -142,6 +181,6 @@
   }
   .cp-nav-btn.active {
     border-left: none;
-    border-bottom-color: var(--primary);
+    border-bottom-color: var(--brand-500);
   }
 }

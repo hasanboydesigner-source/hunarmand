@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { MOCK_CRAFTSMEN, CATEGORIES, REGIONS, API_URL } from '../data/constants';
-import { Search, MapPin, Star, Sparkles, ShieldCheck } from 'lucide-react';
+import { Search, MapPin, Star, Sparkles, ShieldCheck, Users } from 'lucide-react';
 import CategoryIcon from '../components/CategoryIcon';
 import axios from 'axios';
 import './CraftsmenList.css';
@@ -128,10 +128,24 @@ export default function CraftsmenList() {
 
         {/* List of Craftsmen */}
         {filtered.length === 0 ? (
-          <div className="no-results" style={{ padding: '80px 20px' }}>
-            <span className="no-results-icon">👨‍🎨</span>
-            <h3>Hech qanday hunarmand topilmadi</h3>
-            <p>Qidiruv shartlarini o'zgartirib ko'ring</p>
+          <div className="no-results" style={{ padding: '80px 20px', textAlign: 'center' }}>
+            <div className="no-results-icon-wrap" style={{
+              width: '80px',
+              height: '80px',
+              background: 'var(--brand-50, #fdf6ee)',
+              color: 'var(--brand-500, #d4822a)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              boxShadow: '0 8px 24px rgba(212, 130, 42, 0.08)',
+              border: '1px solid rgba(212, 130, 42, 0.15)'
+            }}>
+              <Users size={36} strokeWidth={1.5} />
+            </div>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Hech qanday hunarmand topilmadi</h3>
+            <p style={{ color: 'var(--text-muted)', margin: 0 }}>Qidiruv shartlarini o'zgartirib ko'ring</p>
           </div>
         ) : (
           <div className="craftsmen-grid">

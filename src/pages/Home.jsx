@@ -6,6 +6,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { CATEGORIES, MOCK_PRODUCTS, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
+import { useUIStore } from '../store/useStore';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { ArrowRight, Shield, Truck, CreditCard, Headphones, Star, MapPin, ChevronRight } from 'lucide-react';
@@ -77,6 +78,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState([]);
   const [craftsmen, setCraftsmen] = useState([]);
+  const setProductsLoaded = useUIStore((s) => s.setProductsLoaded);
 
   const HERO_SLIDES = [
     {
@@ -185,7 +187,10 @@ export default function HomePage() {
       } catch (err) {
         console.error("API error fetching data in Home:", err);
       } finally {
-        setTimeout(() => setIsLoading(false), 500); // small delay for skeletons
+        setTimeout(() => {
+          setIsLoading(false);
+          setProductsLoaded(true);
+        }, 500); // small delay for skeletons
       }
     };
     fetchData();

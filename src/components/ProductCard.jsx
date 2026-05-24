@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star, ShoppingCart, Eye, Zap } from 'lucide-react';
-import { useCartStore, useWishlistStore } from '../store/useStore';
+import { useCartStore, useWishlistStore, useAuthStore } from '../store/useStore';
 import { formatPrice, getDiscount, getInitials } from '../data/constants';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import './ProductCard.css';
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
@@ -12,14 +12,23 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     navigate(`/products/${product._id || product.id}`);
   };
 
+  const { isAuthenticated } = useAuthStore();
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
-  const wished = has(product.id);
+  const wished = has(product._id || product.id);
   const discount = getDiscount(product.price, product.originalPrice);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error("Xarid qilish uchun avval ro'yxatdan o'ting yoki tizimga kiring!", { 
+        icon: '🔑', 
+        duration: 4000 
+      });
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/products/${product._id || product.id}`)}`);
+      return;
+    }
     addItem(product);
     toast.success(`"${product.title}" savatga qo'shildi!`, {
       icon: '🛒',
@@ -30,6 +39,14 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error("Sevimlilarga qo'shish uchun avval ro'yxatdan o'ting yoki tizimga kiring!", { 
+        icon: '🔑', 
+        duration: 4000 
+      });
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/products/${product._id || product.id}`)}`);
+      return;
+    }
     toggle(product);
     toast(wished ? 'Sevimlilardan olib tashlandi' : "Sevimlilarga qo'shildi", {
       icon: wished ? '💔' : '❤️',

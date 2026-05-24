@@ -1,6 +1,7 @@
 import { Shield, BarChart2, Users, Package, ShoppingBag, Settings, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/useStore';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const NAV = [
   {id:'overview',  label:'Umumiy',        icon:<BarChart2 size={17}/>},
@@ -17,6 +18,7 @@ export default function AdminSidebar({ active, setActive }) {
 
   const handleLogout = () => {
     logout();
+    toast.info("Tizimdan muvaffaqiyatli chiqdingiz! 👋");
     navigate('/');
   };
 

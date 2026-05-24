@@ -72,6 +72,7 @@ export const useUIStore = create((set) => ({
   theme: 'light',
   sidebarOpen: false,
   searchOpen: false,
+  productsLoaded: false,
   toggleTheme: () =>
     set((s) => {
       const next = s.theme === 'light' ? 'dark' : 'light';
@@ -81,4 +82,5 @@ export const useUIStore = create((set) => ({
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   openSearch: () => set({ searchOpen: true }),
   closeSearch: () => set({ searchOpen: false }),
+  setProductsLoaded: (val) => set({ productsLoaded: val }),
 }));

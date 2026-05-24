@@ -40,12 +40,23 @@
 }
 .pd-main-img {
   position: relative;
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   overflow: hidden;
   aspect-ratio: 1;
-  background: var(--bg-tertiary);
+  background: #fbfbfc;
   width: 100%;
   max-width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    0 10px 30px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pd-main-img:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.03),
+    0 16px 40px rgba(0, 0, 0, 0.06);
 }
 
 /* Swiper – force containment at every level */
@@ -53,28 +64,32 @@
 .pd-main-swiper.swiper {
   width: 100% !important;
   max-width: 100% !important;
+  height: 100% !important;
   overflow: hidden !important;
 }
 .pd-main-swiper .swiper-wrapper {
   /* Don't set overflow:hidden here – Swiper needs to translate it */
   width: 100%;
+  height: 100% !important;
 }
 .pd-main-swiper .swiper-slide {
   width: 100% !important;
   max-width: 100% !important;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   overflow: hidden;
+  padding: 0;
+  box-sizing: border-box;
 }
 .pd-main-swiper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
   cursor: grab;
   display: block;
-  max-width: 100%;
+  mix-blend-mode: multiply;
 }
 .pd-main-swiper img:active { cursor: grabbing; }
 
@@ -98,10 +113,31 @@
 .pd-wish-btn:hover, .pd-wish-btn.active { background: var(--error-light); color: var(--error); }
 .pd-thumbnails { margin-top: 12px; overflow: hidden; }
 .pd-thumbs-swiper { height: 72px; padding: 2px 0; }
-.pd-thumbs-swiper .swiper-slide { width: 72px !important; opacity: 0.5; transition: opacity 0.2s; cursor: pointer; border-radius: var(--radius-md); overflow: hidden; border: 2px solid transparent; }
-.pd-thumbs-swiper .swiper-slide-thumb-active { opacity: 1; border-color: var(--brand-500); }
-.pd-thumb { width: 100%; height: 100%; }
-.pd-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pd-thumbs-swiper .swiper-slide { 
+  width: 72px !important; 
+  opacity: 0.6; 
+  transition: all 0.2s; 
+  cursor: pointer; 
+  border-radius: var(--radius-md); 
+  overflow: hidden; 
+  border: 1.5px solid rgba(0, 0, 0, 0.05); 
+  background: #fbfbfc;
+}
+.pd-thumbs-swiper .swiper-slide-thumb-active { 
+  opacity: 1; 
+  border-color: var(--brand-500); 
+  box-shadow: 0 4px 12px rgba(212, 130, 42, 0.12);
+}
+.pd-thumb { 
+  width: 100%; 
+  height: 100%; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.pd-thumb img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
 
 /* ─── Info Column ────────────────────────────────────────────── */
 .pd-info {

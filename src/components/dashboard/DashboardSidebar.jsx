@@ -1,6 +1,7 @@
 import { LayoutDashboard, Package, ShoppingBag, Star, MessageCircle, Settings, LogOut, ChevronLeft, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useStore';
+import { toast } from 'react-toastify';
 import { GiPaintedPottery } from 'react-icons/gi';
 
 export default function DashboardSidebar({ active, setActive, unreadOrders, unreadMessages, unreadReviews }) {
@@ -20,7 +21,11 @@ export default function DashboardSidebar({ active, setActive, unreadOrders, unre
     ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : 'U';
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => { 
+    logout(); 
+    toast.info("Tizimdan muvaffaqiyatli chiqdingiz! 👋");
+    navigate('/'); 
+  };
 
   return (
     <aside className="dash-sidebar">

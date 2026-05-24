@@ -31,7 +31,7 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div ref={dropdownRef} style={{ width: '88px', height: '40px', flexShrink: 0 }}>
+    <div ref={dropdownRef} className="lang-switcher-wrap" style={{ flexShrink: 0 }}>
       <div style={{ position: 'relative', width: '100%', height: '100%', zIndex: 50 }}>
         <button 
           onClick={() => setIsOpen(!isOpen)}
@@ -126,9 +126,39 @@ export default function LanguageSwitcher() {
         )}
       </div>
       <style>{`
+        .lang-switcher-wrap {
+          width: 88px;
+          height: 40px;
+        }
         @keyframes dropdownFadeIn {
           from { opacity: 0; transform: translateY(-10px) scale(0.95); }
           to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (max-width: 768px) {
+          .lang-switcher-wrap {
+            width: 84px;
+            height: 38px;
+          }
+          .lang-switcher-wrap button {
+            font-size: 14px !important;
+            padding: 0 10px !important;
+            gap: 5px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .lang-switcher-wrap {
+            width: 78px;
+            height: 35px;
+          }
+          .lang-switcher-wrap button {
+            font-size: 13px !important;
+            padding: 0 8px !important;
+            gap: 4px !important;
+          }
+          .lang-switcher-wrap button svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
         }
       `}</style>
     </div>

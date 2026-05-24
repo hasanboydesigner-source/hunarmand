@@ -5,7 +5,7 @@ import { MOCK_CRAFTSMEN, MOCK_PRODUCTS, CATEGORIES, API_URL } from '../data/cons
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { Star, MapPin, CheckCircle2, Send, Package, ShoppingBag, Clock, Award, MessageCircle, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import { useAuthStore } from '../store/useStore';
 import './CraftsmanProfile.css';
 

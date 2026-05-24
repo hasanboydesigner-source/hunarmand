@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle2, XCircle, Menu, X, Upload, Clock, RefreshCw, Truck, Check, RotateCcw } from 'lucide-react';
 import { useAuthStore } from '../store/useStore';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import { CATEGORIES, API_URL } from '../data/constants';
 import './Dashboard.css';
@@ -24,12 +25,15 @@ export default function DashboardPage() {
   const [active, setActive] = useState(defaultTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Toasts
-  const [toasts, setToasts] = useState([]);
+  // Toasts via react-toastify
   const addToast = (message, type = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+    if (type === 'success') {
+      toast.success(message);
+    } else if (type === 'error') {
+      toast.error(message);
+    } else {
+      toast.info(message);
+    }
   };
 
   const dashData = useDashboardData(user, addToast, updateUser);
@@ -203,17 +207,7 @@ export default function DashboardPage() {
         ))}
       </nav>
 
-      {/* Toasts */}
-      <div className="toasts-container">
-        {toasts.map(t => (
-          <div key={t.id} className={`toast toast-${t.type}`}>
-            {t.type === 'success' && <CheckCircle2 size={16} color="#15803d"/>}
-            {t.type === 'error'   && <AlertTriangle size={16} color="#dc2626"/>}
-            {t.type === 'info'    && <CheckCircle2 size={16} color="#1e40af"/>}
-            <span>{t.message}</span>
-          </div>
-        ))}
-      </div>
+      {/* Toasts rendered globally via ToastContainer */}
 
       {/* Add/Edit Product Modal */}
       {showProductModal && (

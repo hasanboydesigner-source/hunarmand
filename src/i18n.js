@@ -18,6 +18,10 @@ i18n
   .init({
     resources,
     fallbackLng: 'uz',
+    detection: {
+      order: ['localStorage', 'cookie', 'htmlTag'],
+      caches: ['localStorage', 'cookie']
+    },
     debug: false,
     interpolation: {
       escapeValue: false // not needed for react as it escapes by default

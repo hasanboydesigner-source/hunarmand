@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/useStore';
 import { formatPrice, getInitials } from '../data/constants';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, ArrowLeft, Tag, ExternalLink } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import './Cart.css';
 
 export default function CartPage() {

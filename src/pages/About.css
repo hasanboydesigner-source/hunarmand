@@ -87,7 +87,7 @@
 
 /* Team */
 .about-team { padding: 80px 0; background: var(--bg-secondary); }
-.about-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 800px; margin: 0 auto; }
+.about-team-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 24px; max-width: 800px; margin: 0 auto; }
 .about-team-card {
   background: var(--bg-primary);
   border: 1px solid var(--border-light);
@@ -95,6 +95,8 @@
   padding: 28px 20px;
   text-align: center;
   transition: box-shadow 0.2s;
+  width: 100%;
+  max-width: 260px;
 }
 .about-team-card:hover { box-shadow: 4px 4px 0 #e1e1e1; }
 .about-team-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; display: block; border: 3px solid var(--brand-100); }
@@ -133,7 +135,7 @@
   .about-stat-card:nth-child(even) { border-right: none; }
   .about-stat-card:last-child, .about-stat-card:nth-last-child(2) { border-bottom: none; }
   .about-values-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .about-team-grid { grid-template-columns: 1fr 1fr; max-width: 100%; }
+  .about-team-grid { max-width: 100%; }
   .about-contact-grid { grid-template-columns: 1fr; max-width: 100%; }
   .about-mission { padding: 56px 0; }
   .about-values { padding: 56px 0; }
@@ -146,7 +148,6 @@
   .about-stats-grid { grid-template-columns: 1fr 1fr; }
   .about-stat-card strong { font-size: 24px; }
   .about-values-grid { grid-template-columns: 1fr; }
-  .about-team-grid { grid-template-columns: 1fr; }
   .about-mission-img img { height: 240px; }
   .about-logo-icon { width: 56px; height: 56px; }
 }

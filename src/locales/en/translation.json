@@ -101,7 +101,7 @@
     "email": "Email",
     "phone": "Phone",
     "address": "Address",
-    "address_val": "Tashkent city, Yunusabad district",
+    "address_val": "Namangan region, Chust district",
     "join_craftsman": "Join as a Craftsman",
     "stat1": "Craftsmen",
     "stat2": "Products",
@@ -160,6 +160,7 @@
     "reg_mock": "Registered (Mock mode)!",
     "enter_email": "Enter email",
     "invalid_email": "Invalid email format",
-    "reset_sent": "Reset link sent to your email!"
+    "reset_sent": "Reset link sent to your email!",
+    "google_restricted": "Currently, signing in with a Google account is restricted! ⚠️"
   }
 }

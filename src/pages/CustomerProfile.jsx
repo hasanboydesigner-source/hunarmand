@@ -3,10 +3,15 @@ import { useAuthStore } from '../store/useStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL, ORDER_STATUSES } from '../data/constants';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import { User, Package, Settings, LogOut, Clock, Check, Truck, XCircle } from 'lucide-react';
 import { BounceLoader } from 'react-spinners';
 import './CustomerProfile.css';
+
+// Simple client-side cache to enable instant tab switching without full unmount reloading
+let cachedProfile = null;
+let cachedOrders = null;
+let cachedUserId = null;
 
 export default function CustomerProfilePage() {
   const { user, isAuthenticated, logout, updateUser } = useAuthStore();
@@ -14,11 +19,11 @@ export default function CustomerProfilePage() {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(location.pathname.includes('orders') ? 'orders' : 'profile');
   
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState(cachedProfile || {
     name: '', email: '', phone: '', region: ''
   });
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [orders, setOrders] = useState(cachedOrders || []);
+  const [isLoading, setIsLoading] = useState(!cachedProfile);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -26,10 +31,18 @@ export default function CustomerProfilePage() {
       navigate('/auth/login');
       return;
     }
+
+    if (cachedUserId !== user?.id) {
+      cachedProfile = null;
+      cachedOrders = null;
+      cachedUserId = user?.id;
+    }
     
     // Fetch profile and orders
     const fetchData = async () => {
-      setIsLoading(true);
+      if (!cachedProfile) {
+        setIsLoading(true);
+      }
       try {
         const [profileRes, ordersRes] = await Promise.all([
           axios.get(`${API_URL}/auth/users/${user?.id}`),
@@ -37,14 +50,18 @@ export default function CustomerProfilePage() {
         ]);
         
         const p = profileRes.data;
-        setProfile({
+        const newProfile = {
           name: p.name || '',
           email: p.email || '',
           phone: p.phone || '',
           region: p.region || ''
-        });
+        };
         
+        setProfile(newProfile);
         setOrders(ordersRes.data);
+        
+        cachedProfile = newProfile;
+        cachedOrders = ordersRes.data;
       } catch (error) {
         console.error("Failed to fetch customer data", error);
         toast.error("Ma'lumotlarni yuklashda xatolik yuz berdi");
@@ -65,6 +82,7 @@ export default function CustomerProfilePage() {
         ...profile
       });
       updateUser({ name: profile.name, email: profile.email });
+      cachedProfile = { ...cachedProfile, ...profile };
       toast.success("Profil muvaffaqiyatli yangilandi!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Xatolik yuz berdi");
@@ -75,6 +93,10 @@ export default function CustomerProfilePage() {
 
   const handleLogout = () => {
     logout();
+    cachedProfile = null;
+    cachedOrders = null;
+    cachedUserId = null;
+    toast.info("Tizimdan muvaffaqiyatli chiqdingiz! 👋");
     navigate('/');
   };
 
@@ -110,7 +132,7 @@ export default function CustomerProfilePage() {
             >
               <Package size={18} /> Mening Buyurtmalarim
             </button>
-            <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid var(--border-color)' }} />
+            <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid var(--border-light)' }} />
             <button className="cp-nav-btn" style={{ color: '#dc2626' }} onClick={handleLogout}>
               <LogOut size={18} /> Tizimdan chiqish
             </button>
@@ -118,8 +140,7 @@ export default function CustomerProfilePage() {
 
           {/* Content */}
           <main className="cp-content">
-            {activeTab === 'profile' && (
-              <div className="animate-fadeIn">
+            <div className={`cp-tab-pane ${activeTab === 'profile' ? 'active' : ''}`}>
                 <h2>Profil Sozlamalari</h2>
                 <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '500px' }}>
                   <div className="form-group">
@@ -163,12 +184,10 @@ export default function CustomerProfilePage() {
                     {isSaving ? 'Saqlanmoqda...' : 'O\'zgarishlarni saqlash'}
                   </button>
                 </form>
-              </div>
-            )}
+            </div>
 
-            {activeTab === 'orders' && (
-              <div className="animate-fadeIn">
-                <h2>Mening Buyurtmalarim</h2>
+            <div className={`cp-tab-pane ${activeTab === 'orders' ? 'active' : ''}`}>
+              <h2>Mening Buyurtmalarim</h2>
                 {orders.length === 0 ? (
                   <div className="cp-empty">
                     <Package size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
@@ -193,11 +212,13 @@ export default function CustomerProfilePage() {
                       
                       <div className="cp-order-body">
                         <div>
-                          <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>MAHSULOTLAR</p>
+                          <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '8px', letterSpacing: '0.5px' }}>MAHSULOTLAR</p>
                           {order.items.map((item, idx) => (
-                            <div key={idx} style={{ marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              {item.image && <img src={item.image} alt="" style={{width: 32, height: 32, borderRadius: 4, objectFit: 'cover'}}/>}
-                              <span>{item.title} <span style={{ color: 'var(--text-muted)' }}>x{item.quantity}</span></span>
+                            <div key={idx} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              {item.image && <img src={item.image} alt="" className="cp-order-item-img" />}
+                              <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+                                {item.title} <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>x{item.quantity}</span>
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -212,8 +233,7 @@ export default function CustomerProfilePage() {
                     </div>
                   ))
                 )}
-              </div>
-            )}
+            </div>
           </main>
         </div>
       </div>

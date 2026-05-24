@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, ShieldOff } from "lucide-react";
+import { toast } from "react-toastify";
 import "./Admin.css";
 
 // Hook
@@ -21,14 +22,15 @@ export default function AdminPage() {
   const { user, isAuthenticated } = useAuthStore();
   const [active, setActive] = useState("overview");
 
-  // Toast notification state
-  const [toasts, setToasts] = useState([]);
+  // Toasts via react-toastify
   const addToast = (message, type = "success") => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    if (type === "success") {
+      toast.success(message);
+    } else if (type === "error") {
+      toast.error(message);
+    } else {
+      toast.info(message);
+    }
   };
 
   const adminData = useAdminData(addToast);
@@ -110,23 +112,7 @@ export default function AdminPage() {
         )}
       </main>
 
-      {/* ── Toasts Container ── */}
-      <div className="toasts-container">
-        {toasts.map((t) => (
-          <div key={t.id} className={`toast toast-${t.type}`}>
-            {t.type === "success" && (
-              <CheckCircle2 size={16} color="var(--success)" />
-            )}
-            {t.type === "error" && (
-              <AlertTriangle size={16} color="var(--error)" />
-            )}
-            {t.type === "info" && (
-              <CheckCircle2 size={16} color="var(--info)" />
-            )}
-            <span>{t.message}</span>
-          </div>
-        ))}
-      </div>
+      {/* Toasts rendered globally via ToastContainer */}
     </div>
   );
 }

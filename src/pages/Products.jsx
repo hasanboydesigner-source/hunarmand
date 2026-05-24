@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { MOCK_PRODUCTS, CATEGORIES, REGIONS, SORT_OPTIONS, formatPrice, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
+import { useUIStore } from '../store/useStore';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
@@ -13,6 +14,7 @@ export default function ProductsPage() {
   const [view, setView] = useState('grid');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const setProductsLoaded = useUIStore((s) => s.setProductsLoaded);
 
   const category = params.get('category') || '';
   const region = params.get('region') || '';
@@ -88,6 +90,7 @@ export default function ProductsPage() {
       })
       .finally(() => {
         setIsLoading(false);
+        setProductsLoaded(true);
       });
   }, []);
 
@@ -281,13 +284,28 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="no-results">
-              <span className="no-results-icon">🔍</span>
-              <h3>Mahsulot topilmadi</h3>
-              <p>Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting</p>
+            <div className="no-results" style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <div className="no-results-icon-wrap" style={{
+                width: '80px',
+                height: '80px',
+                background: 'var(--brand-50, #fdf6ee)',
+                color: 'var(--brand-500, #d4822a)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+                boxShadow: '0 8px 24px rgba(212, 130, 42, 0.08)',
+                border: '1px solid rgba(212, 130, 42, 0.15)'
+              }}>
+                <Search size={36} strokeWidth={1.5} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Mahsulot topilmadi</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting</p>
               <button 
                 className="btn btn-primary" 
                 onClick={clearAll}
+                style={{ margin: '0 auto' }}
               >
                 Filtrlarni tozalash
               </button>

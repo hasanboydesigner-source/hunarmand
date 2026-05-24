@@ -1,9 +1,10 @@
-const CACHE_NAME = 'hunarmand-v1';
+const CACHE_NAME = 'hunarmand-v3';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/handcraft.png'
+  '/new.png',
+  '/logo-square.png'
 ];
 
 self.addEventListener('install', event => {

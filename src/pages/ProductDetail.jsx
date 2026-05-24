@@ -11,11 +11,11 @@ import { MOCK_PRODUCTS, MOCK_REVIEWS, CATEGORIES, formatPrice, getDiscount, getI
 import { useCartStore, useWishlistStore, useAuthStore } from '../store/useStore';
 import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import {
   Star, Heart, ShoppingCart, Zap, Share2, Flag, MapPin,
   Package, Clock, Shield, ChevronRight, MessageCircle, ExternalLink,
-  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send
+  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send, X
 } from 'lucide-react';
 import './ProductDetail.css';
 
@@ -29,7 +29,7 @@ export default function ProductDetailPage() {
   
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, has } = useWishlistStore();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('desc');
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -142,12 +142,33 @@ export default function ProductDetailPage() {
 
   const images = product.images?.length ? product.images : [product.image];
 
+  const checkAuthAndExecute = () => {
+    if (!isAuthenticated) {
+      toast.error("Xarid qilish uchun avval ro'yxatdan o'ting yoki tizimga kiring!", { 
+        icon: '🔑', 
+        duration: 4000 
+      });
+      const currentUrl = `/products/${product._id || product.id}`;
+      navigate(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
+      return false;
+    }
+    return true;
+  };
+
   const handleAddToCart = () => {
+    if (!checkAuthAndExecute()) return;
     addItem(product, qty);
     toast.success(`${qty} ta "${product.title}" savatga qo'shildi!`, { icon: '🛒' });
   };
-  const handleBuyNow = () => { addItem(product, qty); navigate('/cart'); };
+
+  const handleBuyNow = () => {
+    if (!checkAuthAndExecute()) return;
+    addItem(product, qty);
+    navigate('/cart');
+  };
+
   const handleWishlist = () => {
+    if (!checkAuthAndExecute()) return;
     toggle(product);
     toast(wished ? 'Sevimlilardan olib tashlandi' : "Sevimlilarga qo'shildi", { icon: wished ? '💔' : '❤️' });
   };
@@ -241,11 +262,11 @@ export default function ProductDetailPage() {
               thumbs={{ swiper: thumbsSwiper }}
               modules={[FreeMode, Navigation, Thumbs]}
               className="pd-main-swiper"
-              style={{ width: '100%', overflow: 'hidden' }}
+              style={{ width: '100%', height: '100%', overflow: 'hidden' }}
             >
               {images.map((img, i) => (
-                <SwiperSlide key={i} style={{ overflow: 'hidden', maxWidth: '100%' }}>
-                  <img src={img} alt={`${product.title} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', maxWidth: '100%' }} />
+                <SwiperSlide key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', boxSizing: 'border-box', padding: '0px', overflow: 'hidden' }}>
+                  <img src={img} alt={`${product.title} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'multiply', display: 'block' }} />
                 </SwiperSlide>
               ))}
             </Swiper>

@@ -101,7 +101,7 @@
     "email": "Email",
     "phone": "Telefon",
     "address": "Manzil",
-    "address_val": "Toshkent sh., Yunusobod tumani",
+    "address_val": "Namangan viloyati, Chust tumani",
     "join_craftsman": "Hunarmand sifatida qo'shiling",
     "stat1": "Hunarmand",
     "stat2": "Mahsulot",
@@ -160,6 +160,7 @@
     "reg_mock": "Ro'yxatdan o'tdingiz (Mock rejim)!",
     "enter_email": "Emailni kiriting",
     "invalid_email": "Noto'g'ri email formati",
-    "reset_sent": "Tiklash havolasi emailga yuborildi!"
+    "reset_sent": "Tiklash havolasi emailga yuborildi!",
+    "google_restricted": "Hozirda Google account orqali kirish imkoniyati cheklangan! ⚠️"
   }
 }

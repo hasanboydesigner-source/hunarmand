@@ -14,10 +14,7 @@ export default function Footer() {
       <div className="footer-main container">
         <div className="footer-brand">
           <Link to="/" className="footer-logo">
-            <div className="logo-icon"><span>E</span></div>
-            <div className="logo-text">
-              <span className="logo-primary">E-Hunarmand</span>
-            </div>
+            <div className="logo-icon"><img src="/new.png" alt="E-Hunarmand" className="logo-img" /></div>
           </Link>
           <p className="footer-desc">
             {t('footer.desc')}
@@ -53,8 +50,8 @@ export default function Footer() {
         <div className="footer-links-group">
           <h4>{t('footer.contact')}</h4>
           <ul>
-            <li className="contact-item"><MapPin size={14} /><span>Toshkent, O'zbekiston</span></li>
-            <li className="contact-item"><Phone size={14} /><a href="tel:+998712345678">+998 71 234-56-78</a></li>
+            <li className="contact-item"><MapPin size={14} /><span>Namangan viloyati, Chust tumani</span></li>
+            <li className="contact-item"><Phone size={14} /><a href="tel:+998943715271">+998 94 371-52-71</a></li>
             <li className="contact-item"><Mail size={14} /><a href="mailto:info@hunarmand.uz">info@hunarmand.uz</a></li>
           </ul>
           <div className="payment-badges">
