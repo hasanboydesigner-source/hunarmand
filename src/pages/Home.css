@@ -456,9 +456,20 @@
   .category-info p { font-size: 11px; }
   .category-arrow { display: none; }
 
-  /* Craftsmen */
-  .craftsmen-grid { grid-template-columns: 1fr; }
+  /* Craftsmen Card Mobile Optimization */
+  .craftsman-body { padding: 12px; }
+  .craftsman-body h3 { font-size: 14px; margin-top: 30px; margin-bottom: 4px; }
+  .craftsman-avatar-wrap { top: -24px; left: 12px; }
+  .craftsman-avatar { width: 48px; height: 48px; font-size: 16px; border-width: 2px !important; }
+  .craftsman-meta { gap: 8px; font-size: 11px; margin-bottom: 6px; }
+  .craftsman-specialty { font-size: 11px; margin-bottom: 8px; }
+  .cs-stat strong { font-size: 14px; }
+  .cs-stat span { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; }
 
   /* Products section */
   .products-section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+@media (max-width: 370px) {
+  .craftsmen-grid { grid-template-columns: 1fr; }
 }
