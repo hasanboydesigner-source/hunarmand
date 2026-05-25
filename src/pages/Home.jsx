@@ -201,43 +201,47 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="home-page page-with-header container" style={{ paddingBlock: '40px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
-        {/* Hero Slide Skeleton */}
-        <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-xl)', padding: '40px' }}>
-          <HeroSkeleton />
-        </div>
+      <div className="home-page page-with-header">
+        {/* Hero Slide Skeleton - FULL WIDTH */}
+        <section className="hero" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="container hero-container">
+            <HeroSkeleton />
+          </div>
+        </section>
         
-        {/* Features Skeleton */}
-        <div className="features-grid">
-          {[1, 2, 3, 4].map((i) => (
-            <FeatureCardSkeleton key={i} />
-          ))}
-        </div>
+        <div className="container" style={{ paddingBlock: '40px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          {/* Features Skeleton */}
+          <div className="features-grid">
+            {[1, 2, 3, 4].map((i) => (
+              <FeatureCardSkeleton key={i} />
+            ))}
+          </div>
 
-        {/* Categories Section Heading Skeleton */}
-        <div className="section-heading" style={{ marginBottom: '24px' }}>
-          <div style={{ width: '120px', height: '12px', background: 'var(--bg-tertiary)', borderRadius: '4px', margin: '0 auto 10px' }} />
-          <div style={{ width: '280px', height: '32px', background: 'var(--bg-tertiary)', borderRadius: '8px', margin: '0 auto' }} />
-        </div>
+          {/* Categories Section Heading Skeleton */}
+          <div className="section-heading" style={{ marginBottom: '24px' }}>
+            <div style={{ width: '120px', height: '12px', background: 'var(--bg-tertiary)', borderRadius: '4px', margin: '0 auto 10px' }} />
+            <div style={{ width: '280px', height: '32px', background: 'var(--bg-tertiary)', borderRadius: '8px', margin: '0 auto' }} />
+          </div>
 
-        {/* Categories Grid Skeleton */}
-        <div className="categories-grid">
-          {[1, 2, 3, 4].map((i) => (
-            <CategoryCardSkeleton key={i} />
-          ))}
-        </div>
+          {/* Categories Grid Skeleton */}
+          <div className="categories-grid">
+            {[1, 2, 3, 4].map((i) => (
+              <CategoryCardSkeleton key={i} />
+            ))}
+          </div>
 
-        {/* Featured Products Heading Skeleton */}
-        <div className="section-heading" style={{ marginBottom: '24px', marginTop: '20px' }}>
-          <div style={{ width: '100px', height: '12px', background: 'var(--bg-tertiary)', borderRadius: '4px', margin: '0 auto 10px' }} />
-          <div style={{ width: '260px', height: '32px', background: 'var(--bg-tertiary)', borderRadius: '8px', margin: '0 auto' }} />
-        </div>
+          {/* Featured Products Heading Skeleton */}
+          <div className="section-heading" style={{ marginBottom: '24px', marginTop: '20px' }}>
+            <div style={{ width: '100px', height: '12px', background: 'var(--bg-tertiary)', borderRadius: '4px', margin: '0 auto 10px' }} />
+            <div style={{ width: '260px', height: '32px', background: 'var(--bg-tertiary)', borderRadius: '8px', margin: '0 auto' }} />
+          </div>
 
-        {/* Product Grid Skeleton */}
-        <div className="products-grid">
-          {[1, 2, 3, 4].map((i) => (
-            <ProductCardSkeleton key={i} />
-          ))}
+          {/* Product Grid Skeleton */}
+          <div className="products-grid">
+            {[1, 2, 3, 4].map((i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );

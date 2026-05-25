@@ -51,23 +51,23 @@ export const ProductCardSkeleton = () => (
 );
 
 export const HeroSkeleton = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBlock: '20px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', padding: '0', width: '100%', maxWidth: '850px' }}>
     {/* Tag */}
-    <div style={{ ...pulseStyle, width: '100px', height: '26px', borderRadius: '14px' }} />
+    <div style={{ ...pulseStyle, width: '120px', height: '32px', borderRadius: '16px' }} />
     {/* Title */}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ ...pulseStyle, width: '70%', height: '40px', borderRadius: '8px' }} />
-      <div style={{ ...pulseStyle, width: '50%', height: '40px', borderRadius: '8px' }} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ ...pulseStyle, width: '85%', height: '56px', borderRadius: '8px' }} />
+      <div style={{ ...pulseStyle, width: '60%', height: '56px', borderRadius: '8px' }} />
     </div>
     {/* Subtitle */}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
-      <div style={{ ...pulseStyle, width: '60%', height: '12px' }} />
-      <div style={{ ...pulseStyle, width: '45%', height: '12px' }} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
+      <div style={{ ...pulseStyle, width: '75%', height: '16px' }} />
+      <div style={{ ...pulseStyle, width: '50%', height: '16px' }} />
     </div>
     {/* Buttons */}
-    <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
-      <div style={{ ...pulseStyle, width: '160px', height: '48px', borderRadius: '8px' }} />
-      <div style={{ ...pulseStyle, width: '160px', height: '48px', borderRadius: '8px' }} />
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '16px' }}>
+      <div style={{ ...pulseStyle, width: '180px', height: '56px', borderRadius: '999px' }} />
+      <div style={{ ...pulseStyle, width: '160px', height: '56px', borderRadius: '999px' }} />
     </div>
   </div>
 );
