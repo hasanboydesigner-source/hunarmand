@@ -16,6 +16,7 @@ export default function ProductsPage() {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState('grid');
+  const [isViewChanging, setIsViewChanging] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const setProductsLoaded = useUIStore((s) => s.setProductsLoaded);
@@ -114,7 +115,11 @@ export default function ProductsPage() {
 
   const handleViewChange = (newView) => {
     if (newView === view) return;
+    setIsViewChanging(true);
     setView(newView);
+    setTimeout(() => {
+      setIsViewChanging(false);
+    }, 400); // 400ms masks the CSS transition
   };
 
   const filtered = useMemo(() => {
@@ -343,7 +348,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Results */}
-          {isLoading ? (
+          {(isLoading || isViewChanging) ? (
             <div className={view === 'grid' ? 'products-grid' : 'products-list'}>
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <ProductCardSkeleton key={i} viewMode={view} />
