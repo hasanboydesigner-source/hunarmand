@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, XCircle, Menu, X, Upload, Clock, RefreshCw, Truck, Check, RotateCcw } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, XCircle, Menu, X, Upload, Clock, RefreshCw, Truck, Check, RotateCcw, LayoutDashboard, Sparkles, Package, ShoppingBag, Star, MessageCircle, Settings as SettingsIcon, Bot } from 'lucide-react';
 import { useAuthStore } from '../store/useStore';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -115,13 +115,11 @@ export default function DashboardPage() {
 
   // Mobile nav items
   const NAV_MOBILE = [
-    { id: 'overview',  label: 'Umumiy',    emoji: '📊' },
-    { id: 'advisor',   label: 'AI Maslahat', emoji: '🤖' },
-    { id: 'products',  label: 'Mahsulot',  emoji: '📦' },
-    { id: 'orders',    label: 'Buyurtma',  emoji: '🛍️', badge: unreadOrdersCount > 0 ? unreadOrdersCount : null },
-    { id: 'reviews',   label: 'Sharhlar',  emoji: '⭐', badge: reviewsCount > 0 ? reviewsCount : null },
-    { id: 'messages',  label: 'Xabar',     emoji: '💬', badge: unreadMessagesCount > 0 ? unreadMessagesCount : null },
-    { id: 'settings',  label: 'Profil',    emoji: '⚙️' },
+    { id: 'overview',  label: 'Umumiy',    icon: <LayoutDashboard size={20} /> },
+    { id: 'advisor',   label: 'AI Maslahat', icon: <Bot size={20} /> },
+    { id: 'orders',    label: 'Buyurtma',  icon: <ShoppingBag size={20} />, badge: unreadOrdersCount > 0 ? unreadOrdersCount : null },
+    { id: 'messages',  label: 'Xabar',     icon: <MessageCircle size={20} />, badge: unreadMessagesCount > 0 ? unreadMessagesCount : null },
+    { id: 'settings',  label: 'Profil',    icon: <SettingsIcon size={20} /> },
   ];
 
   return (
@@ -203,7 +201,7 @@ export default function DashboardPage() {
             onClick={() => setActive(n.id)}
             style={{ position: 'relative' }}
           >
-            <span style={{ fontSize: 20 }}>{n.emoji}</span>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 2 }}>{n.icon}</span>
             <span>{n.label}</span>
             {n.badge && <span className="dash-mobile-badge">{n.badge}</span>}
           </button>

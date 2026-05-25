@@ -40,7 +40,7 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
         <p style={{ fontSize: 13, color: '#888', marginTop: 4 }}>Shaxsiy va do'kon ma'lumotlarini tahrirlash</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div className="dash-settings-grid">
         {/* Personal Info */}
         <form className="ds-card" onSubmit={onProfileSubmit}>
           <h3>Shaxsiy ma'lumotlar</h3>
