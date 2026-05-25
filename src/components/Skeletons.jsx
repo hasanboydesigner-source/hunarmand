@@ -9,8 +9,6 @@ const pulseStyle = {
   borderRadius: '4px'
 };
 
-import ContentLoader from 'react-content-loader';
-
 export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
   if (viewMode === 'list') {
     return (
