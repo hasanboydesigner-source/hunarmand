@@ -152,7 +152,7 @@ export default function CraftsmanProfilePage() {
             </div>
             <div className="cp-meta-row">
               <span><MapPin size={13}/> {craftsman.region || 'O\'zbekiston'}</span>
-              <span><Star size={13} fill="#f59e0b" color="#f59e0b"/> {rating} ({reviewCount} sharh)</span>
+              <span><Star size={13} fill="#f59e0b" color="#f59e0b"/> {Number(rating || 0).toFixed(1)} ({reviewCount} sharh)</span>
               <span><span className="cat-icon-sm"><CategoryIcon name={cat?.icon} size={13} /></span> {cat?.label || craftsman.specialty || 'Hunarmand'}</span>
               <span><Clock size={13}/> Javob: {responseTime}</span>
             </div>
@@ -160,7 +160,7 @@ export default function CraftsmanProfilePage() {
               <div className="cp-stat"><strong>{products.length}</strong><span>Mahsulot</span></div>
               <div className="cp-stat"><strong>{totalSales.toLocaleString()}</strong><span>Sotuv</span></div>
               <div className="cp-stat"><strong>{yearsExp}</strong><span>Yil tajriba</span></div>
-              <div className="cp-stat"><strong>{rating}</strong><span>Reyting</span></div>
+              <div className="cp-stat"><strong>{Number(rating || 0).toFixed(1)}</strong><span>Reyting</span></div>
             </div>
           </div>
           <div className="cp-actions">

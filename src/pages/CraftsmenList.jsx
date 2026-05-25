@@ -165,7 +165,7 @@ export default function CraftsmenList() {
                   <h3>{c.shopName || c.name}</h3>
                   <div className="craftsman-meta">
                     <span><MapPin size={12} /> {c.region}</span>
-                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {c.rating} ({c.reviewCount} sharh)</span>
+                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {Number(c.rating || 0).toFixed(1)} ({c.reviewCount} sharh)</span>
                   </div>
                   <div className="craftsman-specialty">
                     <CategoryIcon name={CATEGORIES.find(cat => cat.id === (c.specialty || c.category))?.icon} size={14} />

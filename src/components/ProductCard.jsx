@@ -100,7 +100,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                 <Star key={s} size={12} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
               ))}
             </div>
-            <span>{product.rating}</span>
+            <span>{Number(product.rating || 0).toFixed(1)}</span>
             <span className="review-count">({product.reviewCount})</span>
           </div>
           <div className="pc-price-block">
@@ -197,7 +197,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               <Star key={s} size={12} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
             ))}
           </div>
-          <span className="rating-num">{product.rating}</span>
+          <span className="rating-num">{Number(product.rating || 0).toFixed(1)}</span>
           <span className="review-count">({product.reviewCount})</span>
         </div>
 

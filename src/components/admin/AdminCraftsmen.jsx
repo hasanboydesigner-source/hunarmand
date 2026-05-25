@@ -40,7 +40,7 @@ export default function AdminCraftsmen({ craftsmen, handleVerifyCraftsman }) {
                 <td>{c.region}</td>
                 <td>{c.specialty}</td>
                 <td>{c.totalProducts}</td>
-                <td>⭐ {c.rating}</td>
+                <td>⭐ {Number(c.rating || 0).toFixed(1)}</td>
                 <td><span className={`badge ${c.isVerified?'badge-success':'badge-warning'}`}>{c.isVerified?'Tasdiqlangan':'Kutilmoqda'}</span></td>
                 <td>
                   <div className="action-btns">
@@ -89,7 +89,7 @@ export default function AdminCraftsmen({ craftsmen, handleVerifyCraftsman }) {
                   </div>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Reyting</span>
-                    <p style={{ fontWeight: 600, fontSize: 14 }}>⭐ {selectedCraftsman.rating} ({selectedCraftsman.reviewCount} ta sharh)</p>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>⭐ {Number(selectedCraftsman.rating || 0).toFixed(1)} ({selectedCraftsman.reviewCount} ta sharh)</p>
                   </div>
                 </div>
               </div>

@@ -321,7 +321,7 @@ export default function ProductDetailPage() {
                 <Star key={s} size={15} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
               ))}
             </div>
-            <span className="pd-rating-num">{product.rating}</span>
+            <span className="pd-rating-num">{Number(product.rating || 0).toFixed(1)}</span>
             <span className="pd-review-count">({product.reviewCount} sharh)</span>
             <span className="pd-sold">{product.sold} ta sotilgan</span>
           </div>
@@ -387,7 +387,7 @@ export default function ProductDetailPage() {
                 <p className="cc-region"><MapPin size={12} /> {product.craftsman?.region}</p>
                 <div className="cc-rating">
                   <Star size={12} fill="#f59e0b" color="#f59e0b" />
-                  <span>{product.craftsman?.rating}</span>
+                  <span>{Number(product.craftsman?.rating || 0).toFixed(1)}</span>
                 </div>
               </div>
             </div>
@@ -451,7 +451,7 @@ export default function ProductDetailPage() {
             <div className="reviews-section">
               <div className="reviews-summary">
                 <div className="reviews-score">
-                  <span className="big-score">{product.rating}</span>
+                  <span className="big-score">{Number(product.rating || 0).toFixed(1)}</span>
                   <div className="stars">
                     {[1, 2, 3, 4, 5].map(s => <Star key={s} size={20} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />)}
                   </div>
