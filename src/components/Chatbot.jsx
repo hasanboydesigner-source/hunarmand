@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { MessageSquare, X, Send, Bot, User, Minimize2 } from 'lucide-react';
-import { API_URL, CATEGORIES } from '../data/constants';
+import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { API_URL } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuthStore, useUIStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
@@ -94,20 +94,20 @@ export default function Chatbot() {
   useEffect(() => {
     const defaultGreeting = GREETINGS[currentLang] || GREETINGS.uz;
     
-    // Always update first message if it's the default greeting (to switch language dynamically)
     if (messages.length === 0 && !user) {
       setMessages([{ role: 'ai', text: defaultGreeting }]);
     } else if (messages.length === 1 && !user && messages[0].role === 'ai') {
-      // If language changed while only greeting is present, update it
       setMessages([{ role: 'ai', text: defaultGreeting }]);
     }
   }, [messages.length, user, currentLang]);
 
-  // Auto-open logic: wait for products to load first, then open after 3 seconds (once per session)
+  // Auto-open logic: wait for products to load first, then open after 3 seconds (only if tour is completed)
   useEffect(() => {
+    const isTourDone = localStorage.getItem('tour-v2-done') === 'true';
+    if (!isTourDone) return;
+
     if (sessionStorage.getItem('chatbot_auto_opened')) return;
 
-    // If products loaded, open after short delay
     if (productsLoaded) {
       const timer = setTimeout(() => {
         setIsOpen(true);
@@ -116,7 +116,6 @@ export default function Chatbot() {
       return () => clearTimeout(timer);
     }
 
-    // Fallback: if on a page that doesn't load products, auto-open after 8 seconds
     const fallbackTimer = setTimeout(() => {
       if (!sessionStorage.getItem('chatbot_auto_opened')) {
         setIsOpen(true);
@@ -126,8 +125,11 @@ export default function Chatbot() {
     return () => clearTimeout(fallbackTimer);
   }, [productsLoaded]);
 
-  // Special greeting when a user logs in
+  // Special greeting when a user logs in (only if tour is completed)
   useEffect(() => {
+    const isTourDone = localStorage.getItem('tour-v2-done') === 'true';
+    if (!isTourDone) return;
+
     if (user && !hasGreetedUser) {
       setHasGreetedUser(true);
       const userName = user.name ? user.name.split(' ')[0] : '';
@@ -136,6 +138,20 @@ export default function Chatbot() {
       setTimeout(() => { setIsOpen(true); }, 1000);
     }
   }, [user, hasGreetedUser, currentLang]);
+
+  // Listen to the custom onboarding finish event to trigger chatbot
+  useEffect(() => {
+    const handleTourFinished = () => {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        sessionStorage.setItem('chatbot_auto_opened', 'true');
+      }, 800);
+      return () => clearTimeout(timer);
+    };
+
+    window.addEventListener('onboarding-tour-finished', handleTourFinished);
+    return () => window.removeEventListener('onboarding-tour-finished', handleTourFinished);
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
@@ -183,23 +199,24 @@ export default function Chatbot() {
           position: fixed;
           bottom: 24px;
           right: 20px;
-          width: 52px;
-          height: 52px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #c97a22, #b45309);
+          background: #c97a22;
           color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 18px rgba(201,122,34,0.45);
+          box-shadow: 0 4px 14px rgba(201, 122, 34, 0.22);
           border: none;
           cursor: pointer;
           z-index: 600;
-          transition: transform 0.2s, box-shadow 0.2s;
+          transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
         }
         .cb-btn:hover {
-          transform: scale(1.08);
-          box-shadow: 0 6px 24px rgba(201,122,34,0.6);
+          transform: scale(1.04);
+          background: #b45309;
+          box-shadow: 0 6px 18px rgba(201, 122, 34, 0.32);
         }
         .cb-btn.has-nav {
           bottom: 80px;
@@ -210,17 +227,17 @@ export default function Chatbot() {
           position: fixed;
           bottom: 88px;
           right: 20px;
-          width: 320px;
-          height: 480px;
+          width: 330px;
+          height: 490px;
           max-height: calc(100vh - 88px - 80px);
           background: #fff;
-          border-radius: 16px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+          border-radius: 14px;
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
           display: flex;
           flex-direction: column;
           z-index: 600;
           overflow: hidden;
-          border: 1px solid rgba(0,0,0,0.07);
+          border: 1px solid #e4e4e7;
           animation: cbSlideUp 0.25s cubic-bezier(.4,0,.2,1);
         }
         .cb-window.has-nav {
@@ -229,11 +246,11 @@ export default function Chatbot() {
         }
 
         @keyframes cbSlideUp {
-          from { opacity: 0; transform: translateY(14px) scale(0.97); }
+          from { opacity: 0; transform: translateY(10px) scale(0.98); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ── Mobile: to'liq kenglik, header ostiga chiqmaydi ── */
+        /* ── Mobile ── */
         @media (max-width: 540px) {
           .cb-btn {
             bottom: 20px;
@@ -261,17 +278,16 @@ export default function Chatbot() {
           }
         }
 
-        /* Scrollbar */
+        /* Scrollbars */
         .cb-messages::-webkit-scrollbar { width: 4px; }
         .cb-messages::-webkit-scrollbar-track { background: transparent; }
-        .cb-messages::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+        .cb-messages::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 4px; }
 
-        /* Quick replies scrollbar */
         .cb-quick::-webkit-scrollbar { display: none; }
         
-        /* Input focus */
         .cb-input:focus {
           border-color: #c97a22 !important;
+          background-color: #fff !important;
           outline: none;
         }
       `}</style>
@@ -284,21 +300,20 @@ export default function Chatbot() {
           onClick={() => setIsOpen(true)}
           aria-label="Chatbot ochish"
         >
-          <MessageSquare size={24} />
+          <MessageSquare size={22} />
         </button>
       )}
 
       {/* ── Chat Window ── */}
       {isOpen && (
-        <div className={`cb-window${hasBottomNav ? ' has-nav' : ''}`}
-          style={{ '--header-h': '64px' }}
-        >
+        <div className={`cb-window${hasBottomNav ? ' has-nav' : ''}`}>
           
           {/* Header */}
           <div style={{
-            padding: '12px 16px',
-            background: 'linear-gradient(135deg, #c97a22, #b45309)',
-            color: '#fff',
+            padding: '14px 16px',
+            background: '#ffffff',
+            borderBottom: '1px solid #f4f4f5',
+            color: '#18181b',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -306,33 +321,44 @@ export default function Chatbot() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                background: 'rgba(255,255,255,0.2)',
+                background: '#fff7ed',
                 padding: '6px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                color: '#c97a22',
+                border: '1px solid #ffedd5',
               }}>
                 <Bot size={18} />
               </div>
               <div>
-                <div style={{ fontSize: '14px', fontWeight: 700, lineHeight: 1.2 }}>E-Hunarmand AI</div>
-                <div style={{ fontSize: '11px', opacity: 0.85, marginTop: '1px' }}>Savdo yordamchisi</div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#18181b', lineHeight: 1.25 }}>E-Hunarmand AI</div>
+                <div style={{ fontSize: '11px', color: '#71717a', marginTop: '1.5px' }}>Savdo yordamchisi</div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
               style={{
-                background: 'rgba(255,255,255,0.15)',
+                background: 'transparent',
                 border: 'none',
-                color: '#fff',
+                color: '#a1a1aa',
                 cursor: 'pointer',
-                borderRadius: '50%',
-                width: '30px',
-                height: '30px',
+                borderRadius: '6px',
+                width: '28px',
+                height: '28px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                transition: 'background 0.15s, color 0.15s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#f4f4f5';
+                e.currentTarget.style.color = '#71717a';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#a1a1aa';
               }}
             >
               <X size={16} />
@@ -347,7 +373,7 @@ export default function Chatbot() {
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
-            background: '#f8f9fa',
+            background: '#fafafa',
           }}>
             {messages.map((msg, idx) => (
               <div key={idx} style={{
@@ -364,30 +390,29 @@ export default function Chatbot() {
                   height: '24px',
                   borderRadius: '50%',
                   flexShrink: 0,
-                  background: msg.role === 'user' ? '#e5e7eb' : '#fff4e6',
-                  color: msg.role === 'user' ? '#6b7280' : '#c97a22',
+                  background: msg.role === 'user' ? '#f4f4f5' : '#fff7ed',
+                  color: msg.role === 'user' ? '#71717a' : '#c97a22',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                  border: msg.role === 'user' ? '1px solid #e4e4e7' : '1px solid #ffedd5',
                 }}>
-                  {msg.role === 'user' ? <User size={13}/> : <Bot size={13}/>}
+                  {msg.role === 'user' ? <User size={12}/> : <Bot size={12}/>}
                 </div>
                 {/* Bubble */}
                 <div style={{
                   padding: '10px 13px',
-                  borderRadius: '14px',
-                  borderTopLeftRadius: msg.role === 'ai' ? '4px' : '14px',
-                  borderTopRightRadius: msg.role === 'user' ? '4px' : '14px',
-                  background: msg.role === 'user'
-                    ? 'linear-gradient(135deg, #c97a22, #b45309)'
-                    : '#fff',
-                  color: msg.role === 'user' ? '#fff' : '#1a1a1a',
-                  boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+                  borderRadius: '12px',
+                  borderTopLeftRadius: msg.role === 'ai' ? '2px' : '12px',
+                  borderTopRightRadius: msg.role === 'user' ? '2px' : '12px',
+                  background: msg.role === 'user' ? '#c97a22' : '#ffffff',
+                  color: msg.role === 'user' ? '#ffffff' : '#27272a',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   fontSize: '13px',
-                  lineHeight: '1.55',
+                  lineHeight: '1.5',
                   wordBreak: 'break-word',
-                  border: msg.role === 'user' ? 'none' : '1px solid #ebebeb',
+                  border: msg.role === 'user' ? 'none' : '1px solid #e4e4e7',
                 }}>
                   {msg.role === 'user' ? msg.text : parseMarkdown(msg.text, () => setIsOpen(false))}
                 </div>
@@ -399,15 +424,17 @@ export default function Chatbot() {
               <div style={{ alignSelf: 'flex-start', display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
                 <div style={{
                   width: '24px', height: '24px', borderRadius: '50%',
-                  background: '#fff4e6', color: '#c97a22',
+                  background: '#fff7ed', color: '#c97a22',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '1px solid #ffedd5',
                 }}>
-                  <Bot size={13}/>
+                  <Bot size={12}/>
                 </div>
                 <div style={{
-                  padding: '10px 14px', borderRadius: '14px', borderTopLeftRadius: '4px',
-                  background: '#fff', border: '1px solid #ebebeb',
-                  display: 'flex', gap: '4px', alignItems: 'center',
+                  padding: '10px 14px', borderRadius: '12px', borderTopLeftRadius: '2px',
+                  background: '#fff', border: '1px solid #e4e4e7',
+                  display: 'flex', gap: 4, alignItems: 'center',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                 }}>
                   {[0, 1, 2].map(i => (
                     <span key={i} style={{
@@ -420,7 +447,7 @@ export default function Chatbot() {
                   <style>{`
                     @keyframes dotBounce {
                       0%, 80%, 100% { transform: translateY(0); }
-                      40% { transform: translateY(-6px); }
+                      40% { transform: translateY(-5px); }
                     }
                   `}</style>
                 </div>
@@ -438,7 +465,7 @@ export default function Chatbot() {
               gap: '6px',
               overflowX: 'auto',
               whiteSpace: 'nowrap',
-              borderTop: '1px solid #f0f0f0',
+              borderTop: '1px solid #f4f4f5',
               scrollbarWidth: 'none',
             }}>
               {QUICK_REPLIES.map((reply, i) => (
@@ -448,9 +475,9 @@ export default function Chatbot() {
                   style={{
                     padding: '6px 12px',
                     borderRadius: '16px',
-                    border: '1px solid #f0b954',
-                    background: '#fff9f0',
-                    color: '#b45309',
+                    border: '1px solid #e4e4e7',
+                    background: '#ffffff',
+                    color: '#27272a',
                     fontSize: '12px',
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -459,14 +486,14 @@ export default function Chatbot() {
                     transition: 'all 0.15s',
                   }}
                   onMouseOver={e => {
-                    e.currentTarget.style.background = '#c97a22';
-                    e.currentTarget.style.color = '#fff';
-                    e.currentTarget.style.borderColor = '#c97a22';
+                    e.currentTarget.style.background = '#f4f4f5';
+                    e.currentTarget.style.color = '#18181b';
+                    e.currentTarget.style.borderColor = '#d4d4d8';
                   }}
                   onMouseOut={e => {
-                    e.currentTarget.style.background = '#fff9f0';
-                    e.currentTarget.style.color = '#b45309';
-                    e.currentTarget.style.borderColor = '#f0b954';
+                    e.currentTarget.style.background = '#ffffff';
+                    e.currentTarget.style.color = '#27272a';
+                    e.currentTarget.style.borderColor = '#e4e4e7';
                   }}
                 >
                   {reply}
@@ -479,7 +506,7 @@ export default function Chatbot() {
           <form onSubmit={handleSend} style={{
             padding: '10px 12px',
             background: '#fff',
-            borderTop: '1px solid #f0f0f0',
+            borderTop: '1px solid #f4f4f5',
             display: 'flex',
             gap: '8px',
             alignItems: 'center',
@@ -495,10 +522,10 @@ export default function Chatbot() {
                 flex: 1,
                 padding: '9px 14px',
                 borderRadius: '20px',
-                border: '1.5px solid #e5e7eb',
+                border: '1px solid #e4e4e7',
                 fontSize: '13px',
-                background: '#f8f9fa',
-                transition: 'border 0.2s',
+                background: '#f4f4f5',
+                transition: 'border 0.2s, background-color 0.2s',
               }}
               disabled={isLoading}
             />
@@ -506,26 +533,23 @@ export default function Chatbot() {
               type="submit"
               disabled={isLoading || !input.trim()}
               style={{
-                width: '38px',
-                height: '38px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '50%',
                 flexShrink: 0,
                 background: input.trim() && !isLoading
-                  ? 'linear-gradient(135deg, #c97a22, #b45309)'
-                  : '#f3f4f6',
-                color: input.trim() && !isLoading ? '#fff' : '#9ca3af',
+                  ? '#c97a22'
+                  : '#f4f4f5',
+                color: input.trim() && !isLoading ? '#fff' : '#a1a1aa',
                 border: 'none',
                 cursor: input.trim() && !isLoading ? 'pointer' : 'default',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 transition: 'all 0.2s',
-                boxShadow: input.trim() && !isLoading
-                  ? '0 3px 10px rgba(201,122,34,0.35)'
-                  : 'none',
               }}
             >
-              <Send size={16} style={{ marginLeft: '1px' }}/>
+              <Send size={15} style={{ marginLeft: '1px' }}/>
             </button>
           </form>
         </div>

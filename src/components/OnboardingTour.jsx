@@ -6,22 +6,24 @@ const STEPS = [
     targetId: 'search-btn',
     icon: Camera,
     iconColor: '#c97a22',
-    gradientFrom: '#c97a22',
-    gradientTo: '#f0a830',
-    badge: 'YANGI',
+    iconBg: '#fff7ed',
+    badgeColor: '#c97a22',
+    badgeBg: '#fff7ed',
+    badge: 'Yangi imkoniyat',
     title: 'Rasm orqali qidirish',
-    description: "Kerakli mahsulotni topish uchun faqat matn emas — rasm ham yuklay olasiz! AI kamera yoki galereyangizdan yuklangan rasm orqali o'xshash hunarmandchilik buyumlarini topib beradi.",
+    description: "Kerakli mahsulotni tez topish uchun uning rasmini yuklang. Sun'iy intellektimiz unga eng yaqin o'xshash milliy hunarmandchilik buyumlarini topib beradi.",
     placement: 'bottom',
   },
   {
     targetId: 'tour-chatbot-btn',
     icon: Bot,
-    iconColor: '#7c3aed',
-    gradientFrom: '#7c3aed',
-    gradientTo: '#a855f7',
-    badge: 'AI',
-    title: 'Bepul AI Maslahatchi',
-    description: "Qanday sovg'a tanlashni bilmayapsizmi? Bizning AI yordamchimiz sizga narx, material va hunarmand bo'yicha tavsiyalar beradi. Kun-u tun, bepul ishlaydi!",
+    iconColor: '#2563eb',
+    iconBg: '#eff6ff',
+    badgeColor: '#2563eb',
+    badgeBg: '#eff6ff',
+    badge: 'AI Maslahatchi',
+    title: 'Sun\'iy intellekt yordamchisi',
+    description: "Mahsulotlar, narxlar yoki materiallar haqida so'rang. Bizning virtual yordamchimiz kun-u tun sizga to'g'ri tanlov qilishda ko'maklashadi.",
     placement: 'top',
   },
 ];
@@ -45,14 +47,21 @@ function useElementRect(id, active) {
   return rect;
 }
 
-const PAD = 10;
-const TW = 340; // tooltip width
-const TH = 260; // tooltip estimated height
+const PAD = 8;
+const TW = 320; // Tooltip width
+const TH = 230; // Estimated tooltip height
 
 export default function OnboardingTour() {
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const tooltipRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const done = localStorage.getItem('tour-v2-done');
@@ -68,6 +77,8 @@ export default function OnboardingTour() {
   const finish = () => {
     setVisible(false);
     localStorage.setItem('tour-v2-done', 'true');
+    // Dispatch custom event to notify chatbot
+    window.dispatchEvent(new CustomEvent('onboarding-tour-finished'));
   };
 
   const next = () => {
@@ -81,32 +92,50 @@ export default function OnboardingTour() {
 
   if (!visible || !rect) return null;
 
-  // --- Tooltip position (fixed, viewport coords) ---
-  let tooltipTop, tooltipLeft;
+  // --- Tooltip positioning (Desktop) ---
+  let tooltipTop = 0;
+  let tooltipLeft = 0;
 
-  if (current.placement === 'bottom') {
-    tooltipTop = rect.bottom + PAD;
+  if (!isMobile) {
+    if (current.placement === 'bottom') {
+      tooltipTop = rect.bottom + PAD;
+    } else {
+      tooltipTop = rect.top - TH - PAD;
+    }
+
+    // Center horizontally relative to target element
+    tooltipLeft = rect.left + rect.width / 2 - TW / 2;
+
+    // Viewport safety boundary clamping
+    tooltipLeft = Math.max(12, Math.min(tooltipLeft, window.innerWidth - TW - 12));
+    tooltipTop = Math.max(12, Math.min(tooltipTop, window.innerHeight - TH - 12));
   } else {
-    tooltipTop = rect.top - TH - PAD;
+    // Mobile placement: top/bottom based on element viewport center
+    const centerY = rect.top + rect.height / 2;
+    if (centerY > window.innerHeight / 2) {
+      tooltipTop = 16; // Top of the screen if element is in the bottom half
+    } else {
+      tooltipTop = window.innerHeight - 220 - 16; // Bottom of the screen if element is in the top half
+    }
   }
-
-  // Center horizontally over the element
-  tooltipLeft = rect.left + rect.width / 2 - TW / 2;
-  // Clamp to viewport
-  tooltipLeft = Math.max(12, Math.min(tooltipLeft, window.innerWidth - TW - 12));
-  // Keep tooltip in viewport vertically
-  tooltipTop = Math.max(12, Math.min(tooltipTop, window.innerHeight - TH - 12));
 
   const IconComp = current.icon;
   const isLast = step === STEPS.length - 1;
 
+  // Styling helpers
+  const brandColor = '#c97a22';
+
   return (
     <>
-      {/* SVG Overlay with spotlight cutout */}
+      {/* SVG Overlay with clean cutout */}
       <svg
         style={{
-          position: 'fixed', inset: 0, width: '100%', height: '100%',
-          zIndex: 9000, pointerEvents: 'none',
+          position: 'fixed',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 9000,
+          pointerEvents: 'none',
         }}
       >
         <defs>
@@ -117,229 +146,301 @@ export default function OnboardingTour() {
               y={rect.top - PAD}
               width={rect.width + PAD * 2}
               height={rect.height + PAD * 2}
-              rx="10"
+              rx="8"
               fill="black"
             />
           </mask>
         </defs>
         <rect
-          width="100%" height="100%"
-          fill="rgba(10,12,20,0.72)"
+          width="100%"
+          height="100%"
+          fill="rgba(9, 9, 11, 0.55)"
           mask="url(#tour-mask)"
         />
       </svg>
 
-      {/* Spotlight border ring (clickable overlay for dismiss) */}
+      {/* Dismiss overlay */}
       <div
         onClick={finish}
         style={{
-          position: 'fixed', inset: 0, zIndex: 9001,
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9001,
           cursor: 'default',
         }}
       />
 
-      {/* Spotlight animated ring */}
+      {/* Spotlight border ring - Minimalist, very subtle pulse */}
       <div style={{
         position: 'fixed',
         top: rect.top - PAD,
         left: rect.left - PAD,
         width: rect.width + PAD * 2,
         height: rect.height + PAD * 2,
-        borderRadius: 10,
-        border: `2px solid ${current.gradientFrom}`,
+        borderRadius: 8,
+        border: `1.5px solid ${brandColor}`,
         zIndex: 9002,
         pointerEvents: 'none',
-        animation: 'ringPulse 2s ease-in-out infinite',
+        animation: 'spotlightPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         boxSizing: 'border-box',
       }} />
 
-      {/* Tooltip */}
+      {/* Tooltip Card */}
       <div
         ref={tooltipRef}
         onClick={e => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          top: tooltipTop,
-          left: tooltipLeft,
-          width: TW,
-          zIndex: 9003,
-          borderRadius: 18,
-          overflow: 'hidden',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.28), 0 4px 20px rgba(0,0,0,0.15)',
-          animation: 'tooltipIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          background: '#fff',
-        }}
+        style={
+          isMobile
+            ? {
+                position: 'fixed',
+                left: 12,
+                right: 12,
+                top: tooltipTop,
+                zIndex: 9003,
+                borderRadius: 14,
+                overflow: 'hidden',
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                animation: 'tooltipIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+                background: '#fff',
+                border: '1px solid #e4e4e7',
+                padding: '16px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+              }
+            : {
+                position: 'fixed',
+                top: tooltipTop,
+                left: tooltipLeft,
+                width: TW,
+                zIndex: 9003,
+                borderRadius: 14,
+                overflow: 'hidden',
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                animation: 'tooltipIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+                background: '#fff',
+                border: '1px solid #e4e4e7',
+                padding: '16px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+              }
+        }
       >
-        {/* Arrow pointing to element */}
-        {current.placement === 'bottom' && rect.top + rect.height + PAD === tooltipTop && (
+        {/* Little pointer arrow (Desktop only) */}
+        {!isMobile && current.placement === 'bottom' && (
           <div style={{
-            position: 'absolute', top: -7, left: TW / 2 - 7,
-            width: 14, height: 14,
-            background: current.gradientFrom,
+            position: 'absolute',
+            top: -6,
+            left: TW / 2 - 6,
+            width: 12,
+            height: 12,
+            background: '#fff',
+            borderTop: '1px solid #e4e4e7',
+            borderLeft: '1px solid #e4e4e7',
             transform: 'rotate(45deg)',
-            borderRadius: 2,
+            zIndex: 1,
+          }} />
+        )}
+        {!isMobile && current.placement === 'top' && (
+          <div style={{
+            position: 'absolute',
+            bottom: -6,
+            left: TW / 2 - 6,
+            width: 12,
+            height: 12,
+            background: '#fff',
+            borderBottom: '1px solid #e4e4e7',
+            borderRight: '1px solid #e4e4e7',
+            transform: 'rotate(45deg)',
             zIndex: 1,
           }} />
         )}
 
-        {/* Gradient Header */}
+        {/* Minimalist Header */}
         <div style={{
-          background: `linear-gradient(135deg, ${current.gradientFrom}, ${current.gradientTo})`,
-          padding: '18px 18px 16px',
-          position: 'relative',
-          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          marginBottom: 12,
         }}>
-          {/* Background blobs */}
-          <div style={{ position: 'absolute', top: -24, right: -16, width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
-          <div style={{ position: 'absolute', bottom: -20, left: 20, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {/* Icon */}
-              <div style={{
-                width: 44, height: 44, borderRadius: 13,
-                background: 'rgba(255,255,255,0.2)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <IconComp size={22} color="#fff" strokeWidth={1.8} />
-              </div>
-
-              {/* Title area */}
-              <div>
-                <span style={{
-                  display: 'inline-block',
-                  background: 'rgba(255,255,255,0.22)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: '#fff',
-                  fontSize: 9.5,
-                  fontWeight: 800,
-                  letterSpacing: 1.2,
-                  padding: '2px 7px',
-                  borderRadius: 99,
-                  textTransform: 'uppercase',
-                  marginBottom: 5,
-                  display: 'block',
-                  width: 'fit-content',
-                }}>
-                  {current.badge}
-                </span>
-                <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
-                  {current.title}
-                </h3>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Clean Icon Wrapper */}
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: current.iconBg,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <IconComp size={18} color={current.iconColor} strokeWidth={2} />
             </div>
 
-            {/* Close */}
-            <button
-              onClick={finish}
-              style={{
-                width: 30, height: 30,
-                borderRadius: 8,
-                background: 'rgba(255,255,255,0.15)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', flexShrink: 0,
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.28)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div style={{ padding: '16px 18px 18px', background: '#fff' }}>
-          <p style={{ margin: '0 0 16px', fontSize: 13.5, color: '#555', lineHeight: 1.68 }}>
-            {current.description}
-          </p>
-
-          {/* Step progress bar */}
-          <div style={{ display: 'flex', gap: 5, marginBottom: 16 }}>
-            {STEPS.map((s, i) => (
-              <div key={i} style={{
-                height: 3,
+            <div>
+              {/* Badge */}
+              <span style={{
+                display: 'inline-block',
+                background: current.badgeBg,
+                color: current.badgeColor,
+                fontSize: 9.5,
+                fontWeight: 600,
+                letterSpacing: 0.5,
+                padding: '2px 8px',
                 borderRadius: 99,
-                flex: i === step ? 2.5 : 1,
-                background: i <= step ? current.gradientFrom : '#f0f0f0',
-                transition: 'all 0.4s ease',
-              }} />
-            ))}
+                marginBottom: 3,
+              }}>
+                {current.badge}
+              </span>
+              {/* Title */}
+              <h3 style={{ margin: 0, fontSize: 14.5, fontWeight: 600, color: '#18181b', lineHeight: 1.25 }}>
+                {current.title}
+              </h3>
+            </div>
           </div>
 
-          {/* Step counter + actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Step counter */}
-            <span style={{ fontSize: 11.5, color: '#bbb', marginRight: 'auto' }}>
-              {step + 1} / {STEPS.length}
-            </span>
-
-            {step > 0 && (
-              <button
-                onClick={prev}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '7px 13px', borderRadius: 9,
-                  border: '1.5px solid #e8e8e8',
-                  background: '#fafafa',
-                  fontSize: 12.5, color: '#666', fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'border-color 0.15s',
-                }}
-              >
-                <ChevronLeft size={13} /> Orqaga
-              </button>
-            )}
-
-            <button
-              onClick={next}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '8px 18px', borderRadius: 9,
-                background: `linear-gradient(135deg, ${current.gradientFrom}, ${current.gradientTo})`,
-                color: '#fff', border: 'none',
-                fontSize: 13, fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: `0 5px 16px ${current.gradientFrom}55`,
-                transition: 'transform 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              {isLast
-                ? <><Sparkles size={13} /> Boshlash!</>
-                : <>Keyingi <ChevronRight size={13} /></>
-              }
-            </button>
-          </div>
-
-          {/* Skip */}
+          {/* Close button */}
           <button
             onClick={finish}
             style={{
-              display: 'block', margin: '12px auto 0',
-              background: 'none', border: 'none',
-              fontSize: 11.5, color: '#ccc',
+              width: 28,
+              height: 28,
+              borderRadius: 6,
+              background: 'transparent',
+              border: 'none',
+              color: '#a1a1aa',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
+              transition: 'background 0.15s, color 0.15s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#f4f4f5';
+              e.currentTarget.style.color = '#71717a';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#a1a1aa';
             }}
           >
-            Qo'llanmani o'tkazib yuborish
+            <X size={14} />
           </button>
         </div>
+
+        {/* Content Body */}
+        <p style={{
+          margin: '0 0 14px',
+          fontSize: 13,
+          color: '#52525b',
+          lineHeight: 1.6,
+          fontWeight: 400,
+        }}>
+          {current.description}
+        </p>
+
+        {/* Step Indicator (Lines) */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+          {STEPS.map((_, i) => (
+            <div key={i} style={{
+              height: 3,
+              borderRadius: 2,
+              flex: i === step ? 2 : 1,
+              background: i === step ? brandColor : '#e4e4e7',
+              transition: 'all 0.3s ease',
+            }} />
+          ))}
+        </div>
+
+        {/* Footer Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 'auto' }}>
+          {/* Counter */}
+          <span style={{ fontSize: 11.5, color: '#a1a1aa', marginRight: 'auto', fontWeight: 500 }}>
+            {step + 1} / {STEPS.length}
+          </span>
+
+          {step > 0 && (
+            <button
+              onClick={prev}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '6px 12px',
+                borderRadius: 8,
+                border: '1px solid #e4e4e7',
+                background: '#ffffff',
+                fontSize: 12,
+                color: '#27272a',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#f4f4f5'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; }}
+            >
+              <ChevronLeft size={13} /> Orqaga
+            </button>
+          )}
+
+          <button
+            onClick={next}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '7px 16px',
+              borderRadius: 8,
+              background: brandColor,
+              color: '#ffffff',
+              border: 'none',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.15s, transform 0.1s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#b45309'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = brandColor; }}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            {isLast ? (
+              <><Sparkles size={13} /> Boshlash</>
+            ) : (
+              <>Keyingi <ChevronRight size={13} /></>
+            )}
+          </button>
+        </div>
+
+        {/* Skip button */}
+        <button
+          onClick={finish}
+          style={{
+            alignSelf: 'center',
+            background: 'none',
+            border: 'none',
+            fontSize: 11,
+            color: '#a1a1aa',
+            cursor: 'pointer',
+            marginTop: 10,
+            fontWeight: 500,
+            textDecoration: 'none',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#71717a'; e.currentTarget.style.textDecoration = 'underline'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#a1a1aa'; e.currentTarget.style.textDecoration = 'none'; }}
+        >
+          Qo'llanmani o'tkazib yuborish
+        </button>
       </div>
 
       <style>{`
         @keyframes tooltipIn {
-          from { opacity: 0; transform: scale(0.92) translateY(8px); }
+          from { opacity: 0; transform: scale(0.96) translateY(4px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @keyframes ringPulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 3px rgba(201,122,34,0.2); }
-          50%       { opacity: 0.6; box-shadow: 0 0 0 7px rgba(201,122,34,0.06); }
+        @keyframes spotlightPulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 1px rgba(201, 122, 34, 0.2); }
+          50%       { opacity: 0.7; box-shadow: 0 0 0 4px rgba(201, 122, 34, 0.08); }
         }
       `}</style>
     </>
