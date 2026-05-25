@@ -7,6 +7,8 @@ import ProductCard from '../components/ProductCard';
 import CategoryIcon from '../components/CategoryIcon';
 import { Filter, Grid3X3, List, SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { ProductCardSkeleton } from '../components/Skeletons';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 import './Products.css';
 
 export default function ProductsPage() {
@@ -21,7 +23,13 @@ export default function ProductsPage() {
   const sort = params.get('sort') || 'newest';
   const q = params.get('q') || '';
   const minPrice = Number(params.get('minPrice') || 0);
-  const maxPrice = Number(params.get('maxPrice') || 3000000);
+  const maxPrice = Number(params.get('maxPrice') || 150000000);
+
+  const [priceRange, setPriceRange] = useState([minPrice, maxPrice]);
+
+  useEffect(() => {
+    setPriceRange([minPrice, maxPrice]);
+  }, [minPrice, maxPrice]);
 
   const [allProducts, setAllProducts] = useState([]);
   
@@ -231,12 +239,29 @@ export default function ProductsPage() {
 
           {/* Price Filter */}
           <FilterGroup title="Narx oralig'i">
-            <div className="price-inputs">
-              <input type="number" className="form-input" placeholder="Min" defaultValue={minPrice}
-                onBlur={(e) => set('minPrice', e.target.value)} />
+            <div style={{ padding: '10px 10px 20px', marginBottom: '5px' }}>
+              <Slider
+                range
+                min={0}
+                max={150000000}
+                step={50000}
+                value={priceRange}
+                onChange={(val) => setPriceRange(val)}
+                onChangeComplete={(val) => {
+                  set('minPrice', val[0]);
+                  set('maxPrice', val[1]);
+                }}
+                trackStyle={[{ backgroundColor: 'var(--brand-500, #d4822a)' }]}
+                handleStyle={[
+                  { borderColor: 'var(--brand-500, #d4822a)', backgroundColor: '#fff', opacity: 1 },
+                  { borderColor: 'var(--brand-500, #d4822a)', backgroundColor: '#fff', opacity: 1 }
+                ]}
+              />
+            </div>
+            <div className="price-inputs" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '500', color: 'var(--text-secondary)' }}>
+              <span>{formatPrice(priceRange[0])}</span>
               <span>—</span>
-              <input type="number" className="form-input" placeholder="Max" defaultValue={maxPrice}
-                onBlur={(e) => set('maxPrice', e.target.value)} />
+              <span>{formatPrice(priceRange[1])}</span>
             </div>
           </FilterGroup>
 
