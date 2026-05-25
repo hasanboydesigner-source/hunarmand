@@ -94,7 +94,7 @@ export default function CartPage() {
                       <button
                         className="qty-btn-sm"
                         onClick={() => {
-                          if (item.inStock && item.quantity >= item.inStock) {
+                          if (item.inStock !== undefined && item.quantity >= item.inStock) {
                             toast.warning(`Omborda faqat ${item.inStock} ta mavjud!`, { icon: '⚠️' });
                             return;
                           }

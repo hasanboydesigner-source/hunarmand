@@ -31,20 +31,35 @@ export const useCartStore = create(
       addItem: (product, quantity = 1, variant = null) => {
         const key = variant ? `${product.id}-${variant}` : product.id;
         const existing = get().items.find((i) => i.key === key);
+        const stockLimit = product.inStock !== undefined ? product.inStock : Infinity;
+
         if (existing) {
           set((s) => ({
-            items: s.items.map((i) =>
-              i.key === key ? { ...i, quantity: i.quantity + quantity } : i
-            ),
+            items: s.items.map((i) => {
+              if (i.key === key) {
+                const newQty = i.quantity + quantity;
+                return { ...i, quantity: newQty > stockLimit ? stockLimit : newQty };
+              }
+              return i;
+            })
           }));
         } else {
-          set((s) => ({ items: [...s.items, { ...product, key, quantity, variant }] }));
+          const initialQty = quantity > stockLimit ? stockLimit : quantity;
+          if (initialQty > 0) {
+            set((s) => ({ items: [...s.items, { ...product, key, quantity: initialQty, variant }] }));
+          }
         }
       },
       removeItem: (key) => set((s) => ({ items: s.items.filter((i) => i.key !== key) })),
       updateQuantity: (key, qty) => {
         if (qty <= 0) { get().removeItem(key); return; }
-        set((s) => ({ items: s.items.map((i) => (i.key === key ? { ...i, quantity: qty } : i)) }));
+        set((s) => ({ items: s.items.map((i) => {
+          if (i.key === key) {
+            const stockLimit = i.inStock !== undefined ? i.inStock : Infinity;
+            return { ...i, quantity: qty > stockLimit ? stockLimit : qty };
+          }
+          return i;
+        }) }));
       },
       clearCart: () => set({ items: [] }),
       get total() {
