@@ -11,6 +11,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
 import certificateRoutes from './routes/certificateRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/search', searchRoutes);
 
 app.get('/', (req, res) => {
   res.send('E-Hunarmand API is running...');

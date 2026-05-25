@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '../store/useStore';
-import { MOCK_PRODUCTS, CATEGORIES } from '../data/constants';
+import { MOCK_PRODUCTS, CATEGORIES, API_URL } from '../data/constants';
 import CategoryIcon from './CategoryIcon';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import { Search, X, TrendingUp, Clock, ArrowRight, Camera, Upload, Sparkles } from 'lucide-react';
 import './SearchModal.css';
 
@@ -51,20 +53,33 @@ export default function SearchModal() {
 
   const clearRecent = () => { setRecent([]); localStorage.removeItem('search-recent'); };
 
-  const handleVisualSearch = (e) => {
+  const handleVisualSearch = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
     setIsVisualSearch(true);
     setVisualLoading(true);
+    setQuery("Rasmdagiga o'xshash mahsulotlar");
     
-    // Mock AI Analysis time
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const res = await axios.post(`${API_URL}/search/visual`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setResults(res.data || []);
+      if (res.data && res.data.length === 0) {
+        toast.info("Rasmga o'xshash mahsulot topilmadi.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Qidiruvda xatolik yuz berdi. Iltimos qayta urinib ko'ring.");
+      setResults([]);
+    } finally {
       setVisualLoading(false);
-      // Mock results
-      setResults(MOCK_PRODUCTS.slice(0, 3));
-      setQuery("Rasmdagiga o'xshash mahsulotlar");
-    }, 2500);
+    }
   };
 
   if (!searchOpen) return null;
@@ -133,11 +148,11 @@ export default function SearchModal() {
             <div className="search-section">
               <p className="search-section-title">Natijalar</p>
               {results.map((p) => (
-                <button key={p.id} className="search-result-item" onClick={() => { closeSearch(); navigate(`/products/${p.id}`); }}>
+                <button key={p._id || p.id} className="search-result-item" onClick={() => { closeSearch(); navigate(`/products/${p._id || p.id}`); }}>
                   <img src={p.image} alt={p.title} className="search-result-img" />
                   <div className="search-result-info">
                     <p className="search-result-title">{p.title}</p>
-                    <p className="search-result-meta">{p.craftsman?.name} • {p.craftsman?.region}</p>
+                    <p className="search-result-meta">{p.craftsman?.name || p.craftsman?.shopName} • {p.craftsman?.region || 'O\'zbekiston'}</p>
                   </div>
                   <ArrowRight size={14} className="search-result-arrow" />
                 </button>
