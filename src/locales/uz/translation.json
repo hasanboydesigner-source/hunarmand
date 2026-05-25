@@ -162,5 +162,74 @@
     "invalid_email": "Noto'g'ri email formati",
     "reset_sent": "Tiklash havolasi emailga yuborildi!",
     "google_restricted": "Hozirda Google account orqali kirish imkoniyati cheklangan! ⚠️"
+  },
+  "categories_page": {
+    "eyebrow": "Hunarmandchilik yo'nalishlari",
+    "title": "Kategoriyalar",
+    "subtitle": "O'zbekistonning boy hunarmandchilik an'analarini 8 ta asosiy yo'nalish orqali kashf eting",
+    "stat_category": "Kategoriya",
+    "stat_product": "Mahsulot",
+    "stat_craftsman": "Hunarmand",
+    "stat_region": "Viloyat",
+    "products_count": "{{count}} ta mahsulot",
+    "view": "Ko'rish"
+  },
+  "products_page": {
+    "title": "Barcha Mahsulotlar",
+    "filter_category": "Kategoriya",
+    "filter_region": "Hudud",
+    "filter_price": "Narx oralig'i (so'm)",
+    "min_price": "Min narx",
+    "max_price": "Maks narx",
+    "filter_rating": "Reyting",
+    "rating_and_up": "{{rating}} va undan yuqori",
+    "results_count": "{{count}} ta mahsulot topildi",
+    "sort_by": "Saralash:",
+    "sort_newest": "Eng yangilari",
+    "sort_cheapest": "Arzonlari oldin",
+    "sort_expensive": "Qimmatlari oldin",
+    "sort_popular": "Ommaboplari",
+    "no_results": "Mahsulot topilmadi",
+    "no_results_desc": "Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting",
+    "clear_filters": "Filtrlarni tozalash"
+  },
+  "categories_data": {
+    "keramika": {
+      "label": "Keramika",
+      "desc": "Rishton, Farg'ona va boshqa viloyatlarning rang-barang loy idishlari"
+    },
+    "gilam": {
+      "label": "Gilam",
+      "desc": "Buxoro, Xiva va Samarqandning an'anaviy ipak va jun gilamlari"
+    },
+    "zargarlik": {
+      "label": "Zargarlik",
+      "desc": "Kumush va oltin bilan bezatilgan milliy zargarlik buyumlari"
+    },
+    "yogoch": {
+      "label": "Yog'och o'ymakorligi",
+      "desc": "Yong'oq va tut yog'ochidan o'yilgan naqshli devoriy panellar"
+    },
+    "toʻqimachilik": {
+      "label": "To'qimachilik",
+      "desc": "Marg'ilon atlas va adras, Buxoro shoyi — tabiiy ipak matolar"
+    },
+    "naqqoshlik": {
+      "label": "Naqqoshlik",
+      "desc": "Buxoro miniatura rasmlari va devoriy naqshlar, tabiiy bo'yoqlar"
+    },
+    "misgarlik": {
+      "label": "Misgarlik",
+      "desc": "Chust va Qo'qon mis ustalarining qo'l ishlari — samovar, idishlar"
+    },
+    "kandakorlik": {
+      "label": "Kandakorlik",
+      "desc": "Xiva va Buxoro an'anaviy o'ymakorlik — sandiqcha, lavhalar"
+    }
+  },
+  "common": {
+    "add_to_cart": "Savatga",
+    "out_of_stock": "Sotuvda yo'q",
+    "price_uzs": "{{price}} so'm"
   }
 }

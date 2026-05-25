@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star, ShoppingCart, Eye, Zap } from 'lucide-react';
 import { useCartStore, useWishlistStore, useAuthStore } from '../store/useStore';
-import { formatPrice, getDiscount, getInitials } from '../data/constants';
+import { getDiscount, getInitials } from '../data/constants';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import './ProductCard.css';
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -104,16 +106,16 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <span className="review-count">({product.reviewCount})</span>
           </div>
           <div className="pc-price-block">
-            <p className="pc-price">{formatPrice(product.price)}</p>
+            <p className="pc-price">{t('common.price_uzs', { price: new Intl.NumberFormat('uz-UZ').format(product.price) })}</p>
             {product.originalPrice && (
-              <p className="pc-original">{formatPrice(product.originalPrice)}</p>
+              <p className="pc-original">{t('common.price_uzs', { price: new Intl.NumberFormat('uz-UZ').format(product.originalPrice) })}</p>
             )}
           </div>
           <button
             className="btn btn-primary btn-sm"
             onClick={handleAddToCart}
           >
-            <ShoppingCart size={14} /> Savatga
+            <ShoppingCart size={14} /> {t('common.add_to_cart')}
           </button>
           <button
             className={`btn btn-icon ${wished ? 'wished' : 'btn-secondary'}`}
@@ -178,7 +180,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         {product.inStock <= 3 && product.inStock > 0 && (
           <div className="pc-low-stock">Faqat {product.inStock} ta</div>
         )}
-        {product.inStock === 0 && <div className="pc-out-stock">Tugagan</div>}
+        {product.inStock === 0 && <div className="pc-out-stock">{t('common.out_of_stock')}</div>}
       </div>
 
       <div className="pc-body">
@@ -204,19 +206,19 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
         <div className="pc-footer">
           <div className="pc-price-block">
-            <p className="pc-price">{formatPrice(product.price)}</p>
+            <p className="pc-price">{t('common.price_uzs', { price: new Intl.NumberFormat('uz-UZ').format(product.price) })}</p>
             {product.originalPrice && (
-              <p className="pc-original">{formatPrice(product.originalPrice)}</p>
+              <p className="pc-original">{t('common.price_uzs', { price: new Intl.NumberFormat('uz-UZ').format(product.originalPrice) })}</p>
             )}
           </div>
           <button
             className="pc-cart-btn"
             onClick={handleAddToCart}
             disabled={product.inStock === 0}
-            title="Savatga qo'shish"
+            title={t('common.add_to_cart')}
           >
             <ShoppingCart size={16} />
-            <span className="pc-cart-btn-text">Sotib olish</span>
+            <span className="pc-cart-btn-text">{t('common.add_to_cart')}</span>
           </button>
         </div>
       </div>

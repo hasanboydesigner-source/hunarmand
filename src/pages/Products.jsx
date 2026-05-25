@@ -10,8 +10,10 @@ import { ProductCardSkeleton } from '../components/Skeletons';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import './Products.css';
+import { useTranslation } from 'react-i18next';
 
 export default function ProductsPage() {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState('grid');
   const [isViewChanging, setIsViewChanging] = useState(false);
@@ -156,7 +158,7 @@ export default function ProductsPage() {
   }, [allProducts, q, category, region, sort, minPrice, maxPrice]);
 
   const activeFilters = [
-    category && { key: 'category', label: CATEGORIES.find(c=>c.id===category)?.label || category },
+    category && { key: 'category', label: t(`categories_data.${category}.label`, { defaultValue: CATEGORIES.find(c=>c.id===category)?.label || category }) },
     region && { key: 'region', label: region },
     q && { key: 'q', label: `"${q}"` },
   ].filter(Boolean);
@@ -168,16 +170,16 @@ export default function ProductsPage() {
         <div className="container">
           <div className="pph-inner">
             <div>
-              <h1>Barcha mahsulotlar</h1>
+              <h1>{t('products_page.title')}</h1>
               <p>
-                {filtered.length} ta mahsulot topildi
+                {t('products_page.results_count', { count: filtered.length })}
               </p>
             </div>
             <div className="pph-search">
               <Search size={16} />
               <input
                 className="pph-search-input"
-                placeholder="Mahsulot qidiring..."
+                placeholder={t('nav.search')}
                 value={q}
                 onChange={(e) => set('q', e.target.value)}
               />
@@ -190,13 +192,13 @@ export default function ProductsPage() {
         {/* Sidebar Filters */}
         <aside className={`filters-sidebar ${filtersOpen ? 'open' : ''}`}>
           <div className="filters-header">
-            <h3><Filter size={16} /> Filtrlar</h3>
+            <h3><Filter size={16} /> {t('products_page.filter_category').replace('Kategoriya', 'Filtrlar')}</h3>
             {activeFilters.length > 0 && (
               <button 
                 className="clear-filters" 
                 onClick={clearAll}
               >
-                Tozalash
+                {t('products_page.clear_filters')}
               </button>
             )}
           </div>
@@ -217,18 +219,18 @@ export default function ProductsPage() {
           )}
 
           {/* Category Filter */}
-          <FilterGroup title="Kategoriya">
+          <FilterGroup title={t('products_page.filter_category')}>
             <div className="filter-options">
               <label className="filter-option">
                 <input type="radio" name="cat" checked={!category} onChange={() => set('category', '')} />
-                <span>Barchasi</span>
+                <span>{t('categories_page.stat_category').replace('Kategoriya', 'Barchasi')}</span>
               </label>
               {CATEGORIES.map((c) => (
                 <label key={c.id} className="filter-option">
                   <input type="radio" name="cat" checked={category===c.id} onChange={() => set('category', c.id)} />
                   <span>
                     <span className="cat-icon-sm"><CategoryIcon name={c.icon} size={13} /></span> 
-                    {c.label}
+                    {t(`categories_data.${c.id}.label`, { defaultValue: c.label })}
                   </span>
                 </label>
               ))}
@@ -236,19 +238,19 @@ export default function ProductsPage() {
           </FilterGroup>
 
           {/* Region Filter */}
-          <FilterGroup title="Hudud">
+          <FilterGroup title={t('products_page.filter_region')}>
             <select 
               className="form-input form-select" 
               value={region} 
               onChange={(e) => set('region', e.target.value)}
             >
-              <option value="">Barcha hududlar</option>
+              <option value="">{t('products_page.filter_region')}...</option>
               {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </FilterGroup>
 
           {/* Price Filter */}
-          <FilterGroup title="Narx oralig'i">
+          <FilterGroup title={t('products_page.filter_price')}>
             <div className="dual-slider-container">
               <div className="dual-slider-track"></div>
               <div className="dual-slider-range" style={{ 
@@ -285,7 +287,7 @@ export default function ProductsPage() {
               />
             </div>
             <div className="price-inputs">
-              <input type="number" className="form-input" placeholder="Min" value={priceRange[0]}
+              <input type="number" className="form-input" placeholder={t('products_page.min_price')} value={priceRange[0]}
                 onChange={(e) => {
                   const val = Number(e.target.value);
                   setPriceRange([val, priceRange[1]]);
@@ -294,7 +296,7 @@ export default function ProductsPage() {
                   set('minPrice', e.target.value);
                 }} />
               <span>—</span>
-              <input type="number" className="form-input" placeholder="Max" value={priceRange[1]}
+              <input type="number" className="form-input" placeholder={t('products_page.max_price')} value={priceRange[1]}
                 onChange={(e) => {
                   const val = Number(e.target.value);
                   setPriceRange([priceRange[0], val]);
@@ -306,11 +308,11 @@ export default function ProductsPage() {
           </FilterGroup>
 
           {/* Rating */}
-          <FilterGroup title="Reyting">
+          <FilterGroup title={t('products_page.filter_rating')}>
             {[5,4,3].map((r) => (
               <label key={r} className="filter-option">
                 <input type="radio" name="rating" />
-                <span>{'⭐'.repeat(r)} va yuqori</span>
+                <span>{'⭐'.repeat(r)} {t('products_page.rating_and_up', { rating: '' })}</span>
               </label>
             ))}
           </FilterGroup>
@@ -332,7 +334,11 @@ export default function ProductsPage() {
                 value={sort} 
                 onChange={(e) => set('sort', e.target.value)}
               >
-                {SORT_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                <option value="newest">{t('products_page.sort_newest')}</option>
+                <option value="popular">{t('products_page.sort_popular')}</option>
+                <option value="price_asc">{t('products_page.sort_cheapest')}</option>
+                <option value="price_desc">{t('products_page.sort_expensive')}</option>
+                <option value="rating">{t('products_page.filter_rating')} ({t('products_page.rating_and_up', { rating: '' }).trim()})</option>
               </select>
               <div className="view-toggle">
                 <button className={`view-btn ${view==='grid'?'active':''}`} onClick={() => handleViewChange('grid')}><Grid3X3 size={16} /></button>
@@ -365,14 +371,14 @@ export default function ProductsPage() {
               }}>
                 <Search size={36} strokeWidth={1.5} />
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Mahsulot topilmadi</h3>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Filtrlarni o'zgartirib ko'ring yoki boshqa kalit so'z kiriting</p>
+              <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>{t('products_page.no_results')}</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>{t('products_page.no_results_desc')}</p>
               <button 
                 className="btn btn-primary" 
                 onClick={clearAll}
                 style={{ margin: '0 auto' }}
               >
-                Filtrlarni tozalash
+                {t('products_page.clear_filters')}
               </button>
             </div>
           ) : (

@@ -162,5 +162,74 @@
     "invalid_email": "Invalid email format",
     "reset_sent": "Reset link sent to your email!",
     "google_restricted": "Currently, signing in with a Google account is restricted! ⚠️"
+  },
+  "categories_page": {
+    "eyebrow": "Crafting Directions",
+    "title": "Categories",
+    "subtitle": "Discover the rich crafting traditions of Uzbekistan through 8 main directions",
+    "stat_category": "Categories",
+    "stat_product": "Products",
+    "stat_craftsman": "Craftsmen",
+    "stat_region": "Regions",
+    "products_count": "{{count}} products",
+    "view": "View"
+  },
+  "products_page": {
+    "title": "All Products",
+    "filter_category": "Category",
+    "filter_region": "Region",
+    "filter_price": "Price Range (UZS)",
+    "min_price": "Min price",
+    "max_price": "Max price",
+    "filter_rating": "Rating",
+    "rating_and_up": "{{rating}} and up",
+    "results_count": "{{count}} products found",
+    "sort_by": "Sort by:",
+    "sort_newest": "Newest",
+    "sort_cheapest": "Price: Low to High",
+    "sort_expensive": "Price: High to Low",
+    "sort_popular": "Most Popular",
+    "no_results": "No products found",
+    "no_results_desc": "Try changing the filters or entering a different keyword",
+    "clear_filters": "Clear filters"
+  },
+  "categories_data": {
+    "keramika": {
+      "label": "Ceramics",
+      "desc": "Colorful clay dishes from Rishtan, Fergana, and other regions"
+    },
+    "gilam": {
+      "label": "Carpets",
+      "desc": "Traditional silk and wool carpets from Bukhara, Khiva, and Samarkand"
+    },
+    "zargarlik": {
+      "label": "Jewelry",
+      "desc": "National jewelry decorated with silver and gold"
+    },
+    "yogoch": {
+      "label": "Wood Carving",
+      "desc": "Carved wall panels made of walnut and mulberry wood"
+    },
+    "toʻqimachilik": {
+      "label": "Textiles",
+      "desc": "Margilan atlas and adras, Bukhara silk — natural silk fabrics"
+    },
+    "naqqoshlik": {
+      "label": "Painting",
+      "desc": "Bukhara miniature paintings and wall patterns, natural dyes"
+    },
+    "misgarlik": {
+      "label": "Copperwork",
+      "desc": "Handicrafts of copper masters of Chust and Kokand — samovars, dishes"
+    },
+    "kandakorlik": {
+      "label": "Engraving",
+      "desc": "Khiva and Bukhara traditional engraving — boxes, trays"
+    }
+  },
+  "common": {
+    "add_to_cart": "Add to Cart",
+    "out_of_stock": "Out of Stock",
+    "price_uzs": "{{price}} UZS"
   }
 }
