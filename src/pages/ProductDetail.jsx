@@ -14,6 +14,8 @@ import { ProductDetailSkeleton } from '../components/Skeletons';
 import CategoryIcon from '../components/CategoryIcon';
 import { toast } from 'react-toastify';
 import {
+  Star, Heart, ShoppingCart, Zap, Share2, Flag, MapPin,
+  Package, Clock, Shield, ChevronRight, MessageCircle, ExternalLink,
   ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send, X, ShieldCheck, Box
 } from 'lucide-react';
 import './ProductDetail.css';
