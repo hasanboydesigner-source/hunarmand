@@ -239,17 +239,58 @@ export default function ProductsPage() {
 
           {/* Price Filter */}
           <FilterGroup title="Narx oralig'i">
+            <div className="dual-slider-container">
+              <div className="dual-slider-track"></div>
+              <div className="dual-slider-range" style={{ 
+                left: `${(priceRange[0] / 150000000) * 100}%`, 
+                right: `${100 - (priceRange[1] / 150000000) * 100}%` 
+              }}></div>
+              <input 
+                type="range" 
+                min={0} 
+                max={150000000} 
+                step={50000} 
+                value={priceRange[0]} 
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), priceRange[1] - 50000);
+                  setPriceRange([val, priceRange[1]]);
+                }}
+                onMouseUp={() => set('minPrice', priceRange[0])}
+                onTouchEnd={() => set('minPrice', priceRange[0])}
+                className="dual-slider-input" 
+              />
+              <input 
+                type="range" 
+                min={0} 
+                max={150000000} 
+                step={50000} 
+                value={priceRange[1]} 
+                onChange={(e) => {
+                  const val = Math.max(Number(e.target.value), priceRange[0] + 50000);
+                  setPriceRange([priceRange[0], val]);
+                }}
+                onMouseUp={() => set('maxPrice', priceRange[1])}
+                onTouchEnd={() => set('maxPrice', priceRange[1])}
+                className="dual-slider-input" 
+              />
+            </div>
             <div className="price-inputs">
-              <input type="number" className="form-input" placeholder="Min" defaultValue={priceRange[0]}
+              <input type="number" className="form-input" placeholder="Min" value={priceRange[0]}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setPriceRange([val, priceRange[1]]);
+                }}
                 onBlur={(e) => {
                   set('minPrice', e.target.value);
-                  setPriceRange([Number(e.target.value), priceRange[1]]);
                 }} />
               <span>—</span>
-              <input type="number" className="form-input" placeholder="Max" defaultValue={priceRange[1]}
+              <input type="number" className="form-input" placeholder="Max" value={priceRange[1]}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setPriceRange([priceRange[0], val]);
+                }}
                 onBlur={(e) => {
                   set('maxPrice', e.target.value);
-                  setPriceRange([priceRange[0], Number(e.target.value)]);
                 }} />
             </div>
           </FilterGroup>
