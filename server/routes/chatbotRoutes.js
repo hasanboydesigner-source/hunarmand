@@ -46,18 +46,51 @@ ${productListText}
       parts: [{ text: m.text }]
     }));
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: geminiMessages,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.7,
-      }
-    });
+    // List of models to try in order (Fallback Strategy)
+    const modelsToTry = [
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-1.5-flash-8b'
+    ];
 
-    res.json({ text: response.text });
+    let responseText = null;
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`[Chatbot] Trying model: ${modelName}...`);
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: geminiMessages,
+          config: {
+            systemInstruction: systemInstruction,
+            temperature: 0.7,
+          }
+        });
+        
+        if (response && response.text) {
+          responseText = response.text;
+          console.log(`[Chatbot] Muaffaqiyatli: ${modelName} orqali javob olindi.`);
+          break; // Stop trying if successful
+        }
+      } catch (err) {
+        console.error(`[Chatbot] Xatolik: ${modelName} modelida muammo yuz berdi:`, err.message);
+        lastError = err;
+        // Continue to the next model in the loop
+      }
+    }
+
+    if (responseText) {
+      res.json({ text: responseText });
+    } else {
+      // If all models failed
+      console.error('[Chatbot] Barcha modellar xato berdi!', lastError);
+      res.status(500).json({ message: 'Chatbotda xatolik yuz berdi. Hech qaysi model ishlamadi.' });
+    }
+
   } catch (error) {
-    console.error('Chatbot xatosi:', error);
+    console.error('Chatbot umumiy xatosi:', error);
     res.status(500).json({ message: 'Chatbotda xatolik yuz berdi.' });
   }
 });
