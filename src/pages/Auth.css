@@ -130,7 +130,11 @@
   color: var(--brand-600); 
 }
 
-@media (max-width: 1024px) { .auth-visual { display: none; } .auth-layout { grid-template-columns: 1fr; } .auth-form-panel { padding: 40px 24px; min-height: 100vh; } }
+@media (max-width: 1024px) { 
+  .auth-visual { display: none; } 
+  .auth-layout { grid-template-columns: 1fr; min-height: auto; } 
+  .auth-form-panel { padding: 32px 24px 80px; min-height: calc(100vh - 70px); align-items: flex-start; } 
+}
 
 /* Modal Overlay */
 .modal-overlay {
