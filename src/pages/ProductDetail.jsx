@@ -257,7 +257,7 @@ export default function ProductDetailPage() {
   const craftsmanCat = CATEGORIES.find((c) => c.id === product.craftsman?.specialty || c.id === product.category);
 
   return (
-    <div className="pd-page page-with-header">
+    <div className="pd-page page-with-header pattern-bg-dark">
       {/* Breadcrumb */}
       <div className="breadcrumb-bar">
         <div className="container">

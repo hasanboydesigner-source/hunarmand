@@ -164,7 +164,7 @@ export default function ProductsPage() {
   ].filter(Boolean);
 
   return (
-    <div className="products-page page-with-header">
+    <div className="products-page page-with-header pattern-bg-products">
       {/* Page Header */}
       <div className="products-page-header">
         <div className="container">

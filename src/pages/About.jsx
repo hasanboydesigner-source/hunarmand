@@ -55,7 +55,7 @@ export default function AboutPage() {
       </section>
 
       {/* Mission */}
-      <section className="about-mission">
+      <section className="about-mission pattern-bg-about">
         <div className="container about-mission-inner">
           <div className="about-mission-text">
             <span className="eyebrow">{t('about.mission_eyebrow')}</span>

@@ -94,7 +94,7 @@ export default function CraftsmenList() {
   }, [q, region, specialty, craftsmen]);
 
   return (
-    <div className="craftsmen-list-page page-with-header">
+    <div className="craftsmen-list-page page-with-header pattern-bg-craftsmen">
       {/* Hero Header */}
       <div className="clp-header">
         <div className="container">
