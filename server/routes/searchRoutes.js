@@ -7,13 +7,38 @@ dotenv.config();
 
 const router = express.Router();
 
+// Simple in-memory rate limiter to prevent API abuse
+const rateLimitMap = new Map();
+const rateLimiter = (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute
+  const maxRequests = 5; // 5 requests per minute
+
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, []);
+  }
+
+  const timestamps = rateLimitMap.get(ip);
+  // Remove requests older than 1 minute
+  const recentTimestamps = timestamps.filter(time => now - time < windowMs);
+
+  if (recentTimestamps.length >= maxRequests) {
+    return res.status(429).json({ message: "Siz juda ko'p qidiruv qildingiz. Iltimos 1 daqiqa kuting." });
+  }
+
+  recentTimestamps.push(now);
+  rateLimitMap.set(ip, recentTimestamps);
+  next();
+};
+
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // @route   POST /api/search/visual
 // @desc    Perform visual search using Gemini Vision
-router.post('/visual', upload.single('image'), async (req, res) => {
+router.post('/visual', rateLimiter, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "Iltimos, rasm yuklang." });
