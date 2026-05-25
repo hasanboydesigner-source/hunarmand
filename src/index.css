@@ -348,13 +348,13 @@ select {
   padding: 16px 40px;
   font-size: 16px;
 }
-.btn-icon {
-  padding: 10px;
+.btn.btn-icon {
+  padding: 0;
   width: 40px;
   height: 40px;
   border-radius: 50%;
 }
-.btn-icon::before {
+.btn.btn-icon::before {
   display: none;
 }
 
