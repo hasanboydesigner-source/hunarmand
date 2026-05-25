@@ -10,43 +10,35 @@ const pulseStyle = {
 };
 
 export const ProductCardSkeleton = () => (
-  <div 
-    style={{ 
-      background: 'var(--bg-primary)', 
-      border: '1px solid var(--border-light)', 
-      borderRadius: 'var(--radius-lg)', 
-      padding: '16px', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      gap: '12px' 
-    }}
-  >
-    {/* Product Image */}
-    <div style={{ ...pulseStyle, width: '100%', height: '200px', borderRadius: '12px' }} />
-    
-    {/* Craftsman Avatar & Details */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-      <div style={{ ...pulseStyle, width: '32px', height: '32px', borderRadius: '50%' }} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
-        <div style={{ ...pulseStyle, width: '60%', height: '8px' }} />
-        <div style={{ ...pulseStyle, width: '40%', height: '6px' }} />
-      </div>
-    </div>
-    
-    {/* Product Title */}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
-      <div style={{ ...pulseStyle, width: '90%', height: '12px' }} />
-      <div style={{ ...pulseStyle, width: '70%', height: '10px' }} />
-    </div>
-    
-    {/* Rating */}
-    <div style={{ ...pulseStyle, width: '80px', height: '8px', marginTop: '4px' }} />
-    
-    {/* Price & Buy Button */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-      <div style={{ ...pulseStyle, width: '110px', height: '18px' }} />
-      <div style={{ ...pulseStyle, width: '36px', height: '32px', borderRadius: '8px' }} />
-    </div>
+  <div className="product-card" style={{ padding: 0, height: '100%', border: '1px solid var(--border-light)' }}>
+    <ContentLoader 
+      speed={2}
+      width="100%"
+      height="100%"
+      viewBox="0 0 260 410"
+      backgroundColor="var(--bg-tertiary, #f3f4f6)"
+      foregroundColor="var(--bg-secondary, #e5e7eb)"
+      style={{ width: "100%", height: "auto", display: "block" }}
+    >
+      {/* Product Image */}
+      <rect x="0" y="0" rx="0" ry="0" width="260" height="220" />
+      
+      {/* Craftsman Avatar & Details */}
+      <circle cx="30" cy="250" r="16" /> 
+      <rect x="56" y="238" rx="4" ry="4" width="120" height="10" />
+      <rect x="56" y="254" rx="4" ry="4" width="80" height="10" />
+      
+      {/* Product Title */}
+      <rect x="14" y="280" rx="6" ry="6" width="232" height="14" />
+      <rect x="14" y="302" rx="6" ry="6" width="180" height="14" />
+      
+      {/* Rating */}
+      <rect x="14" y="328" rx="4" ry="4" width="100" height="12" />
+      
+      {/* Price & Buy Button */}
+      <rect x="14" y="370" rx="4" ry="4" width="110" height="20" />
+      <rect x="210" y="360" rx="8" ry="8" width="36" height="36" />
+    </ContentLoader>
   </div>
 );
 
