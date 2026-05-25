@@ -41,7 +41,9 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
             flexDirection: 'column', 
             gap: 12, 
             cursor: 'default',
-            background: 'var(--bg-primary)'
+            background: 'var(--bg-primary)',
+            width: '100%',
+            alignItems: 'stretch'
           }}
         >
           <ContentLoader 
@@ -51,7 +53,7 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
             viewBox="0 0 320 360"
             backgroundColor="var(--bg-tertiary, #f3f4f6)"
             foregroundColor="var(--bg-secondary, #e5e7eb)"
-            style={{ width: "100%", height: "auto", display: "block" }}
+            style={{ width: "100%", height: "auto", display: "block", alignSelf: "stretch" }}
           >
             {/* Image at top */}
             <rect x="0" y="0" rx="8" ry="8" width="320" height="160" />
@@ -88,7 +90,9 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
           border: '1px solid var(--border-light)', 
           display: 'flex', 
           cursor: 'default',
-          background: 'var(--bg-primary)'
+          background: 'var(--bg-primary)',
+          width: '100%',
+          alignItems: 'stretch'
         }}
       >
         <ContentLoader 
@@ -98,7 +102,7 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
           viewBox="0 0 800 130"
           backgroundColor="var(--bg-tertiary, #f3f4f6)"
           foregroundColor="var(--bg-secondary, #e5e7eb)"
-          style={{ width: "100%", height: "auto", display: "block" }}
+          style={{ width: "100%", height: "auto", display: "block", alignSelf: "stretch" }}
         >
           {/* Image */}
           <rect x="0" y="0" rx="8" ry="8" width="130" height="130" />
