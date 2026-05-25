@@ -339,12 +339,22 @@
   }
 
   .pcl-actions {
-    flex-direction: row;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
     width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
+    align-items: center;
+  }
+  .pcl-actions .pc-price-block {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .pcl-actions .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+  .pcl-actions .btn-icon {
+    flex-shrink: 0;
   }
 
   /* Grid view card styling for mobile */
