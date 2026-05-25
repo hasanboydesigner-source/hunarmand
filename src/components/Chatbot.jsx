@@ -1,16 +1,53 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Gift, Sparkles, Gem, Truck } from 'lucide-react';
 import { API_URL } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuthStore, useUIStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
 
-const QUICK_REPLIES_LANG = {
-  uz: ["🎁 Sovg'a qidiryapman", "🏺 Keramika mahsulotlari", "💍 Zargarlik buyumlari", "🚚 Yetkazib berish qanday?"],
-  ru: ["🎁 Ищу подарок", "🏺 Керамические изделия", "💍 Ювелирные изделия", "🚚 Как работает доставка?"],
-  en: ["🎁 Looking for a gift", "🏺 Ceramic products", "💍 Jewelry", "🚚 How does delivery work?"]
-};
+const QUICK_REPLIES_DATA = [
+  {
+    icon: Gift,
+    iconColor: '#c97a22',
+    iconBg: '#fff7ed',
+    text: {
+      uz: "Sovg'a qidiryapman",
+      ru: "Ищу подарок",
+      en: "Looking for a gift"
+    }
+  },
+  {
+    icon: Sparkles,
+    iconColor: '#2563eb',
+    iconBg: '#eff6ff',
+    text: {
+      uz: "Keramika mahsulotlari",
+      ru: "Керамические изделия",
+      en: "Ceramic products"
+    }
+  },
+  {
+    icon: Gem,
+    iconColor: '#7c3aed',
+    iconBg: '#f5f3ff',
+    text: {
+      uz: "Zargarlik buyumlari",
+      ru: "Ювелирные изделия",
+      en: "Jewelry"
+    }
+  },
+  {
+    icon: Truck,
+    iconColor: '#059669',
+    iconBg: '#ecfdf5',
+    text: {
+      uz: "Yetkazib berish qanday?",
+      ru: "Как работает доставка?",
+      en: "How does delivery work?"
+    }
+  }
+];
 
 const GREETINGS = {
   uz: "Assalomu alaykum! Men E-Hunarmand savdo yordamchisiman. Qanday milliy hunarmandchilik mahsulotini qidirmoqdasiz?",
@@ -86,7 +123,6 @@ export default function Chatbot() {
   const { i18n } = useTranslation();
   
   const currentLang = i18n.language || 'uz';
-  const QUICK_REPLIES = QUICK_REPLIES_LANG[currentLang] || QUICK_REPLIES_LANG.uz;
 
   const [hasGreetedUser, setHasGreetedUser] = useState(false);
 
@@ -462,43 +498,62 @@ export default function Chatbot() {
               padding: '8px 12px',
               background: '#fff',
               display: 'flex',
-              gap: '6px',
+              gap: '8px',
               overflowX: 'auto',
               whiteSpace: 'nowrap',
               borderTop: '1px solid #f4f4f5',
               scrollbarWidth: 'none',
             }}>
-              {QUICK_REPLIES.map((reply, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(null, reply)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    border: '1px solid #e4e4e7',
-                    background: '#ffffff',
-                    color: '#27272a',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    transition: 'all 0.15s',
-                  }}
-                  onMouseOver={e => {
-                    e.currentTarget.style.background = '#f4f4f5';
-                    e.currentTarget.style.color = '#18181b';
-                    e.currentTarget.style.borderColor = '#d4d4d8';
-                  }}
-                  onMouseOut={e => {
-                    e.currentTarget.style.background = '#ffffff';
-                    e.currentTarget.style.color = '#27272a';
-                    e.currentTarget.style.borderColor = '#e4e4e7';
-                  }}
-                >
-                  {reply}
-                </button>
-              ))}
+              {QUICK_REPLIES_DATA.map((reply, i) => {
+                const IconComp = reply.icon;
+                const labelText = reply.text[currentLang] || reply.text.uz;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(null, labelText)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '16px',
+                      border: '1px solid #e4e4e7',
+                      background: '#ffffff',
+                      color: '#27272a',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.background = '#f4f4f5';
+                      e.currentTarget.style.color = '#18181b';
+                      e.currentTarget.style.borderColor = '#d4d4d8';
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.background = '#ffffff';
+                      e.currentTarget.style.color = '#27272a';
+                      e.currentTarget.style.borderColor = '#e4e4e7';
+                    }}
+                  >
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: reply.iconColor,
+                      background: reply.iconBg,
+                      padding: '3px',
+                      borderRadius: '4px',
+                      marginRight: '2px',
+                    }}>
+                      <IconComp size={12} />
+                    </span>
+                    {labelText}
+                  </button>
+                );
+              })}
             </div>
           )}
 
