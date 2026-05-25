@@ -279,6 +279,7 @@ export default function Chatbot() {
       {/* ── Floating Button ── */}
       {!isOpen && (
         <button
+          id="tour-chatbot-btn"
           className={`cb-btn${hasBottomNav ? ' has-nav' : ''}`}
           onClick={() => setIsOpen(true)}
           aria-label="Chatbot ochish"

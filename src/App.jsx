@@ -9,6 +9,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
 import ScrollToTop from './components/ScrollToTop';
+import OnboardingTour from './components/OnboardingTour';
 import Chatbot from './components/Chatbot';
 import MobileBottomNav from './components/MobileBottomNav';
 import { useAuthStore } from './store/useStore';
@@ -99,6 +100,7 @@ function AppContent() {
     <div className={`app-container ${user && !isDashboardOrAdmin ? 'has-bottom-nav' : ''}`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <GlobalLoader isLoading={isAppLoading} />
       <ScrollToTop />
+      {!isDashboardOrAdmin && <OnboardingTour />}
       {/* Global Components - hidden on admin & dashboard */}
       {!isDashboardOrAdmin && <Header />}
       {!isDashboardOrAdmin && <SearchModal />}
