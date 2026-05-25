@@ -47,7 +47,7 @@ ${productListText}
 Javobingiz faqat quyidagi formatda bo'lishi shart:
 ["id1", "id2", "id3"]`;
 
-    const modelName = 'gemini-1.5-flash';
+    const modelName = 'gemini-2.5-flash';
 
     console.log(`[Visual Search] Analyzing image with ${modelName}...`);
     
