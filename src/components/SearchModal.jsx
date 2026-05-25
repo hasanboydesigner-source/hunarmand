@@ -5,7 +5,7 @@ import { MOCK_PRODUCTS, CATEGORIES, API_URL } from '../data/constants';
 import CategoryIcon from './CategoryIcon';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Search, X, TrendingUp, Clock, ArrowRight, Camera, Upload, Sparkles } from 'lucide-react';
+import { Search, X, TrendingUp, Clock, ArrowRight, Camera, Sparkles, ArrowLeft } from 'lucide-react';
 import './SearchModal.css';
 
 const TRENDING = ['Rishton keramika', 'Buxoro gilam', 'Atlas mato', 'Kumush uzuk', 'Mis samovar'];
@@ -17,9 +17,16 @@ export default function SearchModal() {
   const [recent, setRecent] = useState(() => JSON.parse(localStorage.getItem('search-recent') || '[]'));
   const [isVisualSearch, setIsVisualSearch] = useState(false);
   const [visualLoading, setVisualLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const fileInputRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (searchOpen) { setTimeout(() => inputRef.current?.focus(), 100); setQuery(''); setResults([]); }
@@ -89,18 +96,24 @@ export default function SearchModal() {
       <div className="search-modal animate-scaleIn" onClick={(e) => e.stopPropagation()}>
         {/* Input */}
         <div className="search-input-wrap">
-          <Search size={20} className="search-icon" />
+          {isMobile ? (
+            <button className="search-back-btn" onClick={closeSearch} aria-label="Orqaga">
+              <ArrowLeft size={22} />
+            </button>
+          ) : (
+            <Search size={20} className="search-icon" />
+          )}
           <input
             ref={inputRef}
             className="search-input"
-            placeholder="Mahsulot, hunarmand yoki kategoriya..."
+            placeholder={isMobile ? "Mahsulot yoki hunarmand..." : "Mahsulot, hunarmand yoki kategoriya..."}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             id="global-search-input"
           />
           {query && !isVisualSearch && (
-            <button className="search-clear" onClick={() => setQuery('')}><X size={16} /></button>
+            <button className="search-clear" onClick={() => setQuery('')} aria-label="Tozalash"><X size={16} /></button>
           )}
           
           {/* Visual Search Button */}
@@ -121,7 +134,9 @@ export default function SearchModal() {
             capture="environment"
           />
 
-          <button className="search-close" onClick={closeSearch} style={{ marginLeft: '8px' }}><X size={20} /></button>
+          {!isMobile && (
+            <button className="search-close" onClick={closeSearch} style={{ marginLeft: '8px' }} aria-label="Yopish"><X size={20} /></button>
+          )}
         </div>
 
         <div className="search-body">
@@ -196,7 +211,7 @@ export default function SearchModal() {
                 <div className="search-categories">
                   {CATEGORIES.map((c) => (
                     <button key={c.id} className="search-cat-item"
-                      onClick={() => { closeSearch(); navigate(`/products?category=${c.id}`); }}>
+                       onClick={() => { closeSearch(); navigate(`/products?category=${c.id}`); }}>
                       <span className="cat-icon"><CategoryIcon name={c.icon} size={20} /></span>
                       <span>{c.label}</span>
                     </button>

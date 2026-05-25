@@ -216,3 +216,83 @@
 .search-empty span {
   font-size: 13px;
 }
+
+/* ─── Responsive (Mobile Full-Screen Search Modal) ─────────── */
+@media (max-width: 640px) {
+  .search-overlay {
+    padding-top: 0;
+    padding-inline: 0;
+    align-items: stretch;
+    background: var(--bg-primary);
+    z-index: 9999;
+  }
+
+  .search-modal {
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .search-input-wrap {
+    padding: 12px 14px;
+    gap: 8px;
+    height: 56px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .search-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--text-primary);
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.15s;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .search-back-btn:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .search-input {
+    font-size: 15px;
+  }
+
+  .search-camera-btn {
+    width: 34px !important;
+    height: 34px !important;
+    background: var(--bg-tertiary) !important;
+    color: var(--brand-500) !important;
+  }
+
+  .search-clear {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+  }
+
+  /* Make categories grid fit better on mobile screen */
+  .search-categories {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .search-cat-item {
+    padding: 10px 4px;
+    font-size: 11px;
+    gap: 4px;
+    border-radius: var(--radius-md);
+  }
+
+  .search-section {
+    padding: 14px 16px;
+  }
+}
+
