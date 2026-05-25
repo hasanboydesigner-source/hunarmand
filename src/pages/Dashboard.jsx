@@ -116,7 +116,7 @@ export default function DashboardPage() {
   // Mobile nav items
   const NAV_MOBILE = [
     { id: 'overview',  label: 'Umumiy',    icon: <LayoutDashboard size={20} /> },
-    { id: 'advisor',   label: 'AI Maslahat', icon: <Bot size={20} /> },
+    { id: 'advisor',   label: 'Maslahat', icon: <Bot size={20} /> },
     { id: 'orders',    label: 'Buyurtma',  icon: <ShoppingBag size={20} />, badge: unreadOrdersCount > 0 ? unreadOrdersCount : null },
     { id: 'messages',  label: 'Xabar',     icon: <MessageCircle size={20} />, badge: unreadMessagesCount > 0 ? unreadMessagesCount : null },
     { id: 'settings',  label: 'Profil',    icon: <SettingsIcon size={20} /> },
