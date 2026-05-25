@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send, ChevronLeft } from 'lucide-react';
 
 export default function DashboardMessages({ messages = [], selectMessageThread, handleSendReply }) {
   const [reply, setReply] = useState('');
@@ -72,9 +72,9 @@ export default function DashboardMessages({ messages = [], selectMessageThread, 
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 14, height: 'calc(100vh - 190px)' }}>
+      <div className={`messages-layout ${active ? 'chat-active' : ''}`}>
         {/* Message List */}
-        <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 14, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="messages-list">
           {messages.length === 0 ? (
             <div style={{ padding: '30px 16px', textAlign: 'center', color: '#bbb' }}>
               <MessageCircle size={32} strokeWidth={1.5} style={{ marginBottom: 8 }}/>
@@ -119,11 +119,18 @@ export default function DashboardMessages({ messages = [], selectMessageThread, 
         </div>
 
         {/* Chat Area */}
-        <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="message-chat">
           {active && localThread ? (
             <>
               {/* Chat header */}
               <div style={{ padding: '14px 18px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <button 
+                  className="dash-menu-toggle" 
+                  onClick={() => setActive(null)} 
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 4, width: 32, height: 32 }}
+                >
+                  <ChevronLeft size={18} />
+                </button>
                 <div style={{ width: 34, height: 34, borderRadius: 9, background: '#fff0dc', color: '#c97a22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>
                   {activeThread?.initial}
                 </div>

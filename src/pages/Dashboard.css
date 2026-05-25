@@ -737,7 +737,7 @@
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .charts-grid { grid-template-columns: 1fr; }
   .dash-bottom-grid { grid-template-columns: 1fr; }
-  .messages-layout { grid-template-columns: 1fr; height: auto; }
+  .messages-layout { height: auto; }
 }
 
 @media (max-width: 1024px) {
@@ -748,6 +748,10 @@
   .dash-mobile-nav { display: flex; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .dash-settings-grid { grid-template-columns: 1fr; }
+  
+  .messages-layout { grid-template-columns: 1fr; }
+  .messages-layout.chat-active .messages-list { display: none !important; }
+  .messages-layout:not(.chat-active) .message-chat { display: none !important; }
 }
 
 @media (max-width: 640px) {
