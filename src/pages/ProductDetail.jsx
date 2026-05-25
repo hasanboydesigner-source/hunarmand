@@ -14,9 +14,7 @@ import { ProductDetailSkeleton } from '../components/Skeletons';
 import CategoryIcon from '../components/CategoryIcon';
 import { toast } from 'react-toastify';
 import {
-  Star, Heart, ShoppingCart, Zap, Share2, Flag, MapPin,
-  Package, Clock, Shield, ChevronRight, MessageCircle, ExternalLink,
-  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send, X, ShieldCheck
+  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send, X, ShieldCheck, Box
 } from 'lucide-react';
 import './ProductDetail.css';
 
@@ -34,6 +32,7 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('desc');
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [show3D, setShow3D] = useState(false);
 
   // Review Form
   const [reviewForm, setReviewForm] = useState({ rating: 5, author: '', text: '' });
@@ -270,21 +269,52 @@ export default function ProductDetailPage() {
         {/* ── Left: Gallery ── */}
         <div className="pd-gallery" style={{ minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
           <div className="pd-main-img" style={{ overflow: 'hidden', maxWidth: '100%' }}>
-            <Swiper
-              spaceBetween={0}
-              navigation={false}
-              thumbs={{ swiper: thumbsSwiper }}
-              modules={[FreeMode, Navigation, Thumbs]}
-              className="pd-main-swiper"
-              style={{ width: '100%', height: '100%', overflow: 'hidden' }}
-            >
-              {images.map((img, i) => (
-                <SwiperSlide key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', boxSizing: 'border-box', padding: '0px', overflow: 'hidden' }}>
-                  <img src={img} alt={`${product.title} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'multiply', display: 'block' }} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-            {discount > 0 && <div className="pd-discount-badge">-{discount}%</div>}
+            {show3D && product.model3DUrl ? (
+              <div style={{ width: '100%', height: '100%', minHeight: '400px', background: '#f5f5f5', borderRadius: '12px' }}>
+                <model-viewer
+                  src={product.model3DUrl}
+                  ios-src={product.model3DUrl}
+                  poster={product.image}
+                  alt="3D model of the product"
+                  shadow-intensity="1"
+                  camera-controls
+                  auto-rotate
+                  ar
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  <button slot="ar-button" style={{ backgroundColor: 'white', borderRadius: '4px', border: 'none', position: 'absolute', top: '16px', right: '16px', padding: '8px 16px', fontWeight: 600, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                    AR da ko'rish
+                  </button>
+                </model-viewer>
+              </div>
+            ) : (
+              <Swiper
+                spaceBetween={0}
+                navigation={false}
+                thumbs={{ swiper: thumbsSwiper }}
+                modules={[FreeMode, Navigation, Thumbs]}
+                className="pd-main-swiper"
+                style={{ width: '100%', height: '100%', overflow: 'hidden' }}
+              >
+                {images.map((img, i) => (
+                  <SwiperSlide key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', boxSizing: 'border-box', padding: '0px', overflow: 'hidden' }}>
+                    <img src={img} alt={`${product.title} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'multiply', display: 'block' }} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            )}
+            
+            {product.model3DUrl && (
+              <button 
+                className="pd-3d-toggle-btn"
+                onClick={() => setShow3D(!show3D)}
+                style={{ position: 'absolute', bottom: '16px', left: '16px', zIndex: 10, background: show3D ? '#1a1a1a' : '#c97a22', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+              >
+                <Box size={16} /> {show3D ? "Rasmni ko'rish" : "3D (AR) ko'rish"}
+              </button>
+            )}
+            
+            {discount > 0 && !show3D && <div className="pd-discount-badge">-{discount}%</div>}
             {product.isNew && <div className="pd-new-badge">Yangi</div>}
             <button className={`pd-wish-btn ${wished ? 'active' : ''}`} onClick={handleWishlist}>
               <Heart size={20} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />

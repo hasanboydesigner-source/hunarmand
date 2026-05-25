@@ -16,6 +16,7 @@ const productSchema = new mongoose.Schema({
   sold: { type: Number, default: 0 },
   image: { type: String, required: true },
   images: [{ type: String }],
+  model3DUrl: { type: String },
   sku: { type: String },
   preparationTime: { type: String },
   material: { type: String },

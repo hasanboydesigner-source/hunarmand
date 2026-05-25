@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '../store/useStore';
 import { MOCK_PRODUCTS, CATEGORIES } from '../data/constants';
 import CategoryIcon from './CategoryIcon';
-import { Search, X, TrendingUp, Clock, ArrowRight } from 'lucide-react';
+import { Search, X, TrendingUp, Clock, ArrowRight, Camera, Upload, Sparkles } from 'lucide-react';
 import './SearchModal.css';
 
 const TRENDING = ['Rishton keramika', 'Buxoro gilam', 'Atlas mato', 'Kumush uzuk', 'Mis samovar'];
@@ -13,6 +13,9 @@ export default function SearchModal() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [recent, setRecent] = useState(() => JSON.parse(localStorage.getItem('search-recent') || '[]'));
+  const [isVisualSearch, setIsVisualSearch] = useState(false);
+  const [visualLoading, setVisualLoading] = useState(false);
+  const fileInputRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -48,6 +51,22 @@ export default function SearchModal() {
 
   const clearRecent = () => { setRecent([]); localStorage.removeItem('search-recent'); };
 
+  const handleVisualSearch = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsVisualSearch(true);
+    setVisualLoading(true);
+    
+    // Mock AI Analysis time
+    setTimeout(() => {
+      setVisualLoading(false);
+      // Mock results
+      setResults(MOCK_PRODUCTS.slice(0, 3));
+      setQuery("Rasmdagiga o'xshash mahsulotlar");
+    }, 2500);
+  };
+
   if (!searchOpen) return null;
 
   return (
@@ -65,15 +84,52 @@ export default function SearchModal() {
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             id="global-search-input"
           />
-          {query && (
+          {query && !isVisualSearch && (
             <button className="search-clear" onClick={() => setQuery('')}><X size={16} /></button>
           )}
-          <button className="search-close" onClick={closeSearch}><X size={20} /></button>
+          
+          {/* Visual Search Button */}
+          <button 
+            className="search-camera-btn" 
+            onClick={() => fileInputRef.current?.click()}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f4f2', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', color: '#c97a22', marginLeft: '8px' }}
+            title="Rasm orqali qidirish"
+          >
+            <Camera size={18} />
+          </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleVisualSearch} 
+            accept="image/*" 
+            style={{ display: 'none' }} 
+            capture="environment"
+          />
+
+          <button className="search-close" onClick={closeSearch} style={{ marginLeft: '8px' }}><X size={20} /></button>
         </div>
 
         <div className="search-body">
+          {/* Visual Search Loading */}
+          {isVisualSearch && visualLoading && (
+            <div className="visual-search-loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', textAlign: 'center' }}>
+              <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '20px' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, border: '4px solid #f5f4f2', borderRadius: '50%' }}></div>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, border: '4px solid #c97a22', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
+                <Sparkles size={32} color="#c97a22" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', animation: 'pulse 1.5s infinite' }} />
+              </div>
+              <h3 style={{ fontSize: '18px', color: '#1a1a1a', margin: '0 0 8px', fontFamily: 'Italiana, serif' }}>AI Analiz Qilmoqda...</h3>
+              <p style={{ color: '#666', fontSize: '14px', margin: 0, maxWidth: '280px' }}>Rasmdagi ob'yektning rangi, naqshi va shakli orqali eng o'xshash mahsulotlar qidirilmoqda.</p>
+              
+              <style dangerouslySetInnerHTML={{__html: `
+                @keyframes spin { 100% { transform: rotate(360deg); } }
+                @keyframes pulse { 0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); } }
+              `}} />
+            </div>
+          )}
+
           {/* Results */}
-          {results.length > 0 && (
+          {!visualLoading && results.length > 0 && (
             <div className="search-section">
               <p className="search-section-title">Natijalar</p>
               {results.map((p) => (
@@ -87,12 +143,12 @@ export default function SearchModal() {
                 </button>
               ))}
               <button className="search-see-all" onClick={() => handleSearch()}>
-                Barcha natijalarni ko'rish <ArrowRight size={14} />
+                {isVisualSearch ? "Barcha o'xshash natijalarni ko'rish" : "Barcha natijalarni ko'rish"} <ArrowRight size={14} />
               </button>
             </div>
           )}
 
-          {!query && (
+          {!query && !isVisualSearch && !visualLoading && (
             <>
               {/* Recent */}
               {recent.length > 0 && (
@@ -135,7 +191,7 @@ export default function SearchModal() {
             </>
           )}
 
-          {query && results.length === 0 && (
+          {query && results.length === 0 && !visualLoading && (
             <div className="search-empty">
               <Search size={40} opacity={0.2} />
               <p>"{query}" bo'yicha natija topilmadi</p>
