@@ -8,7 +8,7 @@ class ErrorBoundary extends React.Component {
 
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true };
+    return { hasError: true, error: error };
   }
 
   componentDidCatch(error, errorInfo) {
@@ -49,10 +49,13 @@ class ErrorBoundary extends React.Component {
             maxWidth: '500px'
           }}>
             <h2 style={{ color: '#ef4444', marginBottom: '15px' }}>Saytda xatolik yuz berdi</h2>
-            <p style={{ color: '#6b7280', marginBottom: '25px', lineHeight: '1.6' }}>
+            <p style={{ color: '#6b7280', marginBottom: '10px', lineHeight: '1.6' }}>
               Keçirasiz, brauzer xotirasidagi eski ma'lumotlar tufayli nosozlik kelib chiqdi. 
               Saytni qayta ishga tushirish uchun quyidagi tugmani bosing.
             </p>
+            <div style={{ background: '#fef2f2', color: '#b91c1c', padding: '10px', borderRadius: '8px', fontSize: '12px', textAlign: 'left', marginBottom: '25px', overflow: 'auto', maxHeight: '100px' }}>
+              {this.state.error && this.state.error.toString()}
+            </div>
             <button 
               onClick={() => {
                 localStorage.clear();

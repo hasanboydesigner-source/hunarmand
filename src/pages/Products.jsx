@@ -239,29 +239,18 @@ export default function ProductsPage() {
 
           {/* Price Filter */}
           <FilterGroup title="Narx oralig'i">
-            <div style={{ padding: '10px 10px 20px', marginBottom: '5px' }}>
-              <Slider
-                range
-                min={0}
-                max={150000000}
-                step={50000}
-                value={priceRange}
-                onChange={(val) => setPriceRange(val)}
-                onChangeComplete={(val) => {
-                  set('minPrice', val[0]);
-                  set('maxPrice', val[1]);
-                }}
-                trackStyle={[{ backgroundColor: 'var(--brand-500, #d4822a)' }]}
-                handleStyle={[
-                  { borderColor: 'var(--brand-500, #d4822a)', backgroundColor: '#fff', opacity: 1 },
-                  { borderColor: 'var(--brand-500, #d4822a)', backgroundColor: '#fff', opacity: 1 }
-                ]}
-              />
-            </div>
-            <div className="price-inputs" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '500', color: 'var(--text-secondary)' }}>
-              <span>{formatPrice(priceRange[0])}</span>
+            <div className="price-inputs">
+              <input type="number" className="form-input" placeholder="Min" defaultValue={priceRange[0]}
+                onBlur={(e) => {
+                  set('minPrice', e.target.value);
+                  setPriceRange([Number(e.target.value), priceRange[1]]);
+                }} />
               <span>—</span>
-              <span>{formatPrice(priceRange[1])}</span>
+              <input type="number" className="form-input" placeholder="Max" defaultValue={priceRange[1]}
+                onBlur={(e) => {
+                  set('maxPrice', e.target.value);
+                  setPriceRange([priceRange[0], Number(e.target.value)]);
+                }} />
             </div>
           </FilterGroup>
 
