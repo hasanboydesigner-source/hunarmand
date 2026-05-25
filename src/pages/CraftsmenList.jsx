@@ -4,9 +4,11 @@ import { MOCK_CRAFTSMEN, CATEGORIES, REGIONS, API_URL } from '../data/constants'
 import { Search, MapPin, Star, Sparkles, ShieldCheck, Users } from 'lucide-react';
 import CategoryIcon from '../components/CategoryIcon';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import './CraftsmenList.css';
 
 export default function CraftsmenList() {
+  const { t } = useTranslation();
   const [q, setQ] = useState('');
   const [region, setRegion] = useState('');
   const [specialty, setSpecialty] = useState('');
@@ -96,9 +98,9 @@ export default function CraftsmenList() {
       {/* Hero Header */}
       <div className="clp-header">
         <div className="container">
-          <span className="eyebrow">Bizning Ustalar</span>
-          <h1>O'zbekistonning Noyob Hunarmandlari</h1>
-          <p>O'z kasbining mohir ustalaridan to'g'ridan-to'g'ri xarid qiling. Chegarasiz san'at namunalarini kashf eting.</p>
+          <span className="eyebrow">{t('craftsmen_page.eyebrow')}</span>
+          <h1>{t('craftsmen_page.title')}</h1>
+          <p>{t('craftsmen_page.subtitle')}</p>
         </div>
       </div>
 
@@ -109,19 +111,19 @@ export default function CraftsmenList() {
             <Search size={18} />
             <input 
               type="text" 
-              placeholder="Hunarmand ismi yoki bio orqali qidirish..." 
+              placeholder={t('craftsmen_page.search_placeholder')} 
               value={q} 
               onChange={(e) => setQ(e.target.value)} 
             />
           </div>
           <div className="filters-row">
             <select className="form-input form-select" value={region} onChange={(e) => setRegion(e.target.value)}>
-              <option value="">Barcha hududlar</option>
+              <option value="">{t('craftsmen_page.all_regions')}</option>
               {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
             <select className="form-input form-select" value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
-              <option value="">Barcha mutaxassisliklar</option>
-              {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              <option value="">{t('craftsmen_page.all_specialties')}</option>
+              {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{t(`categories_data.${c.id}.label`, { defaultValue: c.label })}</option>)}
             </select>
           </div>
         </div>
@@ -144,8 +146,8 @@ export default function CraftsmenList() {
             }}>
               <Users size={36} strokeWidth={1.5} />
             </div>
-            <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Hech qanday hunarmand topilmadi</h3>
-            <p style={{ color: 'var(--text-muted)', margin: 0 }}>Qidiruv shartlarini o'zgartirib ko'ring</p>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>{t('craftsmen_page.no_results')}</h3>
+            <p style={{ color: 'var(--text-muted)', margin: 0 }}>{t('craftsmen_page.no_results_desc')}</p>
           </div>
         ) : (
           <div className="craftsmen-grid">
@@ -154,7 +156,7 @@ export default function CraftsmenList() {
                 <div className="craftsman-cover">
                   <img src={c.coverImage || 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&q=80'} alt={c.name} />
                   <div className="craftsman-cover-overlay" />
-                  {c.isVerified && <span className="verified-badge"><ShieldCheck size={12}/> Tasdiqlangan</span>}
+                  {c.isVerified && <span className="verified-badge"><ShieldCheck size={12}/> {t('craftsmen_page.verified')}</span>}
                 </div>
                 <div className="craftsman-body">
                   <div className="craftsman-avatar-wrap">
@@ -165,17 +167,17 @@ export default function CraftsmenList() {
                   <h3>{c.shopName || c.name}</h3>
                   <div className="craftsman-meta">
                     <span><MapPin size={12} /> {c.region}</span>
-                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {Number(c.rating || 0).toFixed(1)} ({c.reviewCount} sharh)</span>
+                    <span><Star size={12} fill="#f59e0b" color="#f59e0b" /> {Number(c.rating || 0).toFixed(1)} ({c.reviewCount} {t('craftsmen_page.reviews')})</span>
                   </div>
                   <div className="craftsman-specialty">
                     <CategoryIcon name={CATEGORIES.find(cat => cat.id === (c.specialty || c.category))?.icon} size={14} />
-                    {CATEGORIES.find(cat => cat.id === (c.specialty || c.category))?.label || c.specialty || 'Hunarmand'}
+                    {t(`categories_data.${c.specialty || c.category}.label`, { defaultValue: CATEGORIES.find(cat => cat.id === (c.specialty || c.category))?.label || c.specialty || 'Hunarmand' })}
                   </div>
-                  <p className="craftsman-bio-excerpt">{(c.bio || 'Ustaxonamizga xush kelibsiz!').slice(0, 100)}...</p>
+                  <p className="craftsman-bio-excerpt">{(c.bio || t('craftsmen_page.default_bio')).slice(0, 100)}...</p>
                   <div className="craftsman-stats-row">
-                    <div className="cs-stat"><strong>{c.totalProducts || 0}</strong><span>Mahsulot</span></div>
-                    <div className="cs-stat"><strong>{(c.totalSales || 0).toLocaleString()}</strong><span>Sotuv</span></div>
-                    <div className="cs-stat"><strong>{c.yearsExp || 0}</strong><span>Tajriba yili</span></div>
+                    <div className="cs-stat"><strong>{c.totalProducts || 0}</strong><span>{t('craftsmen_page.stat_products')}</span></div>
+                    <div className="cs-stat"><strong>{(c.totalSales || 0).toLocaleString()}</strong><span>{t('craftsmen_page.stat_sales')}</span></div>
+                    <div className="cs-stat"><strong>{c.yearsExp || 0}</strong><span>{t('craftsmen_page.stat_experience')}</span></div>
                   </div>
                 </div>
               </Link>

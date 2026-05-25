@@ -231,5 +231,21 @@
     "add_to_cart": "Add to Cart",
     "out_of_stock": "Out of Stock",
     "price_uzs": "{{price}} UZS"
+  },
+  "craftsmen_page": {
+    "eyebrow": "Our Craftsmen",
+    "title": "Unique Craftsmen of Uzbekistan",
+    "subtitle": "Buy directly from skilled masters of their craft. Discover limitless works of art.",
+    "search_placeholder": "Search by craftsman name or bio...",
+    "all_regions": "All regions",
+    "all_specialties": "All specialties",
+    "no_results": "No craftsmen found",
+    "no_results_desc": "Try changing the search criteria",
+    "verified": "Verified",
+    "reviews": "reviews",
+    "stat_products": "Products",
+    "stat_sales": "Sales",
+    "stat_experience": "Years of exp",
+    "default_bio": "Welcome to our workshop!"
   }
 }

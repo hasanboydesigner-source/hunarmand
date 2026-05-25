@@ -231,5 +231,21 @@
     "add_to_cart": "Savatga",
     "out_of_stock": "Sotuvda yo'q",
     "price_uzs": "{{price}} so'm"
+  },
+  "craftsmen_page": {
+    "eyebrow": "Bizning Ustalar",
+    "title": "O'zbekistonning Noyob Hunarmandlari",
+    "subtitle": "O'z kasbining mohir ustalaridan to'g'ridan-to'g'ri xarid qiling. Chegarasiz san'at namunalarini kashf eting.",
+    "search_placeholder": "Hunarmand ismi yoki bio orqali qidirish...",
+    "all_regions": "Barcha hududlar",
+    "all_specialties": "Barcha mutaxassisliklar",
+    "no_results": "Hech qanday hunarmand topilmadi",
+    "no_results_desc": "Qidiruv shartlarini o'zgartirib ko'ring",
+    "verified": "Tasdiqlangan",
+    "reviews": "sharh",
+    "stat_products": "Mahsulot",
+    "stat_sales": "Sotuv",
+    "stat_experience": "Tajriba yili",
+    "default_bio": "Ustaxonamizga xush kelibsiz!"
   }
 }
