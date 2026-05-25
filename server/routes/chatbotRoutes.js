@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { messages, language } = req.body;
     
     // Make sure API key exists
     if (!process.env.GEMINI_API_KEY) {
@@ -24,10 +24,17 @@ router.post('/', async (req, res) => {
       `- ID: ${p._id}, Nomi: "${p.title}", Narxi: ${p.price} so'm, Kategoriya: ${p.category}, Hunarmand: ${p.craftsman?.shopName || p.craftsman?.name || 'Noma\'lum'}, Rasm URL: ${p.image}. Ta'rif: ${p.description.substring(0, 100)}...`
     ).join('\n');
 
+    const langInstruction = language === 'ru' 
+      ? "IMPORTANT: The user prefers Russian. Please answer all their questions in Russian, unless they speak in another language." 
+      : language === 'en' 
+      ? "IMPORTANT: The user prefers English. Please answer all their questions in English, unless they speak in another language." 
+      : "IMPORTANT: The user prefers Uzbek. Please answer all their questions in Uzbek, unless they speak in another language.";
+
     const systemInstruction = `Siz "E-Hunarmand" milliy hunarmandchilik mahsulotlari internet do'konining tajribali savdo yordamchisi (Sales Assistant) va maslahatchisisiz.
 Maqsadingiz: Mijozga iloji boricha ko'proq yordam berish va bizdagi mahsulotlarni sotib olishga jalb qilish (sotish darajasini maksimal darajaga ko'tarish). 
 Mijozga birinchi bo'lib qiziqarli savollar bering, ehtiyojlarini, qanday sovg'a yoki buyum qidirayotganini so'rab oling.
-Javobingizni doimo mijoz tilida (asosan O'zbek tilida) va samimiy, emoji'lar bilan yozing.
+Javobingizni doimo mijoz tilida va samimiy, emoji'lar bilan yozing.
+${langInstruction}
 QAT'IY QOIDA (RASMLAR UCHUN): Mahsulot tavsiya qilayotganda DOIM uning rasmini va havolasini Markdown orqali bering. Masalan: 
 ![Mahsulot Nomi](rasm_url_manzili)
 [Batafsil ma'lumot va sotib olish](/products/id) - Narxi so'm

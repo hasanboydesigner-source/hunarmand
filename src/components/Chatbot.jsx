@@ -4,13 +4,25 @@ import { MessageSquare, X, Send, Bot, User, Minimize2 } from 'lucide-react';
 import { API_URL, CATEGORIES } from '../data/constants';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuthStore, useUIStore } from '../store/useStore';
+import { useTranslation } from 'react-i18next';
 
-const QUICK_REPLIES = [
-  "🎁 Sovg'a qidiryapman",
-  "🏺 Keramika mahsulotlari",
-  "💍 Zargarlik buyumlari",
-  "🚚 Yetkazib berish qanday?"
-];
+const QUICK_REPLIES_LANG = {
+  uz: ["🎁 Sovg'a qidiryapman", "🏺 Keramika mahsulotlari", "💍 Zargarlik buyumlari", "🚚 Yetkazib berish qanday?"],
+  ru: ["🎁 Ищу подарок", "🏺 Керамические изделия", "💍 Ювелирные изделия", "🚚 Как работает доставка?"],
+  en: ["🎁 Looking for a gift", "🏺 Ceramic products", "💍 Jewelry", "🚚 How does delivery work?"]
+};
+
+const GREETINGS = {
+  uz: "Assalomu alaykum! Men E-Hunarmand savdo yordamchisiman. Qanday milliy hunarmandchilik mahsulotini qidirmoqdasiz?",
+  ru: "Здравствуйте! Я торговый помощник E-Hunarmand. Какое национальное ремесленное изделие вы ищете?",
+  en: "Hello! I am the E-Hunarmand sales assistant. What kind of national craft product are you looking for?"
+};
+
+const USER_GREETINGS = {
+  uz: (name) => `Assalomu alaykum, **${name}**! 🎉 E-Hunarmand do'koniga xush kelibsiz! Bugun nimalar xarid qilishni reja qilyapsiz? Maslahat kerak bo'lsa, bemalol so'rang! 👇`,
+  ru: (name) => `Здравствуйте, **${name}**! 🎉 Добро пожаловать в магазин E-Hunarmand! Что планируете купить сегодня? Если нужен совет, смело спрашивайте! 👇`,
+  en: (name) => `Hello, **${name}**! 🎉 Welcome to the E-Hunarmand store! What are you planning to buy today? If you need advice, feel free to ask! 👇`
+};
 
 // Robust markdown parser for images, links, bold, and newlines
 const parseMarkdown = (text, onLinkClick) => {
@@ -71,17 +83,25 @@ export default function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const location = useLocation();
+  const { i18n } = useTranslation();
+  
+  const currentLang = i18n.language || 'uz';
+  const QUICK_REPLIES = QUICK_REPLIES_LANG[currentLang] || QUICK_REPLIES_LANG.uz;
 
   const [hasGreetedUser, setHasGreetedUser] = useState(false);
 
-  // Initialize greeting message
+  // Initialize greeting message when language changes or initially
   useEffect(() => {
-    const defaultGreeting = `Assalomu alaykum! Men E-Hunarmand savdo yordamchisiman. Qanday milliy hunarmandchilik mahsulotini qidirmoqdasiz?`;
+    const defaultGreeting = GREETINGS[currentLang] || GREETINGS.uz;
     
+    // Always update first message if it's the default greeting (to switch language dynamically)
     if (messages.length === 0 && !user) {
       setMessages([{ role: 'ai', text: defaultGreeting }]);
+    } else if (messages.length === 1 && !user && messages[0].role === 'ai') {
+      // If language changed while only greeting is present, update it
+      setMessages([{ role: 'ai', text: defaultGreeting }]);
     }
-  }, [messages.length, user]);
+  }, [messages.length, user, currentLang]);
 
   // Auto-open logic: wait for products to load first, then open after 3 seconds (once per session)
   useEffect(() => {
@@ -111,11 +131,11 @@ export default function Chatbot() {
     if (user && !hasGreetedUser) {
       setHasGreetedUser(true);
       const userName = user.name ? user.name.split(' ')[0] : '';
-      const personalizedGreeting = `Assalomu alaykum, **${userName}**! 🎉 E-Hunarmand do'koniga xush kelibsiz! Bugun nimalar xarid qilishni reja qilyapsiz? Maslahat kerak bo'lsa, bemalol so'rang! 👇`;
+      const personalizedGreeting = (USER_GREETINGS[currentLang] || USER_GREETINGS.uz)(userName);
       setMessages([{ role: 'ai', text: personalizedGreeting }]);
       setTimeout(() => { setIsOpen(true); }, 1000);
     }
-  }, [user, hasGreetedUser]);
+  }, [user, hasGreetedUser, currentLang]);
 
   // Auto-scroll
   useEffect(() => {
@@ -139,11 +159,15 @@ export default function Chatbot() {
 
     try {
       const response = await axios.post(`${API_URL}/chatbot`, {
-        messages: [...messages, userMsg].map(m => ({ role: m.role, text: m.text }))
+        messages: [...messages, userMsg].map(m => ({ role: m.role, text: m.text })),
+        language: currentLang
       });
       setMessages(prev => [...prev, { role: 'ai', text: response.data.text }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'ai', text: "Uzur, xatolik yuz berdi. Iltimos keyinroq urinib ko'ring." }]);
+      const errorMsg = currentLang === 'ru' ? "Извините, произошла ошибка. Пожалуйста, попробуйте позже." : 
+                       currentLang === 'en' ? "Sorry, an error occurred. Please try again later." :
+                       "Uzur, xatolik yuz berdi. Iltimos keyinroq urinib ko'ring.";
+      setMessages(prev => [...prev, { role: 'ai', text: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
