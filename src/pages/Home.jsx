@@ -285,7 +285,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="stats-section">
+      <section className="stats-section pattern-bg-light">
         <div className="container">
           <div className="stats-row" data-aos="fade-up">
             {STATS.map((s, i) => (
@@ -327,7 +327,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Categories ── */}
-      <section className="section">
+      <section className="section pattern-bg-light">
         <div className="container">
           <div className="section-heading" data-aos="fade-up">
             <p className="eyebrow">{t('home.cat_eyebrow')}</p>

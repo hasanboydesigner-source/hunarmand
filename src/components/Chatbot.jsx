@@ -339,7 +339,7 @@ export default function Chatbot() {
           </div>
 
           {/* Messages */}
-          <div className="cb-messages" style={{
+          <div className="cb-messages pattern-bg-chatbot" style={{
             flex: 1,
             padding: '14px 12px',
             overflowY: 'auto',
