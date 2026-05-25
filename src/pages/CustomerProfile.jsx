@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL, ORDER_STATUSES } from '../data/constants';
 import { toast } from 'react-toastify';
-import { User, Package, Settings, LogOut, Clock, Check, Truck, XCircle, MessageSquare, Send } from 'lucide-react';
+import { User, Package, Settings, LogOut, Clock, Check, Truck, XCircle, MessageSquare, Send, ShieldCheck } from 'lucide-react';
 import { BounceLoader } from 'react-spinners';
 import './CustomerProfile.css';
 
@@ -12,6 +12,7 @@ import './CustomerProfile.css';
 let cachedProfile = null;
 let cachedOrders = null;
 let cachedMessages = null;
+let cachedCertificates = null;
 let cachedUserId = null;
 
 export default function CustomerProfilePage() {
@@ -25,6 +26,7 @@ export default function CustomerProfilePage() {
   });
   const [orders, setOrders] = useState(cachedOrders || []);
   const [messages, setMessages] = useState(cachedMessages || []);
+  const [certificates, setCertificates] = useState(cachedCertificates || []);
   const [isLoading, setIsLoading] = useState(!cachedProfile);
   const [isSaving, setIsSaving] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -39,6 +41,8 @@ export default function CustomerProfilePage() {
     if (cachedUserId !== user?.id) {
       cachedProfile = null;
       cachedOrders = null;
+      cachedMessages = null;
+      cachedCertificates = null;
       cachedUserId = user?.id;
     }
     
@@ -48,10 +52,11 @@ export default function CustomerProfilePage() {
         setIsLoading(true);
       }
       try {
-        const [profileRes, ordersRes, msgRes] = await Promise.all([
+        const [profileRes, ordersRes, msgRes, certRes] = await Promise.all([
           axios.get(`${API_URL}/auth/users/${user?.id}`),
           axios.get(`${API_URL}/orders/customer/${user?.id}`),
-          axios.get(`${API_URL}/messages/customer/${user?.id}`).catch(() => ({ data: [] }))
+          axios.get(`${API_URL}/messages/customer/${user?.id}`).catch(() => ({ data: [] })),
+          axios.get(`${API_URL}/certificates/customer/${user?.id}`).catch(() => ({ data: [] }))
         ]);
         
         const p = profileRes.data;
@@ -65,10 +70,12 @@ export default function CustomerProfilePage() {
         setProfile(newProfile);
         setOrders(ordersRes.data);
         setMessages(msgRes.data || []);
+        setCertificates(certRes.data || []);
         
         cachedProfile = newProfile;
         cachedOrders = ordersRes.data;
         cachedMessages = msgRes.data || [];
+        cachedCertificates = certRes.data || [];
       } catch (error) {
         console.error("Failed to fetch customer data", error);
         toast.error("Ma'lumotlarni yuklashda xatolik yuz berdi");
@@ -128,6 +135,7 @@ export default function CustomerProfilePage() {
     cachedProfile = null;
     cachedOrders = null;
     cachedMessages = null;
+    cachedCertificates = null;
     cachedUserId = null;
     toast.info("Tizimdan muvaffaqiyatli chiqdingiz! 👋");
     navigate('/');
@@ -252,14 +260,33 @@ export default function CustomerProfilePage() {
                       <div className="cp-order-body">
                         <div>
                           <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '8px', letterSpacing: '0.5px' }}>MAHSULOTLAR</p>
-                          {order.items.map((item, idx) => (
-                            <div key={idx} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              {item.image && <img src={item.image} alt="" className="cp-order-item-img" />}
-                              <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
-                                {item.title} <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>x{item.quantity}</span>
-                              </span>
-                            </div>
-                          ))}
+                          {order.items.map((item, idx) => {
+                            // Find certificate for this specific order item (product)
+                            const cert = certificates.find(c => c.order === order._id && c.product === item.product);
+                            return (
+                              <div key={idx} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  {item.image && <img src={item.image} alt="" className="cp-order-item-img" />}
+                                  <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+                                    {item.title} <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>x{item.quantity}</span>
+                                  </span>
+                                </div>
+                                {cert && (
+                                  <button
+                                    onClick={() => navigate(`/verify/${cert.certificateId}`)}
+                                    style={{
+                                      display: 'flex', alignItems: 'center', gap: '4px',
+                                      background: 'rgba(201, 122, 34, 0.1)', color: '#c97a22',
+                                      border: '1px solid rgba(201, 122, 34, 0.2)', padding: '4px 10px',
+                                      borderRadius: '4px', fontSize: '12px', fontWeight: '500', cursor: 'pointer'
+                                    }}
+                                  >
+                                    <ShieldCheck size={14} /> Sertifikat
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>UMUMIY SUMMA</p>

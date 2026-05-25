@@ -1,0 +1,358 @@
+.cert-verify-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 40px 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.cert-verify-page.loading, .cert-verify-page.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cert-header {
+  max-width: 800px;
+  margin: 0 auto 24px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #c97a22;
+}
+
+.cert-card-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cert-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  position: relative;
+  overflow: hidden;
+  padding: 48px;
+  border: 1px solid #eaeaea;
+}
+
+/* Add a subtle gold pattern to the background */
+.cert-bg-pattern {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CiAgPHBhdGggZD0iTTAgMGw0MCA0MHYtNDBsLTQwIDQwaC00MHoiIGZpbGw9IiNjOTdhMjIiIGZpbGwtb3BhY2l0eT0iMSIgZmlsbC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPg==');
+}
+
+.cert-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.cert-logo-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-logo-text {
+  font-family: 'Italiana', serif;
+  font-size: 32px;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.cert-logo-sub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #c97a22;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.cert-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(201, 122, 34, 0.1);
+  color: #c97a22;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid rgba(201, 122, 34, 0.2);
+}
+
+.cert-body {
+  position: relative;
+  z-index: 2;
+}
+
+.cert-title {
+  font-family: 'Italiana', serif;
+  font-size: 48px;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.cert-desc {
+  text-align: center;
+  color: #555;
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 48px;
+}
+
+.cert-product-info {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  background: #fdfbf9;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #f4ede4;
+}
+
+.cert-image {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.cert-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cert-details h3 {
+  font-size: 24px;
+  color: #1a1a1a;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+.cert-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cert-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #666;
+}
+
+.meta-label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.meta-val {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 15px;
+}
+
+.cert-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #eaeaea, transparent);
+  margin: 40px 0;
+}
+
+.cert-craftsman-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+
+.cc-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #c97a22;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.cc-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cc-details h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #999;
+  margin: 0 0 4px;
+}
+
+.cc-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.cc-region {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #666;
+}
+
+.cc-stamp {
+  margin-left: auto;
+}
+
+.stamp-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px double #c97a22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #c97a22;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  transform: rotate(-15deg);
+  opacity: 0.8;
+}
+
+.cert-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #eaeaea;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 2;
+}
+
+.cert-id-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.cid-label {
+  font-size: 11px;
+  color: #999;
+  letter-spacing: 1px;
+}
+
+.cid-value {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.cert-verification-text {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.cert-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .cert-card, .cert-card * {
+    visibility: visible;
+  }
+  .cert-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+  .cert-actions {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .cert-card {
+    padding: 24px;
+  }
+  .cert-title {
+    font-size: 32px;
+  }
+  .cert-product-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  .cert-meta-list {
+    align-items: center;
+  }
+  .cert-meta-item {
+    justify-content: center;
+  }
+  .cert-craftsman-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  .cc-stamp {
+    margin: 20px auto 0;
+  }
+  .cert-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .cert-verification-text {
+    text-align: center;
+  }
+}

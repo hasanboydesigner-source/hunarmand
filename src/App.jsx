@@ -30,6 +30,7 @@ import AdminPage from './pages/Admin';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
 import CustomerProfilePage from './pages/CustomerProfile';
+import CertificateVerify from './pages/CertificateVerify';
 
 /* ─── Route Guards ───────────────────────────────────────────── */
 function ProtectedRoute({ children, redirect = '/auth/login' }) {
@@ -112,6 +113,7 @@ function AppContent() {
           <Route path="/craftsmen" element={<CraftsmenList />} />
           <Route path="/craftsmen/:slug" element={<CraftsmanProfilePage />} />
           <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/verify/:id" element={<CertificateVerify />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />

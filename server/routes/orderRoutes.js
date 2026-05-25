@@ -1,6 +1,7 @@
 import express from 'express';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
+import Certificate from '../models/Certificate.js';
 
 const router = express.Router();
 
@@ -104,8 +105,30 @@ router.put('/:id/status', async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (order) {
+      const oldStatus = order.status;
       order.status = status;
       const updatedOrder = await order.save();
+
+      // Generate Certificates if status changed to 'delivered'
+      if (status === 'delivered' && oldStatus !== 'delivered') {
+        for (const item of order.items) {
+          // Check if certificate already exists to prevent duplicates
+          const existing = await Certificate.findOne({ order: order._id, product: item.product });
+          if (!existing && item.product) {
+            const certId = `EHN-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+            await Certificate.create({
+              certificateId: certId,
+              order: order._id,
+              orderItemTitle: item.title,
+              orderItemImage: item.image,
+              product: item.product,
+              craftsman: order.craftsmanId,
+              ownerName: order.customer.name,
+            });
+          }
+        }
+      }
+
       res.json(updatedOrder);
     } else {
       res.status(404).json({ message: 'Order not found' });

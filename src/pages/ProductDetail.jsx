@@ -16,7 +16,7 @@ import { toast } from 'react-toastify';
 import {
   Star, Heart, ShoppingCart, Zap, Share2, Flag, MapPin,
   Package, Clock, Shield, ChevronRight, MessageCircle, ExternalLink,
-  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send, X
+  ChevronLeft, Plus, Minus, CheckCircle2, Truck, RotateCcw, Send, X, ShieldCheck
 } from 'lucide-react';
 import './ProductDetail.css';
 
@@ -393,8 +393,12 @@ export default function ProductDetailPage() {
 
           {/* Guarantees */}
           <div className="pd-guarantees">
-            <div className="pd-guarantee"><Truck size={16} /><span>Namangan bo'ylab bepul yetkazib berish</span></div>
-            <div className="pd-guarantee"><RotateCcw size={16} /><span>14 kun ichida qaytarish mumkin</span></div>
+            <div className="pd-guarantee" style={{ background: 'rgba(201, 122, 34, 0.05)', border: '1px solid rgba(201, 122, 34, 0.2)', padding: '12px', borderRadius: '8px' }}>
+              <ShieldCheck size={20} color="#c97a22" />
+              <span style={{ color: '#c97a22', fontWeight: 500 }}>Haqiqiylik Sertifikati bilan ta'minlanadi</span>
+            </div>
+            <div className="pd-guarantee"><Truck size={16} /><span>O'zbekiston bo'ylab yetkazib berish</span></div>
+            <div className="pd-guarantee"><RotateCcw size={16} /><span>14 kun ichida qaytarish kafolati</span></div>
             <div className="pd-guarantee"><Shield size={16} /><span>Sifat kafolati berilgan</span></div>
           </div>
 
