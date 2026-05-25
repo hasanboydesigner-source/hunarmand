@@ -10,6 +10,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MOCK_PRODUCTS, MOCK_REVIEWS, CATEGORIES, formatPrice, getDiscount, getInitials, MOCK_CRAFTSMEN, API_URL } from '../data/constants';
 import { useCartStore, useWishlistStore, useAuthStore } from '../store/useStore';
 import ProductCard from '../components/ProductCard';
+import { ProductDetailSkeleton } from '../components/Skeletons';
 import CategoryIcon from '../components/CategoryIcon';
 import { toast } from 'react-toastify';
 import {
@@ -131,7 +132,11 @@ export default function ProductDetailPage() {
   const reviews = product?.reviews || [];
   const discount = product ? getDiscount(product.price, product.originalPrice) : 0;
 
-  if (isLoading) return <div className="page-with-header" style={{ padding: '40px', textAlign: 'center' }}>Yuklanmoqda...</div>;
+  if (isLoading) return (
+    <div className="page-with-header">
+      <ProductDetailSkeleton />
+    </div>
+  );
 
   if (!product) return (
     <div className="page-with-header not-found">

@@ -111,3 +111,52 @@ export const CategoryCardSkeleton = () => (
     </div>
   </div>
 );
+
+import ContentLoader from "react-content-loader";
+
+export const ProductDetailSkeleton = () => (
+  <div className="container pd-grid" style={{ paddingTop: "32px", paddingBottom: "64px" }}>
+    <div className="pd-gallery">
+      <ContentLoader 
+        speed={2}
+        width="100%"
+        height={500}
+        backgroundColor="var(--bg-tertiary, #f3f4f6)"
+        foregroundColor="var(--bg-secondary, #e5e7eb)"
+        style={{ width: "100%", borderRadius: "16px" }}
+      >
+        <rect x="0" y="0" rx="16" ry="16" width="100%" height="400" /> 
+        <rect x="0" y="420" rx="8" ry="8" width="22%" height="80" /> 
+        <rect x="26%" y="420" rx="8" ry="8" width="22%" height="80" /> 
+        <rect x="52%" y="420" rx="8" ry="8" width="22%" height="80" /> 
+        <rect x="78%" y="420" rx="8" ry="8" width="22%" height="80" /> 
+      </ContentLoader>
+    </div>
+    <div className="pd-info">
+      <ContentLoader 
+        speed={2}
+        width="100%"
+        height={500}
+        backgroundColor="var(--bg-tertiary, #f3f4f6)"
+        foregroundColor="var(--bg-secondary, #e5e7eb)"
+        style={{ width: "100%" }}
+      >
+        <rect x="0" y="0" rx="12" ry="12" width="120" height="24" />
+        <rect x="0" y="40" rx="8" ry="8" width="90%" height="32" />
+        <rect x="0" y="80" rx="8" ry="8" width="60%" height="32" />
+        <rect x="0" y="130" rx="4" ry="4" width="200" height="20" />
+        
+        <rect x="0" y="170" rx="8" ry="8" width="150" height="40" />
+        
+        <rect x="0" y="230" rx="4" ry="4" width="100%" height="1" />
+        <rect x="0" y="250" rx="8" ry="8" width="100%" height="60" />
+        
+        <rect x="0" y="330" rx="8" ry="8" width="150" height="40" />
+        <rect x="0" y="390" rx="12" ry="12" width="48%" height="48" />
+        <rect x="52%" y="390" rx="12" ry="12" width="48%" height="48" />
+        
+        <rect x="0" y="460" rx="12" ry="12" width="100%" height="40" />
+      </ContentLoader>
+    </div>
+  </div>
+);
