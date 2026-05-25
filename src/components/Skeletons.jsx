@@ -120,42 +120,42 @@ export const ProductDetailSkeleton = () => (
       <ContentLoader 
         speed={2}
         width="100%"
-        height={500}
+        height="100%"
+        viewBox="0 0 500 520"
         backgroundColor="var(--bg-tertiary, #f3f4f6)"
         foregroundColor="var(--bg-secondary, #e5e7eb)"
-        style={{ width: "100%", borderRadius: "16px" }}
+        style={{ width: "100%", height: "auto", aspectRatio: "1/1.05", borderRadius: "16px" }}
       >
-        <rect x="0" y="0" rx="16" ry="16" width="100%" height="400" /> 
-        <rect x="0" y="420" rx="8" ry="8" width="22%" height="80" /> 
-        <rect x="26%" y="420" rx="8" ry="8" width="22%" height="80" /> 
-        <rect x="52%" y="420" rx="8" ry="8" width="22%" height="80" /> 
-        <rect x="78%" y="420" rx="8" ry="8" width="22%" height="80" /> 
+        <rect x="0" y="0" rx="16" ry="16" width="500" height="420" /> 
+        <rect x="0" y="440" rx="8" ry="8" width="110" height="80" /> 
+        <rect x="130" y="440" rx="8" ry="8" width="110" height="80" /> 
+        <rect x="260" y="440" rx="8" ry="8" width="110" height="80" /> 
+        <rect x="390" y="440" rx="8" ry="8" width="110" height="80" /> 
       </ContentLoader>
     </div>
     <div className="pd-info">
       <ContentLoader 
         speed={2}
         width="100%"
-        height={500}
+        height="100%"
+        viewBox="0 0 500 520"
         backgroundColor="var(--bg-tertiary, #f3f4f6)"
         foregroundColor="var(--bg-secondary, #e5e7eb)"
-        style={{ width: "100%" }}
+        style={{ width: "100%", height: "auto" }}
       >
-        <rect x="0" y="0" rx="12" ry="12" width="120" height="24" />
-        <rect x="0" y="40" rx="8" ry="8" width="90%" height="32" />
-        <rect x="0" y="80" rx="8" ry="8" width="60%" height="32" />
-        <rect x="0" y="130" rx="4" ry="4" width="200" height="20" />
+        <rect x="0" y="0" rx="12" ry="12" width="140" height="28" />
+        <rect x="0" y="48" rx="8" ry="8" width="450" height="38" />
+        <rect x="0" y="96" rx="8" ry="8" width="300" height="38" />
+        <rect x="0" y="154" rx="4" ry="4" width="220" height="24" />
         
-        <rect x="0" y="170" rx="8" ry="8" width="150" height="40" />
+        <rect x="0" y="200" rx="8" ry="8" width="180" height="46" />
         
-        <rect x="0" y="230" rx="4" ry="4" width="100%" height="1" />
-        <rect x="0" y="250" rx="8" ry="8" width="100%" height="60" />
+        <rect x="0" y="270" rx="4" ry="4" width="500" height="2" />
+        <rect x="0" y="290" rx="8" ry="8" width="500" height="70" />
         
-        <rect x="0" y="330" rx="8" ry="8" width="150" height="40" />
-        <rect x="0" y="390" rx="12" ry="12" width="48%" height="48" />
-        <rect x="52%" y="390" rx="12" ry="12" width="48%" height="48" />
-        
-        <rect x="0" y="460" rx="12" ry="12" width="100%" height="40" />
+        <rect x="0" y="380" rx="8" ry="8" width="180" height="46" />
+        <rect x="0" y="440" rx="12" ry="12" width="240" height="56" />
+        <rect x="260" y="440" rx="12" ry="12" width="240" height="56" />
       </ContentLoader>
     </div>
   </div>
