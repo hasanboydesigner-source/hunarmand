@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingBag, Star, MessageCircle, Settings, LogOut, ChevronLeft, Bell } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Star, MessageCircle, Settings, LogOut, ChevronLeft, Bell, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useStore';
 import { toast } from 'react-toastify';
@@ -10,6 +10,7 @@ export default function DashboardSidebar({ active, setActive, unreadOrders, unre
 
   const NAV = [
     { id: 'overview',  label: 'Umumiy',      icon: <LayoutDashboard size={16}/> },
+    { id: 'advisor',   label: 'AI Maslahatchi', icon: <Sparkles size={16}/> },
     { id: 'products',  label: 'Mahsulotlar', icon: <Package size={16}/> },
     { id: 'orders',    label: 'Buyurtmalar', icon: <ShoppingBag size={16}/>, badge: unreadOrders > 0 ? unreadOrders : null },
     { id: 'reviews',   label: 'Sharhlar',    icon: <Star size={16}/>, badge: unreadReviews > 0 ? unreadReviews : null },

@@ -1,0 +1,73 @@
+.dash-advisor {
+  padding-bottom: 40px;
+}
+.advisor-intro {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(145deg, #ffffff, #fcfcfc);
+  border: 1px solid #f0f0f0;
+}
+.advisor-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fdf5e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+.advisor-intro h3 {
+  font-size: 22px;
+  color: #111;
+  margin-bottom: 12px;
+}
+.advisor-intro p {
+  color: #555;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.advisor-error {
+  margin-top: 20px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.advisor-result {
+  margin-top: 24px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-left: 4px solid #16a34a;
+  padding: 30px;
+}
+.markdown-content {
+  color: #333;
+  line-height: 1.7;
+  font-size: 15px;
+}
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+  color: #111;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+.markdown-content p {
+  margin-bottom: 16px;
+}
+.markdown-content ul, .markdown-content ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+.markdown-content li {
+  margin-bottom: 8px;
+}
+.markdown-content strong {
+  color: #111;
+  font-weight: 600;
+}

@@ -14,6 +14,7 @@ const productSchema = new mongoose.Schema({
   category: { type: String, required: true },
   inStock: { type: Number, required: true, default: 0 },
   sold: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
   image: { type: String, required: true },
   images: [{ type: String }],
   model3DUrl: { type: String },

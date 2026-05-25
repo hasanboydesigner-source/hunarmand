@@ -114,6 +114,11 @@ export default function ProductDetailPage() {
         // Fetch all products for related (simple logic for demo)
         const { data: allData } = await axios.get(`${API_URL}/products`);
         setRelated(allData.filter(p => p.category === pData.category && p._id !== id).map(p => enrichProductWithCraftsman(p)).slice(0, 4));
+        
+        // Track view
+        if (id.length >= 10) {
+          axios.post(`${API_URL}/products/${id}/view`).catch(e => console.log('View track xatosi:', e.message));
+        }
       } catch (err) {
         console.error("Xatolik:", err);
         // Fallback to mock data if API fails or product not found

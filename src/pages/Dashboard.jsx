@@ -15,6 +15,7 @@ import DashboardOrders from '../components/dashboard/DashboardOrders';
 import DashboardReviews from '../components/dashboard/DashboardReviews';
 import DashboardMessages from '../components/dashboard/DashboardMessages';
 import DashboardSettings from '../components/dashboard/DashboardSettings';
+import DashboardAdvisor from '../components/dashboard/DashboardAdvisor';
 
 export default function DashboardPage() {
   const { user, updateUser } = useAuthStore();
@@ -115,6 +116,7 @@ export default function DashboardPage() {
   // Mobile nav items
   const NAV_MOBILE = [
     { id: 'overview',  label: 'Umumiy',    emoji: '📊' },
+    { id: 'advisor',   label: 'AI Maslahat', emoji: '🤖' },
     { id: 'products',  label: 'Mahsulot',  emoji: '📦' },
     { id: 'orders',    label: 'Buyurtma',  emoji: '🛍️', badge: unreadOrdersCount > 0 ? unreadOrdersCount : null },
     { id: 'reviews',   label: 'Sharhlar',  emoji: '⭐', badge: reviewsCount > 0 ? reviewsCount : null },
@@ -161,6 +163,7 @@ export default function DashboardPage() {
       {/* Main */}
       <main className="dash-main">
         {active === 'overview' && <DashboardOverview products={dashData.products} orders={dashData.orders} reviews={dashData.reviews}/>}
+        {active === 'advisor' && <DashboardAdvisor user={user} />}
         {active === 'products' && (
           <DashboardProducts
             products={dashData.products}

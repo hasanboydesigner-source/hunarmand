@@ -44,6 +44,25 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// @route POST /api/products/:id/view
+// @desc Increment view count of a product
+router.post('/:id/view', async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: 'Mahsulot topilmadi' });
+    }
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    if (!product) return res.status(404).json({ message: 'Mahsulot topilmadi' });
+    res.json({ message: 'Ko\'rilishlar soni oshirildi', views: product.views });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @route POST /api/products
 router.post('/', async (req, res) => {
   try {
