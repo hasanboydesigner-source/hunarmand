@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Sparkles, TrendingUp, AlertCircle, ShoppingBag, PackageOpen } from 'lucide-react';
+import { Sparkles, TrendingUp, AlertCircle, ShoppingBag, PackageOpen, Bot } from 'lucide-react';
 import { API_URL } from '../../data/constants';
 import ReactMarkdown from 'react-markdown';
 import './DashboardAdvisor.css';
@@ -29,7 +29,7 @@ export default function DashboardAdvisor({ user }) {
     <div className="dash-advisor">
       <div className="dash-header">
         <div>
-          <h2>🤖 AI Biznes Maslahatchi</h2>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Bot size={28} color="#c97a22" /> AI Biznes Maslahatchi</h2>
           <p>Savdolaringizni oshirish va biznesingizni rivojlantirish uchun shaxsiy sun'iy intellekt maslahatchisi</p>
         </div>
       </div>
