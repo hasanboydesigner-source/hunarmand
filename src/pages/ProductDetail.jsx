@@ -346,27 +346,45 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Stock */}
-          <div className={`pd-stock ${product.inStock === 0 ? 'out' : product.inStock <= 3 ? 'low' : 'in'}`}>
+          <div className={`pd-stock ${product.inStock <= 0 ? 'out' : product.inStock <= 3 ? 'low' : 'in'}`}>
             <CheckCircle2 size={15} />
-            {product.inStock === 0 ? 'Mahsulot tugagan' : product.inStock <= 3 ? `Faqat ${product.inStock} ta qoldi!` : `Mavjud (${product.inStock} ta)`}
+            {product.inStock <= 0 ? 'Mahsulot tugagan' : product.inStock <= 3 ? `Faqat ${product.inStock} ta qoldi!` : `Mavjud (${product.inStock} ta)`}
           </div>
 
           {/* Qty + Actions */}
-          <div className="pd-qty-row">
-            <div className="qty-control">
-              <button className="qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}><Minus size={14} /></button>
-              <span className="qty-value">{qty}</span>
-              <button className="qty-btn" onClick={() => setQty(Math.min(product.inStock, qty + 1))}><Plus size={14} /></button>
+          {product.inStock > 0 ? (
+            <div className="pd-qty-row">
+              <div className="qty-control">
+                <button className="qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}><Minus size={14} /></button>
+                <span className="qty-value">{qty}</span>
+                <button 
+                  className={`qty-btn ${qty >= product.inStock ? 'disabled' : ''}`} 
+                  onClick={() => {
+                    if (qty >= product.inStock) {
+                      toast.warning("Mahsulot boshqa qolmadi!", { icon: '⚠️' });
+                      return;
+                    }
+                    setQty(qty + 1);
+                  }}
+                  style={{ opacity: qty >= product.inStock ? 0.5 : 1 }}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+              <div className="pd-actions">
+                <button className="btn btn-primary btn-lg pd-action-btn" onClick={handleAddToCart}>
+                  <ShoppingCart size={17} /> Savatga
+                </button>
+                <button className="btn btn-secondary btn-lg pd-action-btn" onClick={handleBuyNow}>
+                  <Zap size={17} /> Hozir sotib ol
+                </button>
+              </div>
             </div>
-            <div className="pd-actions">
-              <button className="btn btn-primary btn-lg pd-action-btn" onClick={handleAddToCart} disabled={product.inStock === 0}>
-                <ShoppingCart size={17} /> Savatga
-              </button>
-              <button className="btn btn-secondary btn-lg pd-action-btn" onClick={handleBuyNow} disabled={product.inStock === 0}>
-                <Zap size={17} /> Hozir sotib ol
-              </button>
+          ) : (
+            <div style={{ padding: '16px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', marginBottom: '24px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <X size={20} /> Ushbu mahsulot hozirda sotuvda mavjud emas.
             </div>
-          </div>
+          )}
 
           {/* Guarantees */}
           <div className="pd-guarantees">
@@ -550,14 +568,22 @@ export default function ProductDetailPage() {
         >
           <Heart size={20} fill={wished ? "#ef4444" : "none"} color={wished ? "#ef4444" : "currentColor"} />
         </button>
-        <div className="pd-msb-actions">
-          <button className="btn btn-primary pd-msb-action-btn" onClick={handleAddToCart} disabled={product.inStock === 0}>
-            <ShoppingCart size={17} /> Savatga
-          </button>
-          <button className="btn btn-secondary pd-msb-action-btn" onClick={handleBuyNow} disabled={product.inStock === 0}>
-            <Zap size={17} /> Hozir sotib ol
-          </button>
-        </div>
+        {product.inStock > 0 ? (
+          <div className="pd-msb-actions">
+            <button className="btn btn-primary pd-msb-action-btn" onClick={handleAddToCart}>
+              <ShoppingCart size={17} /> Savatga
+            </button>
+            <button className="btn btn-secondary pd-msb-action-btn" onClick={handleBuyNow}>
+              <Zap size={17} /> Hozir sotib ol
+            </button>
+          </div>
+        ) : (
+          <div className="pd-msb-actions" style={{ flex: 1 }}>
+            <button className="btn btn-secondary pd-msb-action-btn" disabled style={{ width: '100%', cursor: 'not-allowed' }}>
+              Sotuvda qolmagan
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Message Modal */}
