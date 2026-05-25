@@ -2,79 +2,90 @@ import React from 'react';
 
 // Common CSS class style helper is defined in index.css:
 // @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-// We can use inline animation to make it fully self-contained.
+// We use inline animation to make it fully self-contained.
 const pulseStyle = {
   animation: 'pulse 1.5s infinite ease-in-out',
-  background: 'var(--bg-tertiary)',
+  background: 'var(--bg-tertiary, #f3f4f6)',
   borderRadius: '4px'
 };
 
 export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
   if (viewMode === 'list') {
     return (
-      <div className="product-card list-view" style={{ padding: 0, border: '1px solid var(--border-light)', display: 'flex' }}>
-        <ContentLoader 
-          speed={2}
-          width="100%"
-          height="100%"
-          viewBox="0 0 800 200"
-          backgroundColor="var(--bg-tertiary, #f3f4f6)"
-          foregroundColor="var(--bg-secondary, #e5e7eb)"
-          style={{ width: "100%", height: "auto", display: "block" }}
-        >
-          {/* Image */}
-          <rect x="0" y="0" rx="0" ry="0" width="260" height="200" />
-          
-          {/* Content */}
-          <rect x="290" y="24" rx="4" ry="4" width="80" height="12" />
-          <rect x="290" y="48" rx="6" ry="6" width="280" height="20" />
-          <rect x="290" y="80" rx="4" ry="4" width="220" height="14" />
-          
-          {/* Craftsman Info */}
-          <circle cx="305" cy="120" r="14" />
-          <rect x="330" y="114" rx="4" ry="4" width="140" height="12" />
+      <div 
+        className="product-card-list skeleton-card" 
+        style={{ 
+          cursor: 'default',
+          border: '1px solid var(--border-light)',
+          background: 'var(--bg-primary)',
+          width: '100%',
+        }}
+      >
+        {/* List View Image */}
+        <div className="pcl-image">
+          <div style={{ ...pulseStyle, width: '100%', height: '100%', borderRadius: 0 }} />
+        </div>
 
-          {/* Right Side (Actions) */}
-          <rect x="680" y="24" rx="4" ry="4" width="100" height="14" />
-          <rect x="650" y="50" rx="4" ry="4" width="130" height="24" />
+        {/* List View Body */}
+        <div className="pcl-body" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ ...pulseStyle, width: '70px', height: '12px' }} />
+          <div style={{ ...pulseStyle, width: '75%', height: '18px', marginTop: '4px' }} />
+          <div style={{ ...pulseStyle, width: '90%', height: '12px', marginTop: '4px' }} />
           
-          {/* Buttons */}
-          <rect x="650" y="140" rx="8" ry="8" width="130" height="40" />
-        </ContentLoader>
+          <div className="pc-craftsman" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ ...pulseStyle, width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0 }} />
+            <div style={{ ...pulseStyle, width: '90px', height: '10px' }} />
+          </div>
+        </div>
+
+        {/* List View Actions */}
+        <div className="pcl-actions" style={{ justifyContent: 'center', alignItems: 'flex-end' }}>
+          <div style={{ ...pulseStyle, width: '50px', height: '12px' }} />
+          <div style={{ ...pulseStyle, width: '90px', height: '16px', marginTop: '2px' }} />
+          <div style={{ ...pulseStyle, width: '100px', height: '32px', borderRadius: '8px', marginTop: '8px' }} />
+        </div>
       </div>
     );
   }
 
+  // Grid View
   return (
-    <div className="product-card" style={{ padding: 0, height: '100%', border: '1px solid var(--border-light)' }}>
-      <ContentLoader 
-        speed={2}
-        width="100%"
-        height="100%"
-        viewBox="0 0 260 410"
-        backgroundColor="var(--bg-tertiary, #f3f4f6)"
-        foregroundColor="var(--bg-secondary, #e5e7eb)"
-        style={{ width: "100%", height: "auto", display: "block" }}
-      >
-        {/* Product Image */}
-        <rect x="0" y="0" rx="0" ry="0" width="260" height="220" />
+    <div 
+      className="product-card skeleton-card" 
+      style={{ 
+        cursor: 'default',
+        height: '100%',
+        border: '1px solid var(--border-light)',
+        background: 'var(--bg-primary)',
+      }}
+    >
+      {/* Grid View Image */}
+      <div className="pc-image-wrap">
+        <div style={{ ...pulseStyle, width: '100%', height: '100%', borderRadius: 0 }} />
+      </div>
+
+      {/* Grid View Body */}
+      <div className="pc-body" style={{ gap: '10px' }}>
+        <div className="pc-craftsman">
+          <div style={{ ...pulseStyle, width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+            <div style={{ ...pulseStyle, width: '60%', height: '10px' }} />
+            <div style={{ ...pulseStyle, width: '40%', height: '8px' }} />
+          </div>
+        </div>
+
+        <div style={{ ...pulseStyle, width: '90%', height: '14px', marginTop: '4px' }} />
+        <div style={{ ...pulseStyle, width: '70%', height: '14px' }} />
         
-        {/* Craftsman Avatar & Details */}
-        <circle cx="30" cy="250" r="16" /> 
-        <rect x="56" y="238" rx="4" ry="4" width="120" height="10" />
-        <rect x="56" y="254" rx="4" ry="4" width="80" height="10" />
+        <div style={{ ...pulseStyle, width: '60px', height: '10px', marginTop: '2px' }} />
         
-        {/* Product Title */}
-        <rect x="14" y="280" rx="6" ry="6" width="232" height="14" />
-        <rect x="14" y="302" rx="6" ry="6" width="180" height="14" />
-        
-        {/* Rating */}
-        <rect x="14" y="328" rx="4" ry="4" width="100" height="12" />
-        
-        {/* Price & Buy Button */}
-        <rect x="14" y="370" rx="4" ry="4" width="110" height="20" />
-        <rect x="210" y="360" rx="8" ry="8" width="36" height="36" />
-      </ContentLoader>
+        <div className="pc-footer" style={{ marginTop: 'auto', paddingTop: '6px' }}>
+          <div className="pc-price-block">
+            <div style={{ ...pulseStyle, width: '75px', height: '16px' }} />
+          </div>
+          <div style={{ ...pulseStyle, width: '36px', height: '36px', borderRadius: '8px' }} />
+        </div>
+      </div>
     </div>
   );
 };
@@ -141,52 +152,40 @@ export const CategoryCardSkeleton = () => (
   </div>
 );
 
-import ContentLoader from "react-content-loader";
-
 export const ProductDetailSkeleton = () => (
   <div className="container" style={{ paddingTop: "32px", paddingBottom: "64px" }}>
     <div style={{ display: "flex", flexWrap: "wrap", gap: "28px" }}>
-      <div style={{ flex: "1 1 400px", minWidth: 0 }}>
-        <ContentLoader 
-          speed={2}
-          width="100%"
-          height="100%"
-          viewBox="0 0 500 520"
-          backgroundColor="var(--bg-tertiary, #f3f4f6)"
-          foregroundColor="var(--bg-secondary, #e5e7eb)"
-          style={{ width: "100%", height: "auto", aspectRatio: "1/1.05", borderRadius: "16px" }}
-        >
-          <rect x="0" y="0" rx="16" ry="16" width="500" height="420" /> 
-          <rect x="0" y="440" rx="8" ry="8" width="110" height="80" /> 
-          <rect x="130" y="440" rx="8" ry="8" width="110" height="80" /> 
-          <rect x="260" y="440" rx="8" ry="8" width="110" height="80" /> 
-          <rect x="390" y="440" rx="8" ry="8" width="110" height="80" /> 
-        </ContentLoader>
+      {/* Left Block - Image & Thumbnails */}
+      <div style={{ flex: "1 1 400px", minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div style={{ ...pulseStyle, width: "100%", aspectRatio: "1/1", borderRadius: "16px" }} />
+        <div style={{ display: "flex", gap: "12px" }}>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} style={{ ...pulseStyle, flex: 1, aspectRatio: "1/1", borderRadius: "8px" }} />
+          ))}
+        </div>
       </div>
-      <div style={{ flex: "1 1 400px", minWidth: 0 }}>
-        <ContentLoader 
-          speed={2}
-          width="100%"
-          height="100%"
-          viewBox="0 0 500 520"
-          backgroundColor="var(--bg-tertiary, #f3f4f6)"
-          foregroundColor="var(--bg-secondary, #e5e7eb)"
-          style={{ width: "100%", height: "auto" }}
-        >
-          <rect x="0" y="0" rx="12" ry="12" width="140" height="28" />
-          <rect x="0" y="48" rx="8" ry="8" width="450" height="38" />
-          <rect x="0" y="96" rx="8" ry="8" width="300" height="38" />
-          <rect x="0" y="154" rx="4" ry="4" width="220" height="24" />
-          
-          <rect x="0" y="200" rx="8" ry="8" width="180" height="46" />
-          
-          <rect x="0" y="270" rx="4" ry="4" width="500" height="2" />
-          <rect x="0" y="290" rx="8" ry="8" width="500" height="70" />
-          
-          <rect x="0" y="380" rx="8" ry="8" width="180" height="46" />
-          <rect x="0" y="440" rx="12" ry="12" width="240" height="56" />
-          <rect x="260" y="440" rx="12" ry="12" width="240" height="56" />
-        </ContentLoader>
+      
+      {/* Right Block - Product Details */}
+      <div style={{ flex: "1 1 400px", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div style={{ ...pulseStyle, width: "140px", height: "24px", borderRadius: "6px" }} />
+        <div style={{ ...pulseStyle, width: "90%", height: "36px", borderRadius: "8px" }} />
+        <div style={{ ...pulseStyle, width: "60%", height: "30px", borderRadius: "8px" }} />
+        <div style={{ ...pulseStyle, width: "160px", height: "20px" }} />
+        
+        <div style={{ ...pulseStyle, width: "150px", height: "40px", borderRadius: "8px", marginTop: "10px" }} />
+        
+        <div style={{ width: "100%", height: "1px", background: "var(--border-light)", margin: "10px 0" }} />
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ ...pulseStyle, width: "100%", height: "14px" }} />
+          <div style={{ ...pulseStyle, width: "95%", height: "14px" }} />
+          <div style={{ ...pulseStyle, width: "80%", height: "14px" }} />
+        </div>
+        
+        <div style={{ display: "flex", gap: "16px", marginTop: "20px" }}>
+          <div style={{ ...pulseStyle, flex: 1, height: "48px", borderRadius: "12px" }} />
+          <div style={{ ...pulseStyle, flex: 1, height: "48px", borderRadius: "12px" }} />
+        </div>
       </div>
     </div>
   </div>

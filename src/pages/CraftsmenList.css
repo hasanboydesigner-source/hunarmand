@@ -89,15 +89,21 @@
   min-height: 42px;
 }
 @media (max-width: 1024px) {
-  .craftsmen-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .craftsmen-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 @media (max-width: 768px) {
-  .clp-header { padding: 40px 0; }
+  .clp-header {
+    padding: 40px 0;
+  }
   .clp-toolbar {
     flex-direction: column;
     gap: 10px;
   }
-  .clp-toolbar .search-box { min-width: unset; }
+  .clp-toolbar .search-box {
+    min-width: unset;
+  }
   .clp-toolbar .filters-row {
     width: 100%;
     flex-wrap: wrap;
@@ -108,5 +114,7 @@
   }
 }
 @media (max-width: 540px) {
-  .craftsmen-grid { grid-template-columns: 1fr !important; }
+  .craftsmen-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
