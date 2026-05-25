@@ -116,8 +116,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <ShoppingCart size={14} /> Savatga
           </button>
           <button
-            className={`btn btn-icon ${wished ? 'wished' : 'btn-ghost'}`}
+            className={`btn btn-icon ${wished ? 'wished' : 'btn-secondary'}`}
             onClick={handleWishlist}
+            title="Sevimlilarga qo'shish"
           >
             <Heart size={16} fill={wished ? '#ef4444' : 'none'} color={wished ? '#ef4444' : 'currentColor'} />
           </button>
