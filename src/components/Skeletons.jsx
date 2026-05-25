@@ -9,38 +9,77 @@ const pulseStyle = {
   borderRadius: '4px'
 };
 
-export const ProductCardSkeleton = () => (
-  <div className="product-card" style={{ padding: 0, height: '100%', border: '1px solid var(--border-light)' }}>
-    <ContentLoader 
-      speed={2}
-      width="100%"
-      height="100%"
-      viewBox="0 0 260 410"
-      backgroundColor="var(--bg-tertiary, #f3f4f6)"
-      foregroundColor="var(--bg-secondary, #e5e7eb)"
-      style={{ width: "100%", height: "auto", display: "block" }}
-    >
-      {/* Product Image */}
-      <rect x="0" y="0" rx="0" ry="0" width="260" height="220" />
-      
-      {/* Craftsman Avatar & Details */}
-      <circle cx="30" cy="250" r="16" /> 
-      <rect x="56" y="238" rx="4" ry="4" width="120" height="10" />
-      <rect x="56" y="254" rx="4" ry="4" width="80" height="10" />
-      
-      {/* Product Title */}
-      <rect x="14" y="280" rx="6" ry="6" width="232" height="14" />
-      <rect x="14" y="302" rx="6" ry="6" width="180" height="14" />
-      
-      {/* Rating */}
-      <rect x="14" y="328" rx="4" ry="4" width="100" height="12" />
-      
-      {/* Price & Buy Button */}
-      <rect x="14" y="370" rx="4" ry="4" width="110" height="20" />
-      <rect x="210" y="360" rx="8" ry="8" width="36" height="36" />
-    </ContentLoader>
-  </div>
-);
+import ContentLoader from 'react-content-loader';
+
+export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
+  if (viewMode === 'list') {
+    return (
+      <div className="product-card list-view" style={{ padding: 0, border: '1px solid var(--border-light)', display: 'flex' }}>
+        <ContentLoader 
+          speed={2}
+          width="100%"
+          height="100%"
+          viewBox="0 0 800 200"
+          backgroundColor="var(--bg-tertiary, #f3f4f6)"
+          foregroundColor="var(--bg-secondary, #e5e7eb)"
+          style={{ width: "100%", height: "auto", display: "block" }}
+        >
+          {/* Image */}
+          <rect x="0" y="0" rx="0" ry="0" width="260" height="200" />
+          
+          {/* Content */}
+          <rect x="290" y="24" rx="4" ry="4" width="80" height="12" />
+          <rect x="290" y="48" rx="6" ry="6" width="280" height="20" />
+          <rect x="290" y="80" rx="4" ry="4" width="220" height="14" />
+          
+          {/* Craftsman Info */}
+          <circle cx="305" cy="120" r="14" />
+          <rect x="330" y="114" rx="4" ry="4" width="140" height="12" />
+
+          {/* Right Side (Actions) */}
+          <rect x="680" y="24" rx="4" ry="4" width="100" height="14" />
+          <rect x="650" y="50" rx="4" ry="4" width="130" height="24" />
+          
+          {/* Buttons */}
+          <rect x="650" y="140" rx="8" ry="8" width="130" height="40" />
+        </ContentLoader>
+      </div>
+    );
+  }
+
+  return (
+    <div className="product-card" style={{ padding: 0, height: '100%', border: '1px solid var(--border-light)' }}>
+      <ContentLoader 
+        speed={2}
+        width="100%"
+        height="100%"
+        viewBox="0 0 260 410"
+        backgroundColor="var(--bg-tertiary, #f3f4f6)"
+        foregroundColor="var(--bg-secondary, #e5e7eb)"
+        style={{ width: "100%", height: "auto", display: "block" }}
+      >
+        {/* Product Image */}
+        <rect x="0" y="0" rx="0" ry="0" width="260" height="220" />
+        
+        {/* Craftsman Avatar & Details */}
+        <circle cx="30" cy="250" r="16" /> 
+        <rect x="56" y="238" rx="4" ry="4" width="120" height="10" />
+        <rect x="56" y="254" rx="4" ry="4" width="80" height="10" />
+        
+        {/* Product Title */}
+        <rect x="14" y="280" rx="6" ry="6" width="232" height="14" />
+        <rect x="14" y="302" rx="6" ry="6" width="180" height="14" />
+        
+        {/* Rating */}
+        <rect x="14" y="328" rx="4" ry="4" width="100" height="12" />
+        
+        {/* Price & Buy Button */}
+        <rect x="14" y="370" rx="4" ry="4" width="110" height="20" />
+        <rect x="210" y="360" rx="8" ry="8" width="36" height="36" />
+      </ContentLoader>
+    </div>
+  );
+};
 
 export const HeroSkeleton = () => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', padding: '0', width: '100%', maxWidth: '850px' }}>

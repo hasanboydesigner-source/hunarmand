@@ -14,6 +14,7 @@ import './Products.css';
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState('grid');
+  const [isViewChanging, setIsViewChanging] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const setProductsLoaded = useUIStore((s) => s.setProductsLoaded);
@@ -109,6 +110,15 @@ export default function ProductsPage() {
   };
 
   const clearAll = () => setParams({});
+
+  const handleViewChange = (newView) => {
+    if (newView === view) return;
+    setIsViewChanging(true);
+    setView(newView);
+    setTimeout(() => {
+      setIsViewChanging(false);
+    }, 400); // 400ms masks the CSS transition
+  };
 
   const filtered = useMemo(() => {
     let list = [...allProducts];
@@ -325,17 +335,17 @@ export default function ProductsPage() {
                 {SORT_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
               <div className="view-toggle">
-                <button className={`view-btn ${view==='grid'?'active':''}`} onClick={() => setView('grid')}><Grid3X3 size={16} /></button>
-                <button className={`view-btn ${view==='list'?'active':''}`} onClick={() => setView('list')}><List size={16} /></button>
+                <button className={`view-btn ${view==='grid'?'active':''}`} onClick={() => handleViewChange('grid')}><Grid3X3 size={16} /></button>
+                <button className={`view-btn ${view==='list'?'active':''}`} onClick={() => handleViewChange('list')}><List size={16} /></button>
               </div>
             </div>
           </div>
 
           {/* Results */}
-          {isLoading ? (
-            <div className="products-grid">
+          {(isLoading || isViewChanging) ? (
+            <div className={view === 'grid' ? 'products-grid' : 'products-list'}>
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <ProductCardSkeleton key={i} />
+                <ProductCardSkeleton key={i} viewMode={view} />
               ))}
             </div>
           ) : filtered.length === 0 ? (
