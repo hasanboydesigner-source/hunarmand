@@ -2,20 +2,18 @@ import express from 'express';
 import { GoogleGenAI } from '@google/genai';
 import Groq from 'groq-sdk';
 import Product from '../models/Product.js';
+import Order from '../models/Order.js';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
 
-// Helper to generate professional local business advice (no AI needed)
-const generateLocalAdvice = (craftsman, products) => {
-  let totalViews = 0;
-  let totalSold = 0;
-  let lowStockProducts = [];
-  let highViewLowSaleProducts = [];
-  let bestSeller = null;
-  let maxSold = -1;
+// Local fallback advice generator
+const generateLocalAdvice = (craftsman, products, orders, period) => {
+  let totalViews = 0, totalSold = 0;
+  let lowStockProducts = [], highViewLowSaleProducts = [];
+  let bestSeller = null, maxSold = -1;
 
   products.forEach(p => {
     totalViews += p.views || 0;
@@ -25,51 +23,44 @@ const generateLocalAdvice = (craftsman, products) => {
     if ((p.sold || 0) > maxSold) { maxSold = p.sold || 0; bestSeller = p.title; }
   });
 
-  return `### 📊 Shaxsiy AI Biznes Tahlil Hisoboti
+  const periodLabel = period === 'daily' ? 'bugungi' : period === 'weekly' ? 'haftalik' : 'umumiy';
+  const orderRevenue = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
 
-Salom, **${craftsman.name}**! Sizning do'koningiz va mahsulotlaringiz statistikasi asosida tayyorlangan tahlil:
+  return `### 📊 ${periodLabel.charAt(0).toUpperCase() + periodLabel.slice(1)} AI Biznes Tahlil Hisoboti
 
----
-
-#### 📈 Savdo va Faollik Ko'rsatkichlari
-* **Jami mahsulotlaringiz:** ${products.length} turdagi mahsulot
-* **Umumiy ko'rishlar soni:** ${totalViews} marta
-* **Umumiy sotilgan mahsulotlar:** ${totalSold} ta mahsulot
-* **O'rtacha konversiya:** ${totalViews > 0 ? ((totalSold / totalViews) * 100).toFixed(1) : 0}%
+Salom, **${craftsman.name}**! Sizning do'koningiz statistikasi asosida tayyorlangan tahlil:
 
 ---
 
-#### 🌟 Amaliy Tavsiyalar:
+#### 📈 Ko'rsatkichlar (${periodLabel} davr)
+* **Jami mahsulotlar:** ${products.length} tur
+* **Ko'rishlar:** ${totalViews} marta
+* **Sotilgan:** ${totalSold} ta
+* **Buyurtmalar:** ${orders.length} ta
+* **Daromad:** ${orderRevenue.toLocaleString()} so'm
+* **Konversiya:** ${totalViews > 0 ? ((totalSold / totalViews) * 100).toFixed(1) : 0}%
 
-${bestSeller && maxSold > 0 ? `1. **🔥 Top Mahsulot (Best Seller):**
-   - **"${bestSeller}"** mahsuloti ${maxSold} marta sotilib, eng ommabop mahsulotingizga aylandi!
-   - *Tavsiya:* Sifatini saqlab qoling va zaxirasi doim yetarli bo'lishini ta'minlang.` : ''}
+---
 
-${lowStockProducts.length > 0 ? `2. **⚠️ Zaxirani Yangilash Zarur:**
-   - Kam qolgan mahsulotlar: *${lowStockProducts.join(', ')}*
-   - *Tavsiya:* Zaxirani kamida 10-15 taga yetkazib qo'ying.` : ''}
+#### 🌟 Tavsiyalar:
 
-${highViewLowSaleProducts.length > 0 ? `3. **🔍 Ko'rishlar Bor, Lekin Sotuv Yo'q:**
-   - *${highViewLowSaleProducts.join(', ')}*
-   - *Tavsiya:* Narxni 5-10% tushirib ko'ring yoki rasmlarni yangilang.` : ''}
+${bestSeller && maxSold > 0 ? `1. **🔥 Top Mahsulot:** "${bestSeller}" — ${maxSold} ta sotildi. Zaxirani to'ldirib qo'ying.` : ''}
+${lowStockProducts.length > 0 ? `2. **⚠️ Zaxira Kam:** ${lowStockProducts.join(', ')} — kamida 10-15 taga yetkazing.` : ''}
+${highViewLowSaleProducts.length > 0 ? `3. **🔍 Konversiya past:** ${highViewLowSaleProducts.join(', ')} — narxni 5-10% tushirib ko'ring yoki rasmlarni yangilang.` : ''}
+4. **💬 Sharhlar:** Xaridorlar sharhlariga javob bering — bu ishonchni oshiradi.
+5. **🚀 Strategiya:** Ijtimoiy tarmoqlarda mahsulot tayyorlanish jarayonini ko'rsating.
 
-4. **💬 Xaridorlar bilan Aloqa:**
-   - Sharhlarga samimiy javob qaytarishni unutmang.
-
-5. **🚀 Biznes Strategiyasi:**
-   - Yangi mahsulotlar qo'shganda batafsil tavsif yozing.
-   - Ijtimoiy tarmoqlarda mahsulotlar tayyorlanish jarayonini ko'rsating.
-
-*Biznesingiz rivojida muvaffaqiyatlar! 💼✨*`;
+*Biznesingizga muvaffaqiyatlar! 💼✨*`;
 };
 
-// @route   GET /api/advisor/:craftsmanId
+// @route   GET /api/advisor/:craftsmanId?period=daily|weekly|overall
 router.get('/:craftsmanId', async (req, res) => {
   try {
-    const craftsmanId = req.params.craftsmanId;
+    const { craftsmanId } = req.params;
+    const period = req.query.period || 'overall'; // 'daily' | 'weekly' | 'overall'
 
     if (!craftsmanId || !/^[0-9a-fA-F]{24}$/.test(craftsmanId)) {
-      return res.status(400).json({ message: "Noto'g'ri hunarmand ID raqami." });
+      return res.status(400).json({ message: "Noto'g'ri hunarmand ID." });
     }
 
     const craftsman = await User.findById(craftsmanId);
@@ -78,121 +69,146 @@ router.get('/:craftsmanId', async (req, res) => {
     }
 
     const products = await Product.find({ craftsman: craftsmanId });
-
     if (products.length === 0) {
       return res.json({ advice: "Sizda hali mahsulotlar yo'q. Dastlab mahsulot qo'shing va savdoni boshlang!" });
     }
 
-    // Prepare data for AI
-    let dataForAI = `Hunarmand ismi: ${craftsman.name}\n\nMahsulotlar statistikasi:\n`;
-    products.forEach((p, index) => {
-      dataForAI += `\n${index + 1}. ${p.title}
-- Narxi: ${p.price} so'm
-- Zaxirada: ${p.inStock} ta
-- Sotildi: ${p.sold} ta
-- Ko'rishlar: ${p.views} marta
-`;
-      if (p.reviews && p.reviews.length > 0) {
-        dataForAI += `- Sharhlar:\n`;
-        p.reviews.forEach(r => {
-          dataForAI += `  * Reyting: ${r.rating}/5, Izoh: "${r.text}"\n`;
-        });
-      }
-    });
+    // ── Date filter for orders ──
+    let dateFilter = {};
+    const now = new Date();
+    if (period === 'daily') {
+      const dayStart = new Date(now);
+      dayStart.setHours(0, 0, 0, 0);
+      dateFilter = { createdAt: { $gte: dayStart } };
+    } else if (period === 'weekly') {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - 7);
+      dateFilter = { createdAt: { $gte: weekStart } };
+    }
 
-    const systemInstruction = `Siz elektron tijorat platformasidagi "Senior AI Biznes Maslahatchi"sisiz.
-Hunarmandning mahsulotlari statistikasini (ko'rilishlar, sotilishlar, zaxira, sharhlar) chuqur tahlil qilib, savdoni oshirish bo'yicha amaliy maslahatlar bering.
-Masalan:
-- Agar views yuqori lekin sold kam bo'lsa - narx yoki rasm maslahat bering
-- Agar zaxira kam bo'lsa - to'ldirish eslatma bering
-- Sharhlardan e'tirozlarni yig'ib, sifat maslahatini bering
-Javobni "Siz" deb murojaat qilib, Markdown formatda, emojilar bilan bering.`;
+    const orders = await Order.find({ craftsmanId, ...dateFilter });
+
+    // ── Build stats ──
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
+    const pendingOrders = orders.filter(o => o.status === 'pending').length;
+    const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+    const cancelledOrders = orders.filter(o => o.status === 'cancelled').length;
+
+    let totalViews = 0, totalSold = 0;
+    products.forEach(p => { totalViews += p.views || 0; totalSold += p.sold || 0; });
+
+    const periodLabel = period === 'daily' ? 'BUGUNGI' : period === 'weekly' ? 'HAFTALIK (so\'nggi 7 kun)' : 'UMUMIY';
+
+    // ── AI Prompt ──
+    const dataForAI = `
+Hunarmand: ${craftsman.name} | Do'kon: ${craftsman.shopName || craftsman.name}
+Tahlil davri: ${periodLabel}
+
+═══ MAHSULOTLAR STATISTIKASI ═══
+${products.map((p, i) => `
+${i + 1}. "${p.title}"
+   Narx: ${p.price} so'm | Zaxira: ${p.inStock} ta | Sotildi: ${p.sold} ta | Ko'rishlar: ${p.views} marta
+   ${p.reviews?.length > 0 ? `Sharhlar (${p.reviews.length} ta): ${p.reviews.slice(0, 3).map(r => `${r.rating}/5 — "${r.text?.slice(0, 60)}"`).join('; ')}` : 'Sharhlar yo\'q'}
+`).join('')}
+
+═══ BUYURTMALAR STATISTIKASI (${periodLabel}) ═══
+Jami buyurtmalar: ${totalOrders} ta
+Kutilmoqda: ${pendingOrders} ta | Yetkazildi: ${deliveredOrders} ta | Bekor: ${cancelledOrders} ta
+Jami daromad: ${totalRevenue.toLocaleString()} so'm
+Jami ko'rishlar: ${totalViews} | Jami sotilgan: ${totalSold} ta
+Konversiya: ${totalViews > 0 ? ((totalSold / totalViews) * 100).toFixed(2) : 0}%
+`;
+
+    const systemInstruction = `Sen "E-Hunarmand" elektron tijorat platformasining SENIOR AI Biznes Maslahatchi'sisisan.
+
+VAZIFANG:
+Hunarmandning ${periodLabel} statistikasini CHUQUR tahlil qilib, aniq, amaliy va foydali maslahatlar ber.
+
+TAHLIL TUZILMASI (bu tartibda yoz):
+1. 📊 Davriy Tahlil Xulosasi — raqamlar bilan qisqa xulosa
+2. 🔥 Kuchli Tomonlar — nima yaxshi ishlayapti
+3. ⚠️ Muammolar — nima yaxshilanishi kerak (raqamlar asosida)
+4. 🎯 Amaliy Qadamlar — 3-5 ta ANIQ harakat (masalan: "X mahsulot narxini Y so'mga tushiring")
+5. 💡 Strategik Tavsiya — bu davr uchun eng muhim 1 ta strategik qadam
+
+USLUB:
+- O'ZBEK tilida yoz, grammatik xatosiz
+- Har bir tavsiya ANIQ va AMALIY bo'lsin (umumiy gap emas)
+- Markdown formatdan foydalan
+- "Siz" deb murojaat qil
+- Raqamlarni ko'p ishlatiz`;
 
     let responseText = null;
 
-    // =============================================
-    // 1) TRY GROQ FIRST (Free, fast)
-    // =============================================
+    // ── 1) GROQ ──
     if (process.env.GROQ_API_KEY) {
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
       const groqModels = [
+        'llama-3.3-70b-versatile',
+        'llama-3.1-70b-versatile',
         'llama-3.1-8b-instant',
-        'llama3-8b-8192',
-        'mixtral-8x7b-32768',
         'gemma2-9b-it',
       ];
-
       for (const modelName of groqModels) {
         try {
-          console.log(`[AI Advisor] Groq sinab ko'rilmoqda: ${modelName}...`);
+          console.log(`[Advisor] Groq: ${modelName}...`);
           const completion = await groq.chat.completions.create({
             model: modelName,
             messages: [
               { role: 'system', content: systemInstruction },
               { role: 'user', content: dataForAI }
             ],
-            temperature: 0.7,
-            max_tokens: 1500,
+            temperature: 0.5,
+            max_tokens: 2000,
           });
           const text = completion.choices?.[0]?.message?.content;
-          if (text) {
-            responseText = text;
-            console.log(`[AI Advisor] Groq muvaffaqiyatli: ${modelName}`);
-            break;
-          }
+          if (text) { responseText = text; console.log(`[Advisor] Groq OK: ${modelName}`); break; }
         } catch (err) {
-          console.warn(`[AI Advisor] Groq xatolik ${modelName}:`, err.message);
+          console.warn(`[Advisor] Groq xatolik ${modelName}:`, err.message);
         }
       }
     }
 
-    // =============================================
-    // 2) FALLBACK TO GEMINI
-    // =============================================
+    // ── 2) GEMINI fallback ──
     if (!responseText && process.env.GEMINI_API_KEY) {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const geminiModels = [
         'gemini-2.5-flash-preview-05-20',
-        'gemini-2.5-pro-preview-05-06',
         'gemini-2.0-flash',
         'gemini-2.0-flash-lite',
         'gemini-1.5-flash',
-        'gemini-1.5-pro',
       ];
-
       for (const modelName of geminiModels) {
         try {
-          console.log(`[AI Advisor] Gemini sinab ko'rilmoqda: ${modelName}...`);
+          console.log(`[Advisor] Gemini: ${modelName}...`);
           const response = await ai.models.generateContent({
             model: modelName,
             contents: [{ role: 'user', parts: [{ text: dataForAI }] }],
-            config: { systemInstruction, temperature: 0.7 }
+            config: { systemInstruction, temperature: 0.5 }
           });
-          if (response && response.text) {
+          if (response?.text) {
             responseText = response.text;
-            console.log(`[AI Advisor] Gemini muvaffaqiyatli: ${modelName}`);
+            console.log(`[Advisor] Gemini OK: ${modelName}`);
             break;
           }
         } catch (err) {
-          console.warn(`[AI Advisor] Gemini xatolik ${modelName}:`, err.message);
+          console.warn(`[Advisor] Gemini xatolik ${modelName}:`, err.message);
           if (err.status === 401 || err.status === 403) break;
         }
       }
     }
 
-    // =============================================
-    // 3) LOCAL FALLBACK (always works, no AI)
-    // =============================================
+    // ── 3) Local fallback ──
     if (responseText) {
-      res.json({ advice: responseText });
+      res.json({ advice: responseText, stats: { totalOrders, totalRevenue, pendingOrders, deliveredOrders, totalViews, totalSold } });
     } else {
-      console.warn('[AI Advisor] Barcha AI xizmatlari xato berdi. Lokal tahlil ishlatilmoqda.');
-      const fallbackAdvice = generateLocalAdvice(craftsman, products);
-      res.json({ advice: fallbackAdvice });
+      const fallbackAdvice = generateLocalAdvice(craftsman, products, orders, period);
+      res.json({ advice: fallbackAdvice, stats: { totalOrders, totalRevenue, pendingOrders, deliveredOrders, totalViews, totalSold } });
     }
 
   } catch (error) {
-    console.error('[AI Advisor] Error:', error);
+    console.error('[Advisor] Error:', error);
     res.status(500).json({ message: 'Serverda xatolik yuz berdi.', error: error.message });
   }
 });
