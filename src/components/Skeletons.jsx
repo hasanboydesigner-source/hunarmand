@@ -49,33 +49,34 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
           <ContentLoader 
             speed={2}
             width="100%"
-            height={360}
+            height="100%"
             viewBox="0 0 320 360"
+            preserveAspectRatio="xMidYMid slice"
             backgroundColor="var(--bg-tertiary, #f3f4f6)"
             foregroundColor="var(--bg-secondary, #e5e7eb)"
-            style={{ width: "100%", height: "auto", display: "block", alignSelf: "stretch" }}
+            style={{ width: "100%", height: "100%", display: "block" }}
           >
             {/* Image at top */}
-            <rect x="0" y="0" rx="8" ry="8" width="320" height="160" />
+            <rect x="0" y="0" rx="8" ry="8" width="100%" height="160" />
             
             {/* Category */}
-            <rect x="0" y="180" rx="4" ry="4" width="70" height="12" />
+            <rect x="0" y="180" rx="4" ry="4" width="20%" height="12" />
             
             {/* Title */}
-            <rect x="0" y="204" rx="6" ry="6" width="280" height="18" />
-            <rect x="0" y="228" rx="6" ry="6" width="180" height="18" />
+            <rect x="0" y="204" rx="6" ry="6" width="80%" height="18" />
+            <rect x="0" y="228" rx="6" ry="6" width="50%" height="18" />
             
             {/* Description */}
-            <rect x="0" y="256" rx="4" ry="4" width="320" height="10" />
-            <rect x="0" y="272" rx="4" ry="4" width="240" height="10" />
+            <rect x="0" y="256" rx="4" ry="4" width="100%" height="10" />
+            <rect x="0" y="272" rx="4" ry="4" width="70%" height="10" />
             
             {/* Craftsman Info */}
             <circle cx="15" cy="305" r="12" />
-            <rect x="35" y="300" rx="4" ry="4" width="120" height="10" />
+            <rect x="35" y="300" rx="4" ry="4" width="30%" height="10" />
             
             {/* Price & Buy Button */}
-            <rect x="0" y="330" rx="4" ry="4" width="100" height="16" />
-            <rect x="220" y="325" rx="8" ry="8" width="100" height="34" />
+            <rect x="0" y="330" rx="4" ry="4" width="30%" height="16" />
+            <rect x="70%" y="320" rx="8" ry="8" width="30%" height="34" />
           </ContentLoader>
         </div>
       );
@@ -98,30 +99,31 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
         <ContentLoader 
           speed={2}
           width="100%"
-          height={130}
+          height="100%"
           viewBox="0 0 800 130"
+          preserveAspectRatio="xMidYMid slice"
           backgroundColor="var(--bg-tertiary, #f3f4f6)"
           foregroundColor="var(--bg-secondary, #e5e7eb)"
-          style={{ width: "100%", height: "auto", display: "block", alignSelf: "stretch" }}
+          style={{ width: "100%", height: "130px", display: "block" }}
         >
           {/* Image */}
           <rect x="0" y="0" rx="8" ry="8" width="130" height="130" />
           
           {/* Content */}
-          <rect x="150" y="12" rx="4" ry="4" width="80" height="12" />
-          <rect x="150" y="32" rx="6" ry="6" width="320" height="20" />
-          <rect x="150" y="60" rx="4" ry="4" width="400" height="14" />
+          <rect x="150" y="12" rx="4" ry="4" width="10%" height="12" />
+          <rect x="150" y="32" rx="6" ry="6" width="40%" height="20" />
+          <rect x="150" y="60" rx="4" ry="4" width="50%" height="14" />
           
           {/* Craftsman Info */}
           <circle cx="164" cy="98" r="12" />
-          <rect x="186" y="92" rx="4" ry="4" width="140" height="12" />
+          <rect x="186" y="92" rx="4" ry="4" width="20%" height="12" />
 
           {/* Right Side (Actions) */}
-          <rect x="680" y="12" rx="4" ry="4" width="100" height="14" />
-          <rect x="650" y="34" rx="4" ry="4" width="130" height="20" />
+          <rect x="85%" y="12" rx="4" ry="4" width="10%" height="14" />
+          <rect x="80%" y="34" rx="4" ry="4" width="15%" height="20" />
           
           {/* Buttons */}
-          <rect x="650" y="86" rx="8" ry="8" width="130" height="36" />
+          <rect x="80%" y="86" rx="8" ry="8" width="15%" height="36" />
         </ContentLoader>
       </div>
     );
@@ -136,7 +138,8 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
         height: '100%', 
         border: '1px solid var(--border-light)', 
         cursor: 'default',
-        background: 'var(--bg-primary)'
+        background: 'var(--bg-primary)',
+        overflow: 'hidden'
       }}
     >
       <ContentLoader 
@@ -144,28 +147,29 @@ export const ProductCardSkeleton = ({ viewMode = 'grid' }) => {
         width="100%"
         height="100%"
         viewBox="0 0 260 410"
+        preserveAspectRatio="xMidYMid slice"
         backgroundColor="var(--bg-tertiary, #f3f4f6)"
         foregroundColor="var(--bg-secondary, #e5e7eb)"
-        style={{ width: "100%", height: "auto", display: "block" }}
+        style={{ width: "100%", height: "100%", display: "block" }}
       >
         {/* Product Image */}
-        <rect x="0" y="0" rx="0" ry="0" width="260" height="220" />
+        <rect x="0" y="0" rx="0" ry="0" width="100%" height="220" />
         
         {/* Craftsman Avatar & Details */}
         <circle cx="30" cy="250" r="16" /> 
-        <rect x="56" y="238" rx="4" ry="4" width="120" height="10" />
-        <rect x="56" y="254" rx="4" ry="4" width="80" height="10" />
+        <rect x="56" y="238" rx="4" ry="4" width="40%" height="10" />
+        <rect x="56" y="254" rx="4" ry="4" width="25%" height="10" />
         
         {/* Product Title */}
-        <rect x="14" y="280" rx="6" ry="6" width="232" height="14" />
-        <rect x="14" y="302" rx="6" ry="6" width="180" height="14" />
+        <rect x="14" y="280" rx="6" ry="6" width="80%" height="14" />
+        <rect x="14" y="302" rx="6" ry="6" width="60%" height="14" />
         
         {/* Rating */}
-        <rect x="14" y="328" rx="4" ry="4" width="100" height="12" />
+        <rect x="14" y="328" rx="4" ry="4" width="30%" height="12" />
         
         {/* Price & Buy Button */}
-        <rect x="14" y="370" rx="4" ry="4" width="110" height="20" />
-        <rect x="210" y="360" rx="8" ry="8" width="36" height="36" />
+        <rect x="14" y="370" rx="4" ry="4" width="40%" height="20" />
+        <rect x="80%" y="360" rx="8" ry="8" width="36" height="36" />
       </ContentLoader>
     </div>
   );

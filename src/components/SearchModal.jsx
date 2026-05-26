@@ -129,9 +129,8 @@ export default function SearchModal() {
             type="file" 
             ref={fileInputRef} 
             onChange={handleVisualSearch} 
-            accept="image/*" 
+            accept="image/jpeg, image/png, image/webp" 
             style={{ display: 'none' }} 
-            capture="environment"
           />
 
           {!isMobile && (

@@ -11,11 +11,12 @@ export default function DashboardAdvisor({ user }) {
   const [error, setError] = useState(null);
 
   const fetchAdvice = async () => {
-    if (!user || !user.id) return;
+    const userId = user?.id || user?._id;
+    if (!userId) return;
     setIsLoading(true);
     setError(null);
     try {
-      const { data } = await axios.get(`${API_URL}/advisor/${user.id}`);
+      const { data } = await axios.get(`${API_URL}/advisor/${userId}`);
       setAdvice(data.advice);
     } catch (err) {
       console.error(err);

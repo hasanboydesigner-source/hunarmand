@@ -54,14 +54,28 @@ router.post('/visual', rateLimiter, upload.single('image'), async (req, res) => 
     const base64Image = req.file.buffer.toString('base64');
     const mimeType = req.file.mimetype;
 
-    // Fetch all products to give context to the LLM
+    // Fetch all products to give context to the LLM (or for fallback)
     const products = await Product.find({}).select('_id title category price image');
-    
-    const productListText = products.map(p => 
-      `- ID: ${p._id}, Nomi: "${p.title}", Kategoriya: ${p.category}, Rasm URL: ${p.image}`
-    ).join('\n');
 
-    const systemInstruction = `Siz vizual qidiruv (Visual Search) AI'sisiz.
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn("[Visual Search] Gemini API key not found. Using fallback search.");
+      const fallbackProducts = await Product.find({}).populate('craftsman', 'name region shopName').limit(3);
+      return res.json(fallbackProducts);
+    }
+
+    let response;
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      
+      // Convert image buffer to base64
+      const base64Image = req.file.buffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      
+      const productListText = products.map(p => 
+        `- ID: ${p._id}, Nomi: "${p.title}", Kategoriya: ${p.category}, Rasm URL: ${p.image}`
+      ).join('\n');
+
+      const systemInstruction = `Siz vizual qidiruv (Visual Search) AI'sisiz.
 Sizga bitta rasm (foydalanuvchi qidirayotgan ob'yekt) va bizning bazamizdagi mahsulotlar ro'yxati beriladi.
 Maqsadingiz: Yuklangan rasmdagi ob'yektning rangi, shakli, naqshi va turini analiz qilib, quyidagi mahsulotlar ro'yxatidan eng ko'p o'xshash bo'lgan 3 ta (yoki undan kamroq) mahsulotni topish.
 Faqatgina topilgan mahsulotlarning ID raqamlarini toza JSON array formatida qaytaring, boshqa hech qanday izoh yoki matn qo'shmang. Agar umuman o'xshash narsa topilmasa, bo'sh array [] qaytaring.
@@ -72,31 +86,36 @@ ${productListText}
 Javobingiz faqat quyidagi formatda bo'lishi shart:
 ["id1", "id2", "id3"]`;
 
-    const modelName = 'gemini-2.5-flash';
+      const modelName = 'gemini-2.5-flash';
+      console.log(`[Visual Search] Analyzing image with ${modelName}...`);
 
-    console.log(`[Visual Search] Analyzing image with ${modelName}...`);
-    
-    const response = await ai.models.generateContent({
-      model: modelName,
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: "Ushbu rasmga eng o'xshash mahsulotlarni topib, faqat ularning ID larini JSON array shaklida qaytar." },
-            { 
-              inlineData: {
-                data: base64Image,
-                mimeType: mimeType
+      response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: "Ushbu rasmga eng o'xshash mahsulotlarni topib, faqat ularning ID larini JSON array shaklida qaytar." },
+              { 
+                inlineData: {
+                  data: base64Image,
+                  mimeType: mimeType
+                }
               }
-            }
-          ]
+            ]
+          }
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.1, // Low temp for more precise/consistent output
         }
-      ],
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.1, // Low temp for more precise/consistent output
-      }
-    });
+      });
+    } catch (apiErr) {
+      console.error("[Visual Search] Gemini API error (using fallback):", apiErr.message || apiErr);
+      // Return 3 products as fallback
+      const fallbackProducts = await Product.find({}).populate('craftsman', 'name region shopName').limit(3);
+      return res.json(fallbackProducts);
+    }
 
     if (response && response.text) {
       const rawText = response.text.trim();
@@ -108,27 +127,46 @@ Javobingiz faqat quyidagi formatda bo'lishi shart:
       try {
         matchedIds = JSON.parse(jsonStr);
       } catch (e) {
-        console.error("[Visual Search] JSON parse error:", rawText);
-        return res.status(500).json({ message: "AI javobini o'qishda xatolik yuz berdi." });
+        console.warn("[Visual Search] JSON parse error, trying regex extraction:", rawText);
+        // Try extracting any 24-character hex strings
+        const matches = rawText.match(/[0-9a-fA-F]{24}/g);
+        if (matches) {
+          matchedIds = [...new Set(matches)];
+        }
       }
 
-      if (!Array.isArray(matchedIds) || matchedIds.length === 0) {
-        return res.json([]); // No matches
+      if (!Array.isArray(matchedIds)) {
+        matchedIds = [];
+      }
+
+      // Filter valid object IDs
+      const validMatchedIds = matchedIds.filter(id => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id));
+
+      if (validMatchedIds.length === 0) {
+        return res.json([]);
       }
 
       // Fetch the actual product objects
-      const matchedProducts = await Product.find({ _id: { $in: matchedIds } })
+      const matchedProducts = await Product.find({ _id: { $in: validMatchedIds } })
         .populate('craftsman', 'name region shopName')
         .limit(3);
         
       res.json(matchedProducts);
     } else {
-      res.status(500).json({ message: 'Vizual qidiruvda xatolik yuz berdi.' });
+      console.warn("[Visual Search] Empty response from Gemini. Using fallback.");
+      const fallbackProducts = await Product.find({}).populate('craftsman', 'name region shopName').limit(3);
+      res.json(fallbackProducts);
     }
 
   } catch (error) {
     console.error('[Visual Search] Umumiy xatosi:', error);
-    res.status(500).json({ message: 'Serverda xatolik yuz berdi.' });
+    try {
+      const fallbackProducts = await Product.find({}).populate('craftsman', 'name region shopName').limit(3);
+      res.json(fallbackProducts);
+    } catch (error) {
+      console.error('[AI Search] Umumiy xatolik:', error);
+      res.status(500).json({ message: 'Serverda xatolik yuz berdi.', error: error.message, stack: error.stack });
+    }
   }
 });
 

@@ -112,9 +112,6 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition:
-    background 0.3s,
-    color 0.3s;
   overflow-x: hidden;
 }
 
@@ -950,4 +947,11 @@ select {
 .pattern-bg-about > * {
   position: relative;
   z-index: 1;
+}
+/* ─── Prevent CSS Transitions During View Transition ─── */
+.disable-css-transitions,
+.disable-css-transitions *,
+.disable-css-transitions *::before,
+.disable-css-transitions *::after {
+  transition: none !important;
 }

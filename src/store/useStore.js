@@ -99,7 +99,22 @@ export const useUIStore = create((set) => ({
   toggleTheme: () =>
     set((s) => {
       const next = s.theme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
+      
+      const updateTheme = () => {
+        document.documentElement.classList.add('disable-css-transitions');
+        document.documentElement.setAttribute('data-theme', next);
+      };
+
+      if (document.startViewTransition) {
+        const transition = document.startViewTransition(updateTheme);
+        transition.ready.finally(() => {
+          document.documentElement.classList.remove('disable-css-transitions');
+        });
+      } else {
+        updateTheme();
+        void document.documentElement.offsetHeight; // reflow
+        document.documentElement.classList.remove('disable-css-transitions');
+      }
       return { theme: next };
     }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
