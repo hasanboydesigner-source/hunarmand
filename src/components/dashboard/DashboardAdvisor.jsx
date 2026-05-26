@@ -228,7 +228,7 @@ export default function DashboardAdvisor({ user }) {
         }}>
           {/* Spinner */}
           <div style={{ position: 'relative', width: 80, height: 80, margin: '0 auto 24px' }}>
-            <svg width="80" height="80" style={{ animation: 'advisorSpin 1.2s linear infinite', position: 'absolute' }}>
+            <svg width="80" height="80" style={{ animation: 'advisorSpin 1.2s linear infinite', position: 'absolute', top: 0, left: 0 }}>
               <circle cx="40" cy="40" r="34" fill="none" stroke="#f0f0f0" strokeWidth="5" />
               <circle cx="40" cy="40" r="34" fill="none" stroke="#c97a22" strokeWidth="5"
                 strokeDasharray="60 155" strokeLinecap="round" />
@@ -236,6 +236,7 @@ export default function DashboardAdvisor({ user }) {
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <Sparkles size={28} color="#c97a22" />
             </div>
