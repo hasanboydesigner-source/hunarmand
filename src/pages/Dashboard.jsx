@@ -298,7 +298,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-
       {/* Order Detail Modal */}
       {showOrderModal && selectedOrder && (
         <div className="admin-modal-overlay" onClick={() => setShowOrderModal(false)}>
@@ -308,8 +307,9 @@ export default function DashboardPage() {
               <button className="admin-modal-close" onClick={() => setShowOrderModal(false)}><XCircle size={18}/></button>
             </div>
             
-            <div className="admin-modal-body" style={{ padding: '24px', paddingTop: 8 }}>
-              {/* Grid Top */}
+            <div className="admin-modal-body" style={{ padding: '24px', paddingTop: 8, maxHeight: '72vh', overflowY: 'auto' }}>
+
+              {/* ── Mijoz ismi + sana ── */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, paddingBottom: 16, borderBottom: '1px solid #f0f0f0' }}>
                 <div>
                   <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>MIJOZ</span>
@@ -325,15 +325,94 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Product */}
-              <div style={{ padding: '16px 0', borderBottom: '1px solid #f0f0f0' }}>
-                <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>MAHSULOT</span>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 4 }}>
-                  {selectedOrder.product || (selectedOrder.items && selectedOrder.items.map(i => `${i.title} (x${i.quantity})`).join(', '))}
+              {/* ── Telefon ── */}
+              {selectedOrder.customer?.phone && (
+                <div style={{ padding: '14px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>📞 TELEFON RAQAMI</span>
+                  <div style={{ marginTop: 4 }}>
+                    <a href={`tel:${selectedOrder.customer.phone}`} style={{ fontSize: 15, fontWeight: 600, color: '#c97a22', textDecoration: 'none' }}>
+                      {selectedOrder.customer.phone}
+                    </a>
+                  </div>
                 </div>
+              )}
+
+              {/* ── Yetkazib berish manzili ── */}
+              {(selectedOrder.customer?.region || selectedOrder.customer?.city || selectedOrder.customer?.street) && (
+                <div style={{ padding: '14px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>📍 YETKAZIB BERISH MANZILI</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                    <div>
+                      <span style={{ fontSize: 11, color: '#bbb', fontWeight: 600 }}>Viloyat</span>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginTop: 2 }}>{selectedOrder.customer?.region || '—'}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: 11, color: '#bbb', fontWeight: 600 }}>Shahar / Tuman</span>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginTop: 2 }}>{selectedOrder.customer?.city || '—'}</div>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <span style={{ fontSize: 11, color: '#bbb', fontWeight: 600 }}>Ko'cha / Uy</span>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginTop: 2 }}>{selectedOrder.customer?.street || '—'}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── To'lov va yetkazish usuli ── */}
+              {(selectedOrder.paymentMethod || selectedOrder.deliveryMethod) && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: '14px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  {selectedOrder.paymentMethod && (
+                    <div>
+                      <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>💳 TO'LOV USULI</span>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginTop: 4 }}>
+                        {selectedOrder.paymentMethod === 'cash' ? '💵 Naqd pul'
+                          : selectedOrder.paymentMethod === 'card' ? '💳 Karta'
+                          : selectedOrder.paymentMethod === 'online' ? "📱 Online to'lov"
+                          : selectedOrder.paymentMethod}
+                      </div>
+                    </div>
+                  )}
+                  {selectedOrder.deliveryMethod && (
+                    <div>
+                      <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>🚚 YETKAZISH USULI</span>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginTop: 4 }}>
+                        {selectedOrder.deliveryMethod === 'delivery' ? '🚚 Yetkazib berish'
+                          : selectedOrder.deliveryMethod === 'pickup' ? "🏪 O'zi olib ketish"
+                          : selectedOrder.deliveryMethod}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── Buyurtma tarkibi ── */}
+              <div style={{ padding: '14px 0', borderBottom: '1px solid #f0f0f0' }}>
+                <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>🛍️ BUYURTMA TARKIBI</span>
+                {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+                    {selectedOrder.items.map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fafafa', borderRadius: 10, padding: '10px 12px', border: '1px solid #f0f0f0' }}>
+                        {item.image && (
+                          <img src={item.image} alt={item.title} style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0, border: '1px solid #eee' }} />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{item.title}</div>
+                          <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{item.quantity} dona × {item.price?.toLocaleString()} so'm</div>
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: '#c97a22' }}>
+                          {(item.price * item.quantity).toLocaleString()} so'm
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginTop: 4 }}>
+                    {selectedOrder.product || '—'}
+                  </div>
+                )}
               </div>
 
-              {/* Amount & Status */}
+              {/* ── Jami summa + holat ── */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '16px 0', borderBottom: '1px solid #f0f0f0' }}>
                 <div>
                   <span style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>JAMI SUMMA</span>
@@ -354,7 +433,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Update Status Buttons */}
+              {/* ── Holatni yangilash ── */}
               <div style={{ paddingTop: 16 }}>
                 <span style={{ fontSize: 13, color: '#555', fontWeight: 600, display: 'block', marginBottom: 12 }}>Holatni yangilash:</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
