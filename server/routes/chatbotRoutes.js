@@ -94,11 +94,11 @@ ${productListText}
       // If all models failed (e.g. quota limit), return a polite local message
       console.error('[Chatbot] Barcha modellar xato berdi!', lastError);
       
-      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida vaqtinchalik yuqori yuklama mavjud, ammo siz istalgan mahsulotimizni [Mahsulotlar](/products) sahifasidan topib buyurtma qilishingiz mumkin! Savollaringiz bo'lsa, biz bilan bog'lanishingiz mumkin.";
+      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida xatolik mavjud: " + (lastError ? lastError.message : "Noma'lum xato");
       if (language === 'ru') {
-        fallbackText = "Здравствуйте! Я готов помочь вам с выбором наших национальных изделий. В данный момент сервис ИИ временно перегружен, но вы можете просмотреть и заказать любые товары на странице [Продукты](/products)! Если у вас возникнут вопросы, вы можете связаться с нами.";
+        fallbackText = "Здравствуйте! Я готов помочь вам... Ошибка ИИ: " + (lastError ? lastError.message : "Неизвестная ошибка");
       } else if (language === 'en') {
-        fallbackText = "Hello! I am ready to help you with our traditional craft products. Right now the AI service is experiencing a temporary high load, but you can browse and order all items on the [Products](/products) page! If you have any questions, feel free to contact us.";
+        fallbackText = "Hello! I am ready to help you... AI Error: " + (lastError ? lastError.message : "Unknown error");
       }
       
       res.json({ text: fallbackText });
