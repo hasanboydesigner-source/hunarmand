@@ -109,23 +109,19 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
   };
 
   return (
-    <div style={{ paddingBottom: 40 }}>
+    <div className="settings-container">
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111', margin: 0, letterSpacing: '-0.3px' }}>Sozlamalar</h1>
-        <p style={{ fontSize: 13, color: '#888', marginTop: 4 }}>Profil va do'kon ma'lumotlarini boshqaring</p>
+      <div className="settings-header">
+        <h1>Sozlamalar</h1>
+        <p>Profil va do'kon ma'lumotlarini boshqaring</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 24, alignItems: 'start' }}>
+      <div className="settings-layout">
 
         {/* ── Left sidebar ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Avatar card */}
-          <div style={{
-            background: '#fff', border: '1px solid #f0f0f0',
-            borderRadius: 18, padding: '24px 16px', textAlign: 'center',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-          }}>
+          <div className="settings-card" style={{ textAlign: 'center' }}>
             <div style={{
               width: 72, height: 72, borderRadius: '50%',
               background: 'linear-gradient(135deg, #c97a22, #e8962a)',
@@ -146,11 +142,7 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
           </div>
 
           {/* Tabs */}
-          <div style={{
-            background: '#fff', border: '1px solid #f0f0f0',
-            borderRadius: 18, overflow: 'hidden',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-          }}>
+          <div className="settings-card" style={{ padding: 0, overflow: 'hidden' }}>
             {TABS.map((tab, i) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -178,11 +170,7 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
         </div>
 
         {/* ── Right content ── */}
-        <div style={{
-          background: '#fff', border: '1px solid #f0f0f0',
-          borderRadius: 18, padding: '28px 32px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-        }}>
+        <div className="settings-card content-card">
 
           {/* ── Profile Tab ── */}
           {activeTab === 'profile' && (
@@ -204,8 +192,8 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
                 <button
                   type="submit" disabled={saving}
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    padding: '11px 24px', borderRadius: 12, fontSize: 14, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    width: '100%', padding: '12px 24px', borderRadius: 12, fontSize: 14, fontWeight: 700,
                     background: saving ? '#f5f5f5' : 'linear-gradient(135deg, #c97a22, #e8962a)',
                     color: saving ? '#aaa' : '#fff', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
                     boxShadow: saving ? 'none' : '0 4px 14px rgba(201,122,34,0.25)',
@@ -229,7 +217,7 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
               <FieldGroup label="Do'kon nomi">
                 <Input icon={Store} type="text" placeholder="Masalan: Rishton Keramika" value={localProfile.shopName || ''} onChange={e => setLocalProfile({ ...localProfile, shopName: e.target.value })} />
               </FieldGroup>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="settings-two-cols">
                 <FieldGroup label="Mutaxassislik">
                   <Input icon={Tag} type="text" placeholder="Keramika" value={localProfile.category || ''} onChange={e => setLocalProfile({ ...localProfile, category: e.target.value })} />
                 </FieldGroup>
@@ -271,8 +259,8 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
                 <button
                   type="submit" disabled={saving}
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    padding: '11px 24px', borderRadius: 12, fontSize: 14, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    width: '100%', padding: '12px 24px', borderRadius: 12, fontSize: 14, fontWeight: 700,
                     background: saving ? '#f5f5f5' : 'linear-gradient(135deg, #c97a22, #e8962a)',
                     color: saving ? '#aaa' : '#fff', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
                     boxShadow: saving ? 'none' : '0 4px 14px rgba(201,122,34,0.25)',
@@ -344,8 +332,8 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
                 <button
                   type="submit"
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    padding: '11px 24px', borderRadius: 12, fontSize: 14, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    width: '100%', padding: '12px 24px', borderRadius: 12, fontSize: 14, fontWeight: 700,
                     background: 'linear-gradient(135deg, #1e40af, #2563eb)',
                     color: '#fff', border: 'none', cursor: 'pointer',
                     boxShadow: '0 4px 14px rgba(37,99,235,0.25)',
@@ -363,8 +351,22 @@ export default function DashboardSettings({ profile, handleSaveProfile, handleSa
 
       {/* Mobile responsive */}
       <style>{`
-        @media (max-width: 640px) {
-          .settings-grid { grid-template-columns: 1fr !important; }
+        .settings-container { padding-bottom: 20px; }
+        .settings-header { margin-bottom: 28px; }
+        .settings-header h1 { font-size: 24px; font-weight: 800; color: #111; margin: 0; letter-spacing: -0.3px; }
+        .settings-header p { font-size: 13px; color: #888; margin-top: 4px; }
+        
+        .settings-layout { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; }
+        .settings-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 18px; padding: 24px 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .settings-card.content-card { padding: 28px 32px; }
+        
+        .settings-two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        @media (max-width: 768px) {
+          .settings-layout { grid-template-columns: 1fr; gap: 16px; }
+          .settings-header { margin-bottom: 20px; }
+          .settings-card.content-card { padding: 20px; }
+          .settings-two-cols { grid-template-columns: 1fr; gap: 0; }
         }
       `}</style>
     </div>

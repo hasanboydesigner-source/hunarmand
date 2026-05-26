@@ -751,7 +751,7 @@
   .dashboard { flex-direction: column; }
   .dash-mobile-header { display: flex; }
   .dash-sidebar-desktop { display: none; }
-  .dash-main { padding: 16px 14px 90px; margin-left: 0; }
+  .dash-main { padding: 16px 14px 120px; margin-left: 0; }
   .dash-mobile-nav { display: flex; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .dash-settings-grid { grid-template-columns: 1fr; }
