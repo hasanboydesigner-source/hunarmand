@@ -129,28 +129,52 @@ Masalan:
 
 Javobingizni to'g'ridan-to'g'ri, samimiy va ishonchli ohangda "Siz" deb murojaat qilib bering. Format Markdown bo'linger kerak. Emojilardan o'rinli foydalaning. Maslahatlar aniq va tushunarli bo'lsin.`;
 
+    const modelsToTry = [
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-1.5-flash-8b'
+    ];
+
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       console.log(`[AI Advisor] Analyzing data for ${craftsman.name}...`);
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: dataForAI }]
-          }
-        ],
-        config: {
-          systemInstruction: systemInstruction,
-          temperature: 0.7,
-        }
-      });
+      let responseText = null;
+      let lastError = null;
 
-      if (response && response.text) {
-        res.json({ advice: response.text });
+      for (const modelName of modelsToTry) {
+        try {
+          console.log(`[AI Advisor] Trying model: ${modelName}...`);
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: dataForAI }]
+              }
+            ],
+            config: {
+              systemInstruction: systemInstruction,
+              temperature: 0.7,
+            }
+          });
+          
+          if (response && response.text) {
+            responseText = response.text;
+            console.log(`[AI Advisor] Muaffaqiyatli: ${modelName} orqali tahlil olindi.`);
+            break;
+          }
+        } catch (err) {
+          console.warn(`[AI Advisor] Xatolik: ${modelName} modelida muammo:`, err.message);
+          lastError = err;
+        }
+      }
+
+      if (responseText) {
+        res.json({ advice: responseText });
       } else {
-        console.warn("[AI Advisor] Empty response from Gemini. Using fallback.");
+        console.warn("[AI Advisor] Barcha modellar xato berdi! Fallback ishlatilmoqda. Xato:", lastError ? lastError.message : "Noma'lum xato");
         const fallbackAdvice = generateLocalAdvice(craftsman, products);
         res.json({ advice: fallbackAdvice });
       }

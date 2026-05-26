@@ -86,41 +86,63 @@ ${productListText}
 Javobingiz faqat quyidagi formatda bo'lishi shart:
 ["id1", "id2", "id3"]`;
 
-      const modelName = 'gemini-2.5-flash';
-      console.log(`[Visual Search] Analyzing image with ${modelName}...`);
+      const modelsToTry = [
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro',
+        'gemini-1.5-flash-8b'
+      ];
 
-      response = await ai.models.generateContent({
-        model: modelName,
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: "Ushbu rasmga eng o'xshash mahsulotlarni topib, faqat ularning ID larini JSON array shaklida qaytar." },
-              { 
-                inlineData: {
-                  data: base64Image,
-                  mimeType: mimeType
-                }
+      for (const modelName of modelsToTry) {
+        try {
+          console.log(`[AI Search] Trying model: ${modelName}...`);
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  { text: "Ushbu rasmga eng o'xshash mahsulotlarni topib, faqat ularning ID larini JSON array shaklida qaytar." },
+                  { 
+                    inlineData: {
+                      data: base64Image,
+                      mimeType: mimeType
+                    }
+                  }
+                ]
               }
-            ]
+            ],
+            config: {
+              systemInstruction: systemInstruction,
+              temperature: 0.1, // Pastroq harorat aniqroq javob uchun
+            }
+          });
+          
+          if (response && response.text) {
+            responseText = response.text;
+            console.log(`[AI Search] Muaffaqiyatli: ${modelName} orqali natija olindi.`);
+            break;
           }
-        ],
-        config: {
-          systemInstruction: systemInstruction,
-          temperature: 0.1, // Low temp for more precise/consistent output
+        } catch (err) {
+          console.warn(`[AI Search] Xatolik: ${modelName} modelida muammo:`, err.message);
+          lastError = err;
         }
-      });
+      }
+
+      if (!responseText) {
+        throw new Error("Barcha modellar xato berdi. So'nggi xato: " + (lastError ? lastError.message : "Noma'lum"));
+      }
+
     } catch (apiErr) {
       console.error("[Visual Search] Gemini API error (using fallback):", apiErr.message || apiErr);
-      // Return 3 products as fallback
       const fallbackProducts = await Product.find({}).populate('craftsman', 'name region shopName').limit(3);
       return res.json(fallbackProducts);
     }
 
-    if (response && response.text) {
-      const rawText = response.text.trim();
-      let matchedIds = [];
-      
+    let matchedIds = [];
+    
+    if (responseText) {
+      const rawText = responseText.trim();
       // Clean markdown formatting if Gemini included it
       const jsonStr = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
       
