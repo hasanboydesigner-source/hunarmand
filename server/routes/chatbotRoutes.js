@@ -54,11 +54,14 @@ ${productListText}
     }));
 
     // List of models to try in order (Fallback Strategy)
+    // Newest models first, then fallbacks
     const modelsToTry = [
+      'gemini-2.5-flash-preview-05-20',
+      'gemini-2.5-pro-preview-05-06',
       'gemini-2.0-flash',
+      'gemini-2.0-flash-lite',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
-      'gemini-1.5-flash-8b'
     ];
 
     let responseText = null;
@@ -82,22 +85,29 @@ ${productListText}
           break; // Stop trying if successful
         }
       } catch (err) {
-        console.error(`[Chatbot] Xatolik: ${modelName} modelida muammo yuz berdi:`, err.message);
-        allErrors.push(`${modelName}: ${err.message}`);
+        const errMsg = err.message || String(err);
+        console.error(`[Chatbot] Xatolik: ${modelName}: ${errMsg}`);
+        allErrors.push(`${modelName}: ${errMsg}`);
+        
+        // If it's not a quota/rate limit error, stop trying (e.g., auth error)
+        if (err.status === 401 || err.status === 403) {
+          console.error('[Chatbot] Auth xatoligi - API kalitda muammo bor.');
+          break;
+        }
       }
     }
 
     if (responseText) {
       res.json({ text: responseText });
     } else {
-      console.error('[Chatbot] Barcha modellar xato berdi!', allErrors);
+      console.error('[Chatbot] Barcha modellar xato berdi!');
       
-      let errorMsgs = allErrors.join(' | ');
-      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida vaqtinchalik yuqori yuklama mavjud, ammo siz istalgan mahsulotimizni [Mahsulotlar](/products) sahifasidan topib buyurtma qilishingiz mumkin! Savollaringiz bo'lsa, biz bilan bog'lanishingiz mumkin. (DEBUG: " + errorMsgs + ")";
+      // Return clean fallback message (no debug info shown to user)
+      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida texnik nosozlik mavjud, ammo siz istalgan mahsulotimizni [Mahsulotlar](/products) sahifasidan topib buyurtma qilishingiz mumkin! 🛍️";
       if (language === 'ru') {
-        fallbackText = "Здравствуйте! Я готов помочь вам с выбором наших национальных изделий. В данный момент сервис ИИ временно перегружен, но вы можете просмотреть и заказать любые товары на странице [Продукты](/products)! Если у вас возникнут вопросы, вы можете связаться с нами. (DEBUG: " + errorMsgs + ")";
+        fallbackText = "Здравствуйте! Я готов помочь вам с выбором наших национальных изделий. В данный момент сервис ИИ временно недоступен, но вы можете просмотреть и заказать любые товары на странице [Продукты](/products)! 🛍️";
       } else if (language === 'en') {
-        fallbackText = "Hello! I am ready to help you with our traditional craft products. Right now the AI service is experiencing a temporary high load, but you can browse and order all items on the [Products](/products) page! If you have any questions, feel free to contact us. (DEBUG: " + errorMsgs + ")";
+        fallbackText = "Hello! I'm ready to help you with our traditional craft products. Right now the AI service is temporarily unavailable, but you can browse and order all items on the [Products](/products) page! 🛍️";
       }
       
       res.json({ text: fallbackText });
@@ -105,7 +115,7 @@ ${productListText}
 
   } catch (error) {
     console.error('Chatbot umumiy xatosi:', error);
-    res.status(500).json({ message: 'Chatbotda xatolik yuz berdi.', error: error.message, stack: error.stack });
+    res.status(500).json({ message: 'Chatbotda xatolik yuz berdi.', error: error.message });
   }
 });
 

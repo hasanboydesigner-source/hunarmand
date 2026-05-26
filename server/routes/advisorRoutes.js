@@ -130,10 +130,12 @@ Masalan:
 Javobingizni to'g'ridan-to'g'ri, samimiy va ishonchli ohangda "Siz" deb murojaat qilib bering. Format Markdown bo'linger kerak. Emojilardan o'rinli foydalaning. Maslahatlar aniq va tushunarli bo'lsin.`;
 
     const modelsToTry = [
+      'gemini-2.5-flash-preview-05-20',
+      'gemini-2.5-pro-preview-05-06',
       'gemini-2.0-flash',
+      'gemini-2.0-flash-lite',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
-      'gemini-1.5-flash-8b'
     ];
 
     try {
