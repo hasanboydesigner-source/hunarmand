@@ -92,11 +92,12 @@ ${productListText}
     } else {
       console.error('[Chatbot] Barcha modellar xato berdi!', allErrors);
       
-      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida vaqtinchalik yuqori yuklama mavjud, ammo siz istalgan mahsulotimizni [Mahsulotlar](/products) sahifasidan topib buyurtma qilishingiz mumkin! Savollaringiz bo'lsa, biz bilan bog'lanishingiz mumkin.";
+      let errorMsgs = allErrors.join(' | ');
+      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida vaqtinchalik yuqori yuklama mavjud, ammo siz istalgan mahsulotimizni [Mahsulotlar](/products) sahifasidan topib buyurtma qilishingiz mumkin! Savollaringiz bo'lsa, biz bilan bog'lanishingiz mumkin. (DEBUG: " + errorMsgs + ")";
       if (language === 'ru') {
-        fallbackText = "Здравствуйте! Я готов помочь вам с выбором наших национальных изделий. В данный момент сервис ИИ временно перегружен, но вы можете просмотреть и заказать любые товары на странице [Продукты](/products)! Если у вас возникнут вопросы, вы можете связаться с нами.";
+        fallbackText = "Здравствуйте! Я готов помочь вам с выбором наших национальных изделий. В данный момент сервис ИИ временно перегружен, но вы можете просмотреть и заказать любые товары на странице [Продукты](/products)! Если у вас возникнут вопросы, вы можете связаться с нами. (DEBUG: " + errorMsgs + ")";
       } else if (language === 'en') {
-        fallbackText = "Hello! I am ready to help you with our traditional craft products. Right now the AI service is experiencing a temporary high load, but you can browse and order all items on the [Products](/products) page! If you have any questions, feel free to contact us.";
+        fallbackText = "Hello! I am ready to help you with our traditional craft products. Right now the AI service is experiencing a temporary high load, but you can browse and order all items on the [Products](/products) page! If you have any questions, feel free to contact us. (DEBUG: " + errorMsgs + ")";
       }
       
       res.json({ text: fallbackText });
