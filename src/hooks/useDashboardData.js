@@ -13,25 +13,38 @@ export function useDashboardData(user, addToast, updateUser) {
   const [allMessages, setAllMessages] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitData = async () => {
       try {
         const prodRes = await axios.get(`${API_URL}/products`);
         setAllProducts(prodRes.data);
 
-        // Faqat hunarmand tizimga kirgan bo'lsa buyurtmalar va xabarlarni olamiz
         if (user?.id) {
-          const [ordRes, msgRes] = await Promise.all([
-            axios.get(`${API_URL}/orders/craftsman/${user.id}`),
-            axios.get(`${API_URL}/messages/craftsman/${user.id}`)
-          ]);
+          const ordRes = await axios.get(`${API_URL}/orders/craftsman/${user.id}`);
           setAllOrders(ordRes.data);
-          setAllMessages(msgRes.data);
         }
       } catch (err) {
-        console.error("API error fetching dashboard data:", err);
+        console.error("API error fetching dashboard init data:", err);
       }
     };
-    fetchData();
+    fetchInitData();
+  }, [user]);
+
+  // Messages real-time syncing
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (user?.id) {
+        try {
+          const msgRes = await axios.get(`${API_URL}/messages/craftsman/${user.id}`);
+          setAllMessages(msgRes.data);
+        } catch (err) {
+          console.error("Message sync error:", err);
+        }
+      }
+    };
+
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 5000);
+    return () => clearInterval(interval);
   }, [user]);
 
   const [profile, setProfile] = useState(() => {
@@ -59,7 +72,7 @@ export function useDashboardData(user, addToast, updateUser) {
     }
   }, [user]);
 
-  // Filtered for current user (MongoDB populated craftsman._id or fallback by name)
+  // Filtered for current user
   const products = allProducts.filter(p => {
     const cid = typeof p.craftsman === 'object' ? p.craftsman?._id : p.craftsman;
     const cname = typeof p.craftsman === 'object' ? p.craftsman?.name : null;
@@ -74,17 +87,17 @@ export function useDashboardData(user, addToast, updateUser) {
     date: o.createdAt ? new Date(o.createdAt).toLocaleDateString('uz-UZ') : o.date,
     amount: o.totalAmount || o.amount,
   }));
+
   const threads = {};
   allMessages.forEach(m => {
     const isFromMe = m.senderId === user?.id || m.isReply || m.sender === 'Siz';
     const otherId = isFromMe ? (m.receiverId || 'unknown') : (m.senderId || m.sender || 'unknown');
-    const otherName = isFromMe ? (m.receiverName || 'Mijoz') : (m.sender || 'Mijoz');
     
     if (!threads[otherId]) {
       threads[otherId] = {
         id: otherId,
-        user: otherName,
-        initial: otherName ? otherName[0].toUpperCase() : 'M',
+        user: null,
+        initial: 'M',
         initBg: '#fff8f0',
         initColor: '#c97a22',
         time: new Date(m.createdAt || Date.now()).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
@@ -95,6 +108,12 @@ export function useDashboardData(user, addToast, updateUser) {
       };
     }
     
+    // Extract customer name from incoming messages
+    if (!isFromMe && m.sender) {
+      threads[otherId].user = m.sender;
+      threads[otherId].initial = m.sender[0].toUpperCase();
+    }
+    
     if (new Date(m.createdAt || 0) > new Date(threads[otherId].latestTime)) {
        threads[otherId].preview = m.text;
        threads[otherId].time = new Date(m.createdAt || Date.now()).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
@@ -103,6 +122,7 @@ export function useDashboardData(user, addToast, updateUser) {
     }
     
     threads[otherId].thread.push({
+      _id: m._id,
       _rawTime: m.createdAt || new Date().toISOString(),
       from: !isFromMe,
       text: m.text,
@@ -111,6 +131,7 @@ export function useDashboardData(user, addToast, updateUser) {
   });
 
   const messages = Object.values(threads).map(t => {
+    if (!t.user) t.user = 'Mijoz';
     t.thread.sort((a,b) => new Date(a._rawTime) - new Date(b._rawTime));
     return t;
   }).sort((a,b) => new Date(b.latestTime) - new Date(a.latestTime));
@@ -224,7 +245,18 @@ export function useDashboardData(user, addToast, updateUser) {
   };
 
   const selectMessageThread = (msg) => {
-    const updated = allMessages.map(m => m.id === msg.id ? { ...m, unread: false } : m);
+    // msg.id is the other person's ID
+    const updated = allMessages.map(m => {
+      const isFromOther = m.senderId === msg.id || m.sender === msg.id || m.sender === msg.user;
+      if (isFromOther && !m.isRead) {
+        // Mark as read in backend asynchronously
+        if (m._id && !m._id.toString().startsWith('rep')) {
+          axios.put(`${API_URL}/messages/${m._id}/read`).catch(console.error);
+        }
+        return { ...m, isRead: true };
+      }
+      return m;
+    });
     setAllMessages(updated);
     return { ...msg, unread: false };
   };

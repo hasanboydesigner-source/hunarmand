@@ -31,10 +31,15 @@ router.post('/', async (req, res) => {
 });
 
 // @route   GET /api/messages/craftsman/:id
-// @desc    Get all messages for a craftsman
+// @desc    Get all messages for a craftsman (both incoming and outgoing)
 router.get('/craftsman/:id', async (req, res) => {
   try {
-    const messages = await Message.find({ receiverId: req.params.id }).sort({ createdAt: -1 });
+    const messages = await Message.find({
+      $or: [
+        { receiverId: req.params.id },
+        { senderId: req.params.id }
+      ]
+    }).sort({ createdAt: -1 });
     res.json(messages);
   } catch (error) {
     console.error(error);

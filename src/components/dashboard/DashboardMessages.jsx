@@ -13,14 +13,19 @@ export default function DashboardMessages({ messages = [], selectMessageThread, 
   // Active thread object
   const activeThread = messages.find(m => m.id === active);
 
-  // Auto-scroll to bottom when new message arrives
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [localThread]);
+  const [threadLength, setThreadLength] = useState(0);
 
-  // Sync localThread when messages prop updates (e.g. after send reply)
+  // Auto-scroll to bottom only when new message arrives or thread changes
+  useEffect(() => {
+    if (localThread && localThread.length !== threadLength) {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+      setThreadLength(localThread.length);
+    }
+  }, [localThread, threadLength]);
+
+  // Sync localThread when messages prop updates (e.g. after send reply or polling)
   useEffect(() => {
     if (active) {
       const updated = messages.find(m => m.id === active);
@@ -33,6 +38,7 @@ export default function DashboardMessages({ messages = [], selectMessageThread, 
   const handleSelect = (msg) => {
     setActive(msg.id);
     setLocalThread(msg.thread || []);
+    setThreadLength(0); // Force scroll for new thread
     if (selectMessageThread) selectMessageThread(msg);
   };
 
