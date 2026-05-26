@@ -112,8 +112,8 @@ export default function SearchModal() {
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             id="global-search-input"
           />
-          {query && !isVisualSearch && (
-            <button className="search-clear" onClick={() => setQuery('')} aria-label="Tozalash"><X size={16} /></button>
+          {query && (
+            <button className="search-clear" onClick={() => { setQuery(''); setResults([]); setIsVisualSearch(false); }} aria-label="Tozalash"><X size={16} /></button>
           )}
           
           {/* Visual Search Button */}
@@ -171,9 +171,16 @@ export default function SearchModal() {
                   <ArrowRight size={14} className="search-result-arrow" />
                 </button>
               ))}
-              <button className="search-see-all" onClick={() => handleSearch()}>
-                {isVisualSearch ? "Barcha o'xshash natijalarni ko'rish" : "Barcha natijalarni ko'rish"} <ArrowRight size={14} />
-              </button>
+              {!isVisualSearch && (
+                <button className="search-see-all" onClick={() => handleSearch()}>
+                  Barcha natijalarni ko'rish <ArrowRight size={14} />
+                </button>
+              )}
+              {isVisualSearch && (
+                <button className="search-see-all" onClick={() => { setResults([]); setIsVisualSearch(false); setQuery(''); }}>
+                  Boshqa rasm yuklash <Camera size={14} />
+                </button>
+              )}
             </div>
           )}
 
