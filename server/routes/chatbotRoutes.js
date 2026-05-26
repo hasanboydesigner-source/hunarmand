@@ -62,7 +62,7 @@ ${productListText}
     ];
 
     let responseText = null;
-    let lastError = null;
+    let allErrors = [];
 
     for (const modelName of modelsToTry) {
       try {
@@ -83,22 +83,21 @@ ${productListText}
         }
       } catch (err) {
         console.error(`[Chatbot] Xatolik: ${modelName} modelida muammo yuz berdi:`, err.message);
-        lastError = err;
-        // Continue to the next model in the loop
+        allErrors.push(`${modelName}: ${err.message}`);
       }
     }
 
     if (responseText) {
       res.json({ text: responseText });
     } else {
-      // If all models failed (e.g. quota limit), return a polite local message
-      console.error('[Chatbot] Barcha modellar xato berdi!', lastError);
+      console.error('[Chatbot] Barcha modellar xato berdi!', allErrors);
       
-      let fallbackText = "Salom! Men sizga do'konimiz va milliy mahsulotlarimiz bo'yicha yordam berishga tayyorman. Hozirda AI xizmatida xatolik mavjud: " + (lastError ? lastError.message : "Noma'lum xato");
+      let errorMsgs = allErrors.join(' | ');
+      let fallbackText = "Salom! AI xizmatida xatolik mavjud: " + errorMsgs;
       if (language === 'ru') {
-        fallbackText = "Здравствуйте! Я готов помочь вам... Ошибка ИИ: " + (lastError ? lastError.message : "Неизвестная ошибка");
+        fallbackText = "Здравствуйте! Ошибка ИИ: " + errorMsgs;
       } else if (language === 'en') {
-        fallbackText = "Hello! I am ready to help you... AI Error: " + (lastError ? lastError.message : "Unknown error");
+        fallbackText = "Hello! AI Error: " + errorMsgs;
       }
       
       res.json({ text: fallbackText });
