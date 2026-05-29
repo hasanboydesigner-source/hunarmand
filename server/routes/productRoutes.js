@@ -69,8 +69,8 @@ router.post('/', async (req, res) => {
     const { title, price, inStock, category, image, images, craftsmanId, description, sku, preparationTime, material } = req.body;
     
     const craftsman = await User.findById(craftsmanId);
-    if (!craftsman || craftsman.role !== 'craftsman') {
-      return res.status(400).json({ message: 'Hunarmand topilmadi' });
+    if (!craftsman || (craftsman.role !== 'craftsman' && craftsman.role !== 'admin')) {
+      return res.status(400).json({ message: 'Ruxsat yo\'q yoki hunarmand topilmadi' });
     }
 
     const product = new Product({

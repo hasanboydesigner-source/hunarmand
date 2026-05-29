@@ -46,7 +46,8 @@ function ProtectedRoute({ children, redirect = '/auth/login' }) {
 function RoleRoute({ children, role, redirect = '/' }) {
   const { user, isAuthenticated } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
-  if (user?.role !== role) return <Navigate to={redirect} replace />;
+  const hasRole = Array.isArray(role) ? role.includes(user?.role) : user?.role === role;
+  if (!hasRole) return <Navigate to={redirect} replace />;
   return children;
 }
 
@@ -131,7 +132,8 @@ function AppContent() {
           <Route path="/profile/messages" element={<ProtectedRoute><CustomerProfilePage /></ProtectedRoute>} />
 
           {/* Role protected: faqat hunarmand */}
-          <Route path="/dashboard" element={<RoleRoute role="craftsman" redirect="/"><DashboardPage /></RoleRoute>} />
+          {/* Role protected: hunarmand va admin uchun */}
+          <Route path="/dashboard" element={<RoleRoute role={['craftsman', 'admin']} redirect="/"><DashboardPage /></RoleRoute>} />
 
           {/* Role protected: faqat admin */}
           <Route path="/admin" element={<RoleRoute role="admin" redirect="/"><AdminPage /></RoleRoute>} />

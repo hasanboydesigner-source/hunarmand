@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {
 // @route GET /api/auth/craftsmen
 router.get('/craftsmen', async (req, res) => {
   try {
-    const craftsmen = await User.find({ role: 'craftsman' }).select('-password');
+    const craftsmen = await User.find({ role: { $in: ['craftsman', 'admin'] } }).select('-password');
     res.json(craftsmen);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -84,7 +84,7 @@ router.get('/craftsmen/:id', async (req, res) => {
       return res.status(404).json({ message: 'Hunarmand topilmadi (Noto\'g\'ri ID formati)' });
     }
     const craftsman = await User.findById(req.params.id).select('-password');
-    if (!craftsman || craftsman.role !== 'craftsman') {
+    if (!craftsman || (craftsman.role !== 'craftsman' && craftsman.role !== 'admin')) {
       return res.status(404).json({ message: 'Hunarmand topilmadi' });
     }
     res.json(craftsman);

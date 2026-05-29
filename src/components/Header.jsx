@@ -103,7 +103,7 @@ export default function Header() {
                     <p className="dropdown-role">{user?.role === 'craftsman' ? 'Hunarmand' : user?.role === 'admin' ? 'Admin' : 'Mijoz'}</p>
                   </div>
                   <div className="dropdown-divider" />
-                  {(user?.role === 'craftsman') && (
+                  {(user?.role === 'craftsman' || user?.role === 'admin') && (
                     <Link to="/dashboard" className="dropdown-item" onClick={() => setProfileOpen(false)}>
                       <LayoutDashboard size={15} /> Boshqaruv paneli
                     </Link>
