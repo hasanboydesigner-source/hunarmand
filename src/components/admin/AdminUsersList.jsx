@@ -9,7 +9,8 @@ export default function AdminUsersList({ users, handleToggleUserStatus }) {
   const [showUserModal, setShowUserModal] = useState(false);
 
   const filteredUsers = users.filter(u => {
-    const matchesSearch = u.name.toLowerCase().includes(userSearchQ.toLowerCase()) || u.email.toLowerCase().includes(userSearchQ.toLowerCase());
+    const matchesSearch = (u?.name?.toLowerCase() || '').includes(userSearchQ.toLowerCase()) || 
+                          (u?.email?.toLowerCase() || '').includes(userSearchQ.toLowerCase());
     const matchesRole = userRoleFilter === 'all' || u.role === userRoleFilter;
     return matchesSearch && matchesRole;
   });

@@ -10,7 +10,9 @@ export default function AdminOrders({ orders, handleUpdateOrderStatus }) {
   const [showOrderModal, setShowOrderModal] = useState(false);
 
   const filteredOrders = orders.filter(o => {
-    const matchesSearch = o.product.toLowerCase().includes(orderSearchQ.toLowerCase()) || o.customer.toLowerCase().includes(orderSearchQ.toLowerCase()) || o.id.toLowerCase().includes(orderSearchQ.toLowerCase());
+    const matchesSearch = (o?.product?.toLowerCase() || '').includes(orderSearchQ.toLowerCase()) || 
+                          (o?.customer?.toLowerCase() || '').includes(orderSearchQ.toLowerCase()) || 
+                          (o?._id?.toLowerCase() || o?.id?.toLowerCase() || '').includes(orderSearchQ.toLowerCase());
     const matchesStatus = orderStatusFilter === 'all' || o.status === orderStatusFilter;
     return matchesSearch && matchesStatus;
   });

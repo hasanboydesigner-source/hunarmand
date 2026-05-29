@@ -6,7 +6,7 @@ export default function AdminProductsMod({ products, handleApproveProduct, handl
   const [productSearchQ, setProductSearchQ] = useState('');
 
   const filteredProducts = products.filter(p =>
-    p.title.toLowerCase().includes(productSearchQ.toLowerCase())
+    (p?.title?.toLowerCase() || '').includes(productSearchQ.toLowerCase())
   );
 
   return (
