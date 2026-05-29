@@ -10,9 +10,13 @@ export default function AdminOrders({ orders, handleUpdateOrderStatus }) {
   const [showOrderModal, setShowOrderModal] = useState(false);
 
   const filteredOrders = orders.filter(o => {
-    const matchesSearch = (o?.product?.toLowerCase() || '').includes(orderSearchQ.toLowerCase()) || 
-                          (o?.customer?.toLowerCase() || '').includes(orderSearchQ.toLowerCase()) || 
-                          (o?._id?.toLowerCase() || o?.id?.toLowerCase() || '').includes(orderSearchQ.toLowerCase());
+    const custName = typeof o.customer === 'object' ? o.customer?.name : o.customer;
+    const prodName = o.items && o.items.length > 0 ? o.items[0].title : o.product;
+    const oId = o._id || o.id || '';
+
+    const matchesSearch = (prodName?.toLowerCase() || '').includes(orderSearchQ.toLowerCase()) || 
+                          (custName?.toLowerCase() || '').includes(orderSearchQ.toLowerCase()) || 
+                          (oId.toLowerCase()).includes(orderSearchQ.toLowerCase());
     const matchesStatus = orderStatusFilter === 'all' || o.status === orderStatusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -59,25 +63,34 @@ export default function AdminOrders({ orders, handleUpdateOrderStatus }) {
           <tbody>
             {filteredOrders.length === 0 ? (
               <tr><td colSpan={7} style={{textAlign:'center',padding:40,color:'var(--text-muted)'}}>Sorov bo'yicha buyurtma topilmadi</td></tr>
-            ) : filteredOrders.map(o => (
-              <tr key={o.id}>
-                <td className="order-id">{o.id}</td>
-                <td><strong>{o.customer}</strong></td>
-                <td>{o.product}</td>
-                <td>{o.date}</td>
-                <td>
-                  <span className={`status-badge status-${o.status}`}>
-                    {ORDER_STATUSES[o.status]?.label || o.status}
-                  </span>
-                </td>
-                <td><strong>{formatPrice(o.amount)}</strong></td>
-                <td>
-                  <div className="action-btns">
-                    <button className="btn btn-secondary btn-sm" onClick={() => { setSelectedOrder(o); setShowOrderModal(true); }}>Ko'rish</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            ) : filteredOrders.map(o => {
+              const custName = typeof o.customer === 'object' ? o.customer?.name : o.customer;
+              const prodName = o.items && o.items.length > 0 ? o.items[0].title : o.product;
+              const itemsCount = o.items ? o.items.length : 1;
+              const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : o.date;
+              const amt = o.totalAmount || o.amount || 0;
+              const oId = o._id || o.id;
+
+              return (
+                <tr key={oId}>
+                  <td className="order-id">{oId.slice(-6).toUpperCase()}</td>
+                  <td><strong>{custName}</strong></td>
+                  <td>{prodName} {itemsCount > 1 && <span style={{fontSize: 11, color: 'var(--text-muted)'}}>(+{itemsCount - 1})</span>}</td>
+                  <td>{dateStr}</td>
+                  <td>
+                    <span className={`status-badge status-${o.status}`}>
+                      {ORDER_STATUSES[o.status]?.label || o.status}
+                    </span>
+                  </td>
+                  <td><strong>{formatPrice(amt)}</strong></td>
+                  <td>
+                    <div className="action-btns">
+                      <button className="btn btn-secondary btn-sm" onClick={() => { setSelectedOrder(o); setShowOrderModal(true); }}>Ko'rish</button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -87,7 +100,7 @@ export default function AdminOrders({ orders, handleUpdateOrderStatus }) {
         <div className="admin-modal-overlay" onClick={() => setShowOrderModal(false)}>
           <div className="admin-modal" onClick={e => e.stopPropagation()}>
             <div className="admin-modal-header">
-              <h3>Buyurtma tafsilotlari - {selectedOrder.id}</h3>
+              <h3>Buyurtma tafsilotlari - {(selectedOrder._id || selectedOrder.id || '').slice(-6).toUpperCase()}</h3>
               <button className="admin-modal-close" onClick={() => setShowOrderModal(false)}><XCircle size={18}/></button>
             </div>
             <div className="admin-modal-body">
@@ -95,21 +108,28 @@ export default function AdminOrders({ orders, handleUpdateOrderStatus }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mijoz</span>
-                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.customer}</p>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{typeof selectedOrder.customer === 'object' ? selectedOrder.customer?.name : selectedOrder.customer}</p>
+                    {typeof selectedOrder.customer === 'object' && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{selectedOrder.customer.phone}</p>}
                   </div>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Sana</span>
-                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.date}</p>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString() : selectedOrder.date}</p>
                   </div>
                 </div>
                 <div>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mahsulot</span>
-                  <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.product}</p>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mahsulotlar</span>
+                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                    <ul style={{ paddingLeft: 20, margin: '8px 0', fontSize: 14 }}>
+                      {selectedOrder.items.map((it, idx) => <li key={idx}><strong>{it.title}</strong> - {it.quantity} dona ({formatPrice(it.price)})</li>)}
+                    </ul>
+                  ) : (
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>{selectedOrder.product}</p>
+                  )}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Summa</span>
-                    <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--brand-600)' }}>{formatPrice(selectedOrder.amount)}</p>
+                    <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--brand-600)' }}>{formatPrice(selectedOrder.totalAmount || selectedOrder.amount || 0)}</p>
                   </div>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Joriy Holat</span>
