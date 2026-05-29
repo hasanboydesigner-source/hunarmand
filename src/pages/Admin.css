@@ -1,7 +1,8 @@
 .admin-page {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg-secondary);
+  overflow: hidden;
 }
 .admin-sidebar {
   width: 220px;
@@ -10,9 +11,7 @@
   display: flex;
   flex-direction: column;
   padding: 0;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
 }
 .admin-brand {
@@ -96,7 +95,8 @@
 .admin-main {
   flex: 1;
   padding: 32px;
-  overflow-x: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .admin-header {
   display: flex;
