@@ -9,8 +9,8 @@ const REVENUE_DATA = [
 
 export default function AdminOverview({ users, products, orders, craftsmen }) {
   const totalRev = orders
-    .filter(o => o.status === 'delivered' || o.status === 'processing')
-    .reduce((sum, o) => sum + o.amount, 0);
+    .filter(o => o.status === 'delivered' || o.status === 'processing' || o.status === 'pending') // include pending for broader MVP view
+    .reduce((sum, o) => sum + (o.totalAmount || o.amount || 0), 0);
 
   const dynamicPlatformMetrics = [
     { label:'Jami foydalanuvchi', value: String(users.length), icon:<Users size={20}/>,     delta:'', color:'var(--info)' },
@@ -19,9 +19,9 @@ export default function AdminOverview({ users, products, orders, craftsmen }) {
     { label:'Jami daromad',      value: formatPrice(totalRev), icon:<DollarSign size={20}/>, delta:'', color:'#f59e0b',unit:"" },
   ];
 
-  const ceramicCount = products.filter(p => p.category === 'keramika').length;
-  const carpetCount = products.filter(p => p.category === 'gilam').length;
-  const jewelryCount = products.filter(p => p.category === 'zargarlik').length;
+  const ceramicCount = products.filter(p => p?.category?.toLowerCase() === 'keramika').length;
+  const carpetCount = products.filter(p => p?.category?.toLowerCase() === 'gilam').length;
+  const jewelryCount = products.filter(p => p?.category?.toLowerCase() === 'zargarlik').length;
   const otherCount = products.length - (ceramicCount + carpetCount + jewelryCount);
   const totalProds = products.length || 1;
   const dynamicPieData = [
@@ -30,6 +30,28 @@ export default function AdminOverview({ users, products, orders, craftsmen }) {
     { name: 'Zargarlik', value: Math.round((jewelryCount / totalProds) * 100), color: '#7c3aed' },
     { name: 'Boshqa', value: Math.round((otherCount / totalProds) * 100), color: '#6b7280' },
   ];
+
+  // Dynamically calculate revenue data for the chart
+  const currentYear = new Date().getFullYear();
+  const fullRevenueData = [
+    {month:'Yan',revenue:0},{month:'Fev',revenue:0},{month:'Mar',revenue:0},
+    {month:'Apr',revenue:0},{month:'May',revenue:0},{month:'Iyn',revenue:0},
+    {month:'Iyl',revenue:0},{month:'Avg',revenue:0},{month:'Sen',revenue:0},
+    {month:'Okt',revenue:0},{month:'Noy',revenue:0},{month:'Dek',revenue:0},
+  ];
+
+  orders.forEach(o => {
+    if (o.status !== 'cancelled') {
+      const d = new Date(o.createdAt || o.date || new Date());
+      if (d.getFullYear() === currentYear) {
+        fullRevenueData[d.getMonth()].revenue += (o.totalAmount || o.amount || 0);
+      }
+    }
+  });
+
+  const currentMonth = new Date().getMonth();
+  const startIndex = Math.max(0, currentMonth - 5);
+  const displayRevenueData = fullRevenueData.slice(startIndex, currentMonth + 1);
 
   const pendingCraftsmenCount = craftsmen.filter(c => !c.isVerified).length;
   const rejectedProductsCount = products.filter(p => p.status === 'rejected').length;
@@ -60,7 +82,7 @@ export default function AdminOverview({ users, products, orders, craftsmen }) {
         <div className="chart-card">
           <h3>Platform daromadi (so'm)</h3>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={REVENUE_DATA}>
+            <AreaChart data={displayRevenueData}>
               <defs>
                 <linearGradient id="agrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#d4822a" stopOpacity={0.3}/>
